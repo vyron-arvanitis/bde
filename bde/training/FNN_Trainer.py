@@ -2,6 +2,7 @@ import jax
 import jax.numpy as jnp
 import optax
 
+
 class FNN_Trainer():
     @staticmethod
     def mlp_forward(params, X):
