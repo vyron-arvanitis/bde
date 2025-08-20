@@ -46,4 +46,5 @@ class FNN_Trainer():
         model.params = params
 
     def predict(self):
+        # TODO: Create an issue for predict method
         pass
