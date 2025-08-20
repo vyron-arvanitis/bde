@@ -55,7 +55,7 @@ ruff = "0.4.2"
 [tool.pixi.feature.lint.tasks]
 black = { cmd = "black --check --diff bde && black --check --diff examples" }
 ruff = { cmd = "ruff check --output-format=full bde && ruff check --output-format=full examples" }
-lint = { depends_on = ["black", "ruff"]}
+lint = { depends-on = ["black", "ruff"]}
 
 [tool.pixi.feature.test.dependencies]
 pytest = "*"
