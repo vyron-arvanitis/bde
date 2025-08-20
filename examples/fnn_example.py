@@ -4,6 +4,11 @@ from bde.models.FNN_Builder import FNN
 from bde.training.FNN_Trainer import FNN_Trainer
 import optax
 
+import sys
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+
 def main():
     # generate True data for test purposes
     main_key = jax.random.PRNGKey(0)
