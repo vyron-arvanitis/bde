@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import optax
 
 
-class FNN_Trainer():
+class FnnTrainer:
     @staticmethod
     def mlp_forward(params, X):
         for (W, b) in params[:-1]:
@@ -14,7 +14,7 @@ class FNN_Trainer():
 
     @staticmethod
     def mse_loss(params, X, y):
-        pred = FNN_Trainer.mlp_forward(params, X)
+        pred = FnnTrainer.mlp_forward(params, X)
         return jnp.mean((pred - y) ** 2)
 
     def create_train_step(self, optimizer):
@@ -31,7 +31,7 @@ class FNN_Trainer():
 
     def fit(self, model, X, y, optimizer, epochs=100):
         if model.params is None:
-            model.init_mlp()
+            model.init_mlp(seed=0)
         opt_state = optimizer.init(model.params)
         params = model.params
 

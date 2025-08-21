@@ -3,14 +3,14 @@ import jax
 import jax.numpy as jnp
 
 
-class FNN:
+class Fnn:
     """Builds a single FNN"""
     def __init__(self, sizes):
         self.sizes = sizes
         self.params = None  # will hold initialized weights
 
-    def init_mlp(self):
-        key = jax.random.PRNGKey(0)
+    def init_mlp(self, seed):
+        key = jax.random.PRNGKey(seed)
         keys = jax.random.split(key, len(self.sizes) - 1)
         params = []
         for k, (m, n) in zip(keys, zip(self.sizes[:-1], self.sizes[1:])):
