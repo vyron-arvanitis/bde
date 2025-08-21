@@ -6,6 +6,18 @@ import optax
 class FnnTrainer:
     @staticmethod
     def mlp_forward(params, X):
+        """
+        #TODO: documentation
+
+        Parameters
+        ----------
+        params
+        X
+
+        Returns
+        -------
+
+        """
         for (W, b) in params[:-1]:
             X = jnp.dot(X, W) + b
             X = jnp.tanh(X)
@@ -13,11 +25,16 @@ class FnnTrainer:
         return jnp.dot(X, W) + b
 
     def mse_loss(self, params, x, y):
+        """
+        #TODO: documentation
+        """
         prediction = self.predict(params,x)
         return jnp.mean((prediction - y) ** 2)
 
     def create_train_step(self, optimizer):
-        """Factory function to create a jitted train_step with the optimizer"""
+        """Factory function to create a jitted train_step with the optimizer
+                #TODO: documentation
+        """
 
         @jax.jit
         def train_step(params, opt_state, X, y):
@@ -29,6 +46,21 @@ class FnnTrainer:
         return train_step
 
     def fit(self, model, x, y, optimizer, epochs=100):
+        """
+        #TODO: documentation
+
+        Parameters
+        ----------
+        model
+        x
+        y
+        optimizer
+        epochs
+
+        Returns
+        -------
+
+        """
         if model.params is None:
             model.init_mlp(seed=0)
         opt_state = optimizer.init(model.params)

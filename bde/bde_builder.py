@@ -102,7 +102,6 @@ class BdeBuilder(Fnn, FnnTrainer):
         ensemble_mean = jnp.mean(member_preds, axis=0)  # (N, D)
         ensemble_var = jnp.var(member_preds, axis=0)  # (N, D) epistemic
 
-
         out = {
             "ensemble_mean": ensemble_mean,
             "ensemble_var": ensemble_var,
@@ -111,14 +110,38 @@ class BdeBuilder(Fnn, FnnTrainer):
             out["member_means"] = member_preds
         return out
 
-    def store_ensemble_results(self, x, y=None, include_members: bool = True):
-        """Thin wrapper around `predict` that caches results for later evaluation/logging.
-        #TODO:Documentation
+    def store_ensemble_results(
+            self, x, y=None, include_members: bool = True, params=None
+    ):
+        """Cache ensemble predictions and, optionally, compute MSE.
+
+        Parameters
+        ----------
+        x : jnp.ndarray
+            Input data passed to :meth:`predict`.
+        y : jnp.ndarray, optional
+            Ground truth targets. If provided, the mean-squared error is
+            computed.
+        include_members : bool, default=True
+            Forwarded to :meth:`predict` to optionally include member
+            predictions in the results.
+        params : list of tuple[jnp.ndarray, jnp.ndarray], optional
+            Model parameters to compute the loss with.  If ``None``, the MSE is
+            computed directly from the ensemble predictions.
+
+        Returns
+        -------
+        dict
+            Dictionary containing ensemble statistics and, if ``y`` is given,
+            the corresponding MSE.
         """
+
         res = self.predict(x, include_members=include_members)
         if y is not None:
             res["y"] = y
-            res["mse"] = jnp.mean((res["ensemble_mean"] - y) ** 2)
-            res["mse"] = jnp.mean(super().mse_loss(res["ensemble_mean"]))
+            if params is not None:
+                res["mse"] = super().mse_loss(params, x, y)
+            else:
+                res["mse"] = jnp.mean((res["ensemble_mean"] - y) ** 2)
         self.results = res
         return res
