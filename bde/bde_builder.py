@@ -78,9 +78,15 @@ class BdeBuilder(Fnn, FnnTrainer):
 
         Returns
         -------
-        jnp.ndarray or tuple
-            The ensemble mean prediction of shape (n_samples, output_dim).
-            If `return_members` is True, returns (mean, members).
+        tuple
+            If return_members is False:
+                (mean_pred, var_pred)
+            Shapes:
+                mean_pred: (n_samples, output_dim)
+                var_pred: (n_samples, output_dim)
+            If return_members is True:
+                (mean_pred, var_pred, member_preds)
+            where member_preds has shape (n_members, n_samples, output_dim).
         """
         if not self.members:
             raise ValueError("Ensemble has no members. Call `fit` or "
@@ -93,7 +99,11 @@ class BdeBuilder(Fnn, FnnTrainer):
         )  # (n_members, n_samples, output_dim)
 
         mean_pred = jnp.mean(member_preds, axis=0)  # (n_samples, output_dim)
-        return (mean_pred, member_preds) if return_members else mean_pred
+        var_pred = jnp.var(member_preds, axis=0)
+        if return_members:
+            return mean_pred, var_pred, member_preds
+        else:
+            return mean_pred, var_pred
 
     def store_ensemble_results(self):
         pass
