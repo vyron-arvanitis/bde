@@ -42,6 +42,9 @@ def main():
     # fit + predict
     bde.fit(x=X_true, y=y_true, optimizer=bde.optimizer, epochs=500, model=None)
     out = bde.predict_ensemble(X_true, include_members=False)
+    print(out["ensemble_mean"])
+    print(out["ensemble_var"])
+
     print("keys:", list(out.keys()))            # ['ensemble_mean', 'ensemble_var']
     print("mean shape:", out["ensemble_mean"].shape)
 
