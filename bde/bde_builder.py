@@ -110,38 +110,28 @@ class BdeBuilder(Fnn, FnnTrainer):
             out["member_means"] = member_preds
         return out
 
-    def store_ensemble_results(
-            self, x, y=None, include_members: bool = True, params=None
-    ):
-        """Cache ensemble predictions and, optionally, compute MSE.
-
-        Parameters
-        ----------
-        x : jnp.ndarray
-            Input data passed to :meth:`predict`.
-        y : jnp.ndarray, optional
-            Ground truth targets. If provided, the mean-squared error is
-            computed.
-        include_members : bool, default=True
-            Forwarded to :meth:`predict` to optionally include member
-            predictions in the results.
-        params : list of tuple[jnp.ndarray, jnp.ndarray], optional
-            Model parameters to compute the loss with.  If ``None``, the MSE is
-            computed directly from the ensemble predictions.
+    def store_ensemble_results(self, x, y=None, include_members: bool = True):
+        """
+        Cache ensemble predictions and, optionally, compute MSEs.
 
         Returns
         -------
         dict
-            Dictionary containing ensemble statistics and, if ``y`` is given,
-            the corresponding MSE.
+            Keys: "ensemble_mean", "ensemble_var", optional "member_means",
+                  optional "y", "ensemble_mse", "member_mse".
         """
-
         res = self.predict(x, include_members=include_members)
+
         if y is not None:
             res["y"] = y
-            if params is not None:
-                res["mse"] = super().mse_loss(params, x, y)
-            else:
-                res["mse"] = jnp.mean((res["ensemble_mean"] - y) ** 2)
+            # Ensemble MSE (no params object for ensemble)
+            res["ensemble_mse"] = jnp.mean((res["ensemble_mean"] - y) ** 2)
+            # Per-member MSEs
+            member_mse = [
+                super().mse_loss(self, m.params, x, y) for m in self.members
+            ]
+            # stack to (n_members,) or (n_members, out_dim) depending on y shape
+            res["member_mse"] = jnp.stack(member_mse, axis=0)
+
         self.results = res
         return res
