@@ -57,7 +57,7 @@ def main():
     # print(out["ensemble_var"])
 
     print("keys:", list(out.keys()))            # ['ensemble_mean', 'ensemble_var']
-    print("mean shape:", out["ensemble_mean"].shape)
+    print("mean shape:", out["ensemble_mean"].shape) # TODO: I THINK THERE IS AN ISSUE HERE! WITH THE SHAPE (500,1)
     plot_pred_vs_true(out["ensemble_mean"], data.y, "trial", savepath="to_be_deleted" )
 
 if __name__ == "__main__":
