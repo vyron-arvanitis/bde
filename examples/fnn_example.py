@@ -1,10 +1,12 @@
 import jax
 import jax.numpy as jnp
-from bde.models.models import Fnn
-from bde.training.trainer import FnnTrainer
 import optax
 
+from bde.models.models import Fnn
+from bde.training.trainer import FnnTrainer
 from bde.bde_builder import BdeBuilder
+from bde.viz.plotting import plot_pred_vs_true
+
 import sys
 import os
 
@@ -14,9 +16,9 @@ def main():
     # generate True data for test purposes
     main_key = jax.random.PRNGKey(0)
     k_X, k_W, k_eps = jax.random.split(main_key, 3)
-    X_true = jax.random.normal(k_X, (5, 10))
+    X_true = jax.random.normal(k_X, (1024, 10))
     true_W = jax.random.normal(k_W, (10, 1))
-    y_true = X_true @ true_W + 0.1 * jax.random.normal(k_eps, (5, 1))
+    y_true = X_true @ true_W + 0.1 * jax.random.normal(k_eps, (1024, 1))
 
     sizes = [10, 64, 64, 1]
 
@@ -33,6 +35,8 @@ def main():
         optimizer=optimizer,
         epochs=1000
     )
+    print(trainer.history["train_loss"][:10])  # first 10 losses
+
 
     y_pred = trainer.predict(model.params, X_true)
     print("the first predictions are ", y_pred)
@@ -47,7 +51,7 @@ def main():
 
     print("keys:", list(out.keys()))            # ['ensemble_mean', 'ensemble_var']
     print("mean shape:", out["ensemble_mean"].shape)
-
+    plot_pred_vs_true(out["ensemble_mean"], y_true, "trial", savepath="to_be_deleted" )
 
 if __name__ == "__main__":
     main()

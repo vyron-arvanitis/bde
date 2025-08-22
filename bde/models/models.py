@@ -1,10 +1,10 @@
-# models.py
 import jax
 import jax.numpy as jnp
 
 
 class Fnn:
     """Builds a single FNN"""
+
     def __init__(self, sizes):
         self.sizes = sizes
         self.params = None  # will hold initialized weights

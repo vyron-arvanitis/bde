@@ -2,8 +2,18 @@ import jax
 import jax.numpy as jnp
 import optax
 
+
 # TODO: major restructure is needed!
 class FnnTrainer:
+
+    def __init__(self):
+        self.history = {}
+        self.log_every = 100
+        self.keep_best = False
+
+    def _reset_history(self):
+        self.history = {"train_loss": []}
+
     @staticmethod
     def mlp_forward(params, X):
         """
@@ -63,6 +73,9 @@ class FnnTrainer:
         """
         if model.params is None:
             model.init_mlp(seed=0)
+
+        self._reset_history()  # clear history at the start of each training
+
         opt_state = optimizer.init(model.params)
         params = model.params
 
@@ -71,10 +84,14 @@ class FnnTrainer:
 
         for step in range(epochs):
             params, opt_state = train_step_fn(params, opt_state, x, y)
-            if step % 200 == 0:
-                loss = float(self.mse_loss(params, x, y))
+            loss = float(self.mse_loss(params, x, y))
+            self.history["train_loss"].append(loss)
+
+            if step % self.log_every  == 0:
                 print(step, loss)
         model.params = params
+
+        return model
 
     def predict(self, params, x):
         """
