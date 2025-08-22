@@ -6,6 +6,7 @@ from bde.models.models import Fnn
 from bde.training.trainer import FnnTrainer
 from bde.bde_builder import BdeBuilder
 from bde.viz.plotting import plot_pred_vs_true
+from bde.data.dataloader import DataLoader
 
 import sys
 import os
@@ -14,28 +15,30 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../"
 
 def main():
     # generate True data for test purposes
-    main_key = jax.random.PRNGKey(0)
-    k_X, k_W, k_eps = jax.random.split(main_key, 3)
-    X_true = jax.random.normal(k_X, (1024, 10))
-    true_W = jax.random.normal(k_W, (10, 1))
-    y_true = X_true @ true_W + 0.1 * jax.random.normal(k_eps, (1024, 1))
+    # main_key = jax.random.PRNGKey(0)
+    # k_X, k_W, k_eps = jax.random.split(main_key, 3)
+    # X_true = jax.random.normal(k_X, (1024, 10))
+    # true_W = jax.random.normal(k_W, (10, 1))
+    # y_true = X_true @ true_W + 0.1 * jax.random.normal(k_eps, (1024, 1))
+
+
+    data = DataLoader(seed=42, n_samples=500, n_features=10)
 
     sizes = [10, 64, 64, 1]
 
     model = Fnn(sizes)
     trainer = FnnTrainer()
-
     trainer.fit(
         model=model,
-        x=X_true,
-        y=y_true,
+        x=data.x,
+        y=data.y,
         optimizer=trainer.default_optimizer(), #the default optimizer!
         epochs=1000
     )
     print(trainer.history["train_loss"][:10])  # first 10 losses
 
 
-    y_pred = model.predict(X_true)
+    y_pred = model.predict(data.x)
     print("the first predictions are ", y_pred)
 
 
