@@ -8,7 +8,7 @@ import jax.numpy as jnp
 
 class BdeBuilder(Fnn, FnnTrainer):
     # TODO: build the BdeBuilderClass
-    def __init__(self, sizes, n_members, epochs, optimizer, base_seed: int = 0):
+    def __init__(self, sizes, n_members, epochs, optimizer, base_seed: int = 100):
         Fnn.__init__(self, sizes)
         FnnTrainer.__init__(self)
         self.sizes = sizes
@@ -50,19 +50,17 @@ class BdeBuilder(Fnn, FnnTrainer):
 
         return [self.get_model(base_seed + i) for i in range(self.n_members)]
 
-    def fit(self, model, x, y, optimizer, epochs=100):
+    def fit(self, x, y, epochs=None) -> "BdeBuilder":
         """Train each member of the ensemble
 
         Parameters
         ---------
         #TODO: documentation
         """
-        # if not self.members:
-        #     self.deep_ensemble_creator()
 
         for member in self.members:
             super().train(model=member, x=x, y=y, optimizer=self.optimizer, epochs=epochs or self.epochs)
-        return self.members
+        return self
 
     def predict_ensemble(self, x, include_members: bool = False):
         """

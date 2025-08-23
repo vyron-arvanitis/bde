@@ -44,10 +44,10 @@ def main():
     # print("the first predictions are ", y_pred)
 
     print("-----------------------------------------------------------")
-    bde = BdeBuilder(sizes, n_members=3, epochs=500, optimizer=optax.adam(1e-2))
+    bde = BdeBuilder(sizes, n_members=5, epochs=500, optimizer=optax.adam(1e-2))
     print(len(bde.members))
     # fit + predict
-    bde.fit(x=data.x, y=data.y, optimizer=bde.optimizer, epochs=500, model=None) #TODO: model=None, needs to be fixed!
+    bde.fit(x=data.x, y=data.y, optimizer=bde.optimizer, epochs=500)
     bde_pred = bde.predict_ensemble(test_set.x, include_members=True)
     # print(out["ensemble_mean"])
     # print(out["ensemble_var"])
