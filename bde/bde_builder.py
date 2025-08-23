@@ -8,14 +8,15 @@ import jax.numpy as jnp
 
 class BdeBuilder(Fnn, FnnTrainer):
     # TODO: build the BdeBuilderClass
-    def __init__(self, sizes, n_members, epochs, optimizer):
+    def __init__(self, sizes, n_members, epochs, optimizer, base_seed: int = 100):
         Fnn.__init__(self, sizes)
         FnnTrainer.__init__(self)
         self.sizes = sizes
         self.n_members = n_members
         self.epochs = epochs
+        self.base_seed = base_seed
 
-        self.members = []
+        self.members = self.deep_ensemble_creator(base_seed=self.base_seed)
         self.optimizer = optimizer or optax.adam(learning_rate=0.01)
         self.results = {}
 
@@ -31,11 +32,10 @@ class BdeBuilder(Fnn, FnnTrainer):
         -------
 
         """
-        m = Fnn(self.sizes)
-        m.init_mlp(seed=seed)
-        return m
 
-    def deep_ensemble_creator(self):
+        return Fnn(self.sizes, init_seed=seed)
+
+    def deep_ensemble_creator(self, base_seed: int = 0) -> list[Fnn]:
         """Create an ensemble of ``n_members`` FNN models.
 
         Each member is initialized with a different random seed to encourage
@@ -48,22 +48,19 @@ class BdeBuilder(Fnn, FnnTrainer):
             List of initialized FNN models comprising the ensemble.
         """
 
-        self.members = [self.get_model(seed) for seed in range(self.n_members)]
-        return self.members
+        return [self.get_model(base_seed + i) for i in range(self.n_members)]
 
-    def fit(self, model, x, y, optimizer, epochs=100):
+    def fit(self, x, y, epochs=None) -> "BdeBuilder":
         """Train each member of the ensemble
 
         Parameters
         ---------
         #TODO: documentation
         """
-        if not self.members:
-            self.deep_ensemble_creator()
 
         for member in self.members:
-            super().fit(model=member, x=x, y=y, optimizer=self.optimizer, epochs=epochs or self.epochs)
-        return self.members
+            super().train(model=member, x=x, y=y, optimizer=self.optimizer, epochs=epochs or self.epochs)
+        return self
 
     def predict_ensemble(self, x, include_members: bool = False):
         """

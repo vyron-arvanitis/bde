@@ -90,7 +90,7 @@ class FnnTrainer:
 
         return train_step
 
-    def fit(self, model, x, y, optimizer, epochs=100):
+    def train(self, model, x, y, optimizer, epochs=100):
         """
         #TODO: documentation
 
@@ -122,8 +122,8 @@ class FnnTrainer:
             loss = float(self.mse_loss(model, params, x, y))
             self.history["train_loss"].append(loss)
 
-            if step % self.log_every == 0:
-                print(step, loss)
+            # if step % self.log_every == 0:
+            #     print(step, loss)
         model.params = params
 
         return model

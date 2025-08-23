@@ -15,6 +15,16 @@ class Fnn:
         self.params = self.init_mlp(seed=init_seed)
 
     def init_mlp(self, seed):
+        """
+        #TODO:documentation
+        Parameters
+        ----------
+        seed
+
+        Returns
+        -------
+
+        """
         key = jax.random.PRNGKey(seed)
         keys = jax.random.split(key, len(self.sizes) - 1)
         params = []
