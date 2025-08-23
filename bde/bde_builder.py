@@ -119,29 +119,3 @@ class BdeBuilder(Fnn, FnnTrainer):
             raise ValueError("No results saved. Call `predict_ensemble(..., cache=True)` first!")
         return list(self.results.keys())
 
-    #
-    # def store_ensemble_results(self, x, y=None, include_members: bool = True):
-    #     """
-    #     Cache ensemble predictions and, optionally, compute MSEs.
-    #
-    #     Returns
-    #     -------
-    #     dict
-    #         Keys: "ensemble_mean", "ensemble_var", optional "member_means",
-    #               optional "y", "ensemble_mse", "member_mse".
-    #     """
-    #     res = self.predict_ensemble(x, include_members=include_members)
-    #
-    #     if y is not None:
-    #         res["y"] = y
-    #         # Ensemble MSE (no params object for ensemble)
-    #         res["ensemble_mse"] = jnp.mean((res["ensemble_mean"] - y) ** 2)
-    #         # Per-member MSEs
-    #         member_mse = [
-    #             super().mse_loss(self, m.params, x, y) for m in self.members
-    #         ]
-    #         # stack to (n_members,) or (n_members, out_dim) depending on y shape
-    #         res["member_mse"] = jnp.stack(member_mse, axis=0)
-    #
-    #     self.results = res
-    #     return res

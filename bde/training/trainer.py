@@ -15,26 +15,6 @@ class FnnTrainer:
     def _reset_history(self):
         self.history = {"train_loss": []}
 
-    # @staticmethod
-    # def mlp_forward(params, X):
-    #     """
-    #     #TODO: documentation
-    #
-    #     Parameters
-    #     ----------
-    #     params
-    #     X
-    #
-    #     Returns
-    #     -------
-    #
-    #     """
-    #     for (W, b) in params[:-1]:
-    #         X = jnp.dot(X, W) + b
-    #         X = jnp.tanh(X)
-    #     W, b = params[-1]  # Fixed indentation - this should be outside the loop
-    #     return jnp.dot(X, W) + b
-
     @staticmethod
     def mse_loss(model, params, x, y):
         """
@@ -127,28 +107,6 @@ class FnnTrainer:
         model.params = params
 
         return model
-
-    # def predict(self, params, x):
-    #     """
-    #     Obtain model predictions for input data using the current model parameters.
-    #
-    #     Parameters
-    #     ----------
-    #     params : list of tuple[jnp.ndarray, jnp.ndarray]
-    #         List of weight and bias tuples for each layer of the model.
-    #         Each tuple is of the form (W, b) where:
-    #         - W is a weight matrix of shape (input_dim, output_dim)
-    #         - b is a bias vector of shape (output_dim,)
-    #
-    #     x : jnp.ndarray
-    #         Input data of shape (n_samples, input_dim)
-    #
-    #     Returns
-    #     -------
-    #     jnp.ndarray
-    #         Model predictions of shape (n_samples, output_dim)
-    #     """
-    #     return self.mlp_forward(params, x)
 
     @staticmethod
     def default_optimizer():
