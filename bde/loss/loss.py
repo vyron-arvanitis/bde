@@ -17,31 +17,18 @@ from typing import (
     Tuple,
 )
 
+
 @register_pytree_node_class
 class Loss(ABC):
     """An abstract base class defining an API for loss function classes.
-
-    Methods
-    -------
-    __call__(y_true, y_pred, **kwargs)
-        Abstract method to be implemented by subclasses, defining the loss evaluation.
-    tree_flatten()
-        Used to turn the class into a jitible PyTree.
-    tree_unflatten(aux_data, children)
-        A class method used to recreate the class from a PyTree.
-    apply_reduced(y_true, y_pred, **kwargs)
-        The loss is evaluated separately for each item in the batch and the loss of
-        all batches is reduced to a single value.
-        The default implementation takes the arithmetic mean as the reduction, but
-        classes implementing this API are free to reimplement this method.
     """
 
     @abstractmethod
     def __call__(
-        self,
-        y_true: ArrayLike,
-        y_pred: ArrayLike,
-        **kwargs,
+            self,
+            y_true: ArrayLike,
+            y_pred: ArrayLike,
+            **kwargs,
     ) -> Array:
         """Evaluate the loss.
 
@@ -50,9 +37,9 @@ class Loss(ABC):
 
         Parameters
         ----------
-        y_true
+        y_true : ArrayLike
             The ground truth labels.
-        y_pred
+        y_pred : ArrayLike
             The predictions.
 
         Returns
@@ -64,10 +51,10 @@ class Loss(ABC):
 
     @jax.jit
     def apply_reduced(
-        self,
-        y_true: ArrayLike,
-        y_pred: ArrayLike,
-        **kwargs,
+            self,
+            y_true: ArrayLike,
+            y_pred: ArrayLike,
+            **kwargs,
     ) -> ArrayLike:
         """Evaluate and reduces the loss.
 
@@ -76,22 +63,22 @@ class Loss(ABC):
 
         Parameters
         ----------
-        y_true
+        y_true :  ArrayLike
             The ground truth labels.
-        y_pred
+        y_pred : ArrayLike
             The predictions.
         **kwargs
             Other keywords that may be passed to the unreduced loss function.
 
         Returns
         -------
-        Array
+        ArrayLike
             The reduced loss value.
         """
         return self(y_true=y_true, y_pred=y_pred, **kwargs).mean()
 
     @abstractmethod
-    def tree_flatten(self) -> tuple[Sequence[ArrayLike], any]:
+    def tree_flatten(self) -> Tuple[Sequence[ArrayLike], Any]:
         """Specify how to serialize module into a JAX PyTree.
 
         Returns
@@ -105,17 +92,17 @@ class Loss(ABC):
     @classmethod
     @abstractmethod
     def tree_unflatten(
-        cls,
-        aux_data: Optional[Tuple],
-        children: Tuple,
+            cls,
+            aux_data: Optional[Tuple],
+            children: Tuple,
     ) -> "Loss":
         """Specify how to build a module from a JAX PyTree.
 
         Parameters
         ----------
-        aux_data
+        aux_data : Optional[Tuple]
             Contains static, hashable data.
-        children
+        children : Tuple
             Contain arrays & PyTrees.
 
         Returns
