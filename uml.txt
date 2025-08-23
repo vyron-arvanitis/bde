@@ -1,0 +1,51 @@
++----------------+            +--------------------+
+|  DataLoader    |            |  DataPreProcessor  |
+|----------------|            |--------------------|
+| +_data_gen()   |
+  +load()        |            | +norm_data()       |
+| +from_arrays() |            | +aug_data()        |
+| +validate()    |            | +add_noise_data()  |
+| +keys()        |            | +split()           |
++----------------+            +--------------------+
+                            |
+                            |
+                            v
++----------------+     uses (optionally)     +------------------+
+|    Model       |<--------------------------|     Trainer      |
+|----------------|                           |------------------|
+| +init_params() |                           | - model: Model   |
+| +forward(p,X)  |                           | - optimizer      |
+|                |                           | - history        |
++----------------+                           |------------------|
+                                             | +fit(X,y,...)    |
+                                             | +predict(p,X)    |
+                                             | +loss(p,X,y)     |
+                                             +------------------+
+
+                          orchestrates many
+                                |
+                                v
++---------------------------------------------------------------+
+|                        BdeBuilder                              |
+|---------------------------------------------------------------|
+| - model_ctor, model_kwargs                                     |
+| - n_members, seeds, epochs, optimizer                          |
+| - members: list[Model], params_list: list[Params]              |
+| - histories: list[dict], results: dict                         |
+|---------------------------------------------------------------|
+| +build_members()                                               |
+| +fit(X,y,...)                                                  |
+| +predict_member(i,X)                                           |
+| +predict_ensemble(X, include_members=False) -> {mean,var,...}  |
+| +evaluate(X,y, include_member_mse=True)                        |
+| +keys()                                                        |
++---------------------------------------------------------------+
+
+(Parallel track, added later)
++------------------+
+|     Sampler      |
+|------------------|
+| +warmup(...)     |
+| +sample(...)     |
+| +predict_from_samples(...) |
++------------------+

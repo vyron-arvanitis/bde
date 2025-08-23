@@ -95,7 +95,7 @@ class BdeBuilder(Fnn, FnnTrainer):
 
         # single-model forward from the trainer; avoids name collision with this method
         member_preds = jnp.stack(
-            [super().predict(m.params, x) for m in self.members],
+            [model.predict(x) for model in self.members],
             axis=0
         )  # (n_members, n_samples, output_dim)
 
@@ -145,6 +145,3 @@ class BdeBuilder(Fnn, FnnTrainer):
     #
     #     self.results = res
     #     return res
-
-
-

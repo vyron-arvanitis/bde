@@ -1,13 +1,18 @@
 import jax
 import jax.numpy as jnp
 
+from bde.data.dataloader import DataLoader
+from bde.training.trainer import FnnTrainer
+from bde.data.dataloader import DataLoader
+
 
 class Fnn:
-    """Builds a single FNN"""
+    """Single FNN that can optionally train itself on init."""
 
-    def __init__(self, sizes):
+    def __init__(self, sizes, init_seed=0):
+        super().__init__()  # init the trainer side (history, etc.)
         self.sizes = sizes
-        self.params = None  # will hold initialized weights
+        self.params = self.init_mlp(seed=init_seed)
 
     def init_mlp(self, seed):
         key = jax.random.PRNGKey(seed)
@@ -19,3 +24,28 @@ class Fnn:
             params.append((W, b))
         self.params = params
         return params
+
+    @staticmethod
+    def forward(params, x):
+        """
+        #TODO: documentation
+
+        Parameters
+        ----------
+        params
+        x
+
+        Returns
+        -------
+
+        """
+        for (W, b) in params[:-1]:
+            x = jnp.dot(x, W) + b
+            x = jnp.tanh(x)
+        W, b = params[-1]  # Fixed indentation - this should be outside the loop
+        return jnp.dot(x, W) + b
+
+    def predict(self, x):
+        if self.params is None:
+            raise ValueError("Model parameters not initialized!")
+        return self.forward(self.params, x)
