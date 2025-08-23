@@ -35,15 +35,15 @@ def main():
     trainer = FnnTrainer()
     trainer.fit(
         model=model,
-        x=data.x,
-        y=data.y,
+        x=train_set.x,
+        y=train_set.y,
         optimizer=trainer.default_optimizer(), #the default optimizer!
         epochs=1000
     )
     print(trainer.history["train_loss"][:10])  # first 10 losses
 
 
-    y_pred = model.predict(data.x)
+    y_pred = model.predict(test_set.x)
     # print("the first predictions are ", y_pred)
 
 
@@ -52,13 +52,13 @@ def main():
     print(bde)
     # fit + predict
     bde.fit(x=data.x, y=data.y, optimizer=bde.optimizer, epochs=500, model=None)
-    out = bde.predict_ensemble(data.x, include_members=True)
+    bde_pred = bde.predict_ensemble(test_set.x, include_members=True)
     # print(out["ensemble_mean"])
     # print(out["ensemble_var"])
 
-    print("keys:", list(out.keys()))            # ['ensemble_mean', 'ensemble_var']
-    print("mean shape:", out["ensemble_mean"].shape) # TODO: I THINK THERE IS AN ISSUE HERE! WITH THE SHAPE (500,1)
-    plot_pred_vs_true(out["ensemble_mean"], data.y, "trial", savepath="to_be_deleted" )
+    print("keys:", list(bde_pred.keys()))            # ['ensemble_mean', 'ensemble_var']
+    print("mean shape:", bde_pred["ensemble_mean"].shape) # TODO: I THINK THERE IS AN ISSUE HERE! WITH THE SHAPE (500,1)
+    plot_pred_vs_true(bde_pred["ensemble_mean"], test_set.y, "trial", savepath="to_be_deleted" )
 
 if __name__ == "__main__":
     main()

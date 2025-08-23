@@ -4,8 +4,7 @@ from typing import Optional
 
 import jax
 import jax.numpy as jnp
-
-
+import numpy as np
 
 class TaskType:
     """Holder for task types."""
@@ -21,19 +20,24 @@ class DataLoader:
             n_samples: int = 1024,
             n_features: int = 10,
             task: Optional[str] = None,
+            data: Optional[dict[str, any]] = None
     ):
         self.seed = int(seed)
         self.n_samples = int(n_samples)
         self.n_features = int(n_features)
 
         # Generate data by default
-        self.data = self._data_gen()
         # TODO: delete below no ned for these attributes because we introduced a __getattr__
         # self.x = self.data["x"]
         # self.y = self.data["y"]
         # self.w = self.data["w"]
 
         # self.task = self.infer_task() # TODO: figure out where you are going with this
+
+        if data is None:
+            self.data = self._data_gen()
+        else:
+            self.data = {k: jnp.asarray(v) for k, v in data.items()}
 
     def _data_gen(self) -> dict[str, jnp.ndarray]:
         """Generate a simple linear regression dataset: y = X @ w + noise."""
@@ -43,6 +47,13 @@ class DataLoader:
         w = jax.random.normal(k_w, (self.n_features, 1))
         y = x @ w + jax.random.normal(k_eps, (self.n_samples, 1))
         return {"x": x, "w": w, "y": y}
+
+
+    @classmethod
+    def from_dict(cls, data: dict[str, any]) -> "DataLoader":
+        """Schema-agnostic constructor: any keys you like."""
+        return cls(data=data)
+
 
     def infer_task(self) -> "TaskType":
         """This method is responsible for bringing the data in correct format according to the problem,
@@ -111,10 +122,20 @@ class DataLoader:
         return int(self.x.shape[1])
 
     def __getitem__(self, item):
-        if item in self.data:
+        if isinstance(item, str):
             return self.data[item]
-        else:
-            raise AttributeError(f"{self.__class__.__name__} has no item '{item}' !")
+
+        if isinstance(item, (np.ndarray, jnp.ndarray, list, tuple, slice)):
+            n = len(self)  # original row count
+            new_data = {}
+            for k, v in self.data.items():
+                if hasattr(v, "shape") and v.ndim >= 1 and int(v.shape[0]) == n:
+                    new_data[k] = v[item]  # row-aligned -> subset
+                else:
+                    new_data[k] = v  # e.g. (D,1) weights -> keep same
+            return DataLoader.from_dict(new_data)
+
+        raise TypeError(f"Unsupported index type for DataLoader.__getitem__: {type(item)}")
 
     def __len__(self) -> int:
         return int(self.x.shape[0])
