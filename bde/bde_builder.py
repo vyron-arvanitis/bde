@@ -32,9 +32,8 @@ class BdeBuilder(Fnn, FnnTrainer):
         -------
 
         """
-        m = Fnn(self.sizes)
-        m.init_mlp(seed=seed)
-        return m
+
+        return Fnn(self.sizes, init_seed=seed)
 
     def deep_ensemble_creator(self, base_seed: int = 0) -> list[Fnn]:
         """Create an ensemble of ``n_members`` FNN models.
