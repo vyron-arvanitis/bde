@@ -20,7 +20,6 @@ class FnnTrainer:
         self.keep_best = False
         self.default_optimizer = self.default_optimizer
 
-
     def _reset_history(self):
         self.history = {"train_loss": []}
 
@@ -62,7 +61,8 @@ class FnnTrainer:
         prediction = model.forward(params, x)
         return jnp.mean((prediction - y) ** 2)
 
-    def create_train_step(self, model, optimizer, loss_obj):
+    @staticmethod
+    def create_train_step(model, optimizer, loss_obj):
         """
         #TODO:documentation
 
@@ -70,14 +70,16 @@ class FnnTrainer:
         ----------
         model
         optimizer
+        loss_obj
 
         Returns
         -------
 
         """
+
         def loss_fn(params, x, y):
-            preds = model.forward(params, x)
-            return loss_obj.apply_reduced(y_true=y, y_pred=preds)  # scalar
+            preds = model.forward(params, x) #(N,D)
+            return loss_obj.mean_over_batch(y_true=y, y_pred=preds)  # scalar
 
         value_and_grad = jax.value_and_grad(loss_fn)
 
@@ -117,20 +119,19 @@ class FnnTrainer:
         - model.forward(params, x) must exist
         - loss must implement Loss API (apply_reduced)
         """
-        # lazy defaults
-        opt = optimizer or self.default_optimizer()
-        if loss is None:
-            loss = LossMSE()
+        # lazy defaults TODO this is also not needed
+        # if loss is None:
+        #     loss = LossMSE()
 
-        # init params
-        if getattr(model, "params", None) is None:
-            model.init_mlp(seed=0)
+        # init params #TODO: i think this is not needed
+        # if getattr(model, "params", None) is None:
+        #     model.init_mlp(seed=0)
 
         self._reset_history()
 
         params = model.params
-        opt_state = opt.init(params)
-        train_step = self.create_train_step(model, opt, loss)
+        opt_state = optimizer.init(params)
+        train_step = self.create_train_step(model, optimizer, loss)
 
         for step in range(epochs):
             params, opt_state, loss_val = train_step(params, opt_state, x, y)
