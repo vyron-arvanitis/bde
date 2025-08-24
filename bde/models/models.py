@@ -10,6 +10,14 @@ class Fnn:
     """Single FNN that can optionally train itself on init."""
 
     def __init__(self, sizes, init_seed=0):
+        """
+        #TODO: documentation
+
+        Parameters
+        ----------
+        sizes
+        init_seed
+        """
         super().__init__()  # init the trainer side (history, etc.)
         self.sizes = sizes
         self.params = self.init_mlp(seed=init_seed)
@@ -52,10 +60,20 @@ class Fnn:
         for (W, b) in params[:-1]:
             x = jnp.dot(x, W) + b
             x = jnp.tanh(x)
-        W, b = params[-1]  # Fixed indentation - this should be outside the loop
+        W, b = params[-1]
         return jnp.dot(x, W) + b
 
     def predict(self, x):
+        """
+        #TODO: documentation
+        Parameters
+        ----------
+        x
+
+        Returns
+        -------
+
+        """
         if self.params is None:
             raise ValueError("Model parameters not initialized!")
         return self.forward(self.params, x)

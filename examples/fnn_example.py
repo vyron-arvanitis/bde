@@ -54,7 +54,8 @@ def main():
     # print(bde_pred["ensemble_mean"])
     # print(bde_pred["ensemble_var"])
 
-    print("keys:", list(bde_pred.keys()))  # ['ensemble_mean', 'ensemble_var']
+    print("keys:", list(bde.keys()))  # ['ensemble_mean', 'ensemble_var']
+    print(bde.ensemble_mean[:2]) # another way to access the ensemble_mean
     print("mean shape:", bde_pred["ensemble_mean"].shape)
     print("var shape:", bde_pred["ensemble_var"].shape)
 

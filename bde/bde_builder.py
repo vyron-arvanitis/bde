@@ -116,6 +116,22 @@ class BdeBuilder(Fnn, FnnTrainer):
             raise ValueError("No results saved. Call `predict_ensemble(..., cache=True)` first!")
         return list(self.results.keys())
 
+    def __getattr__(self, item):
+        """
+        #TODO: dcoumentation
+        Parameters
+        ----------
+        item
+
+        Returns
+        -------
+
+        """
+        if item in self.results:
+            return self.results[item]
+        else:
+            raise AttributeError(f"{self.__class__.__name__} has no attribute '{item}' !")
+
     #
     # def store_ensemble_results(self, x, y=None, include_members: bool = True):
     #     """
