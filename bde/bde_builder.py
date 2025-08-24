@@ -59,7 +59,7 @@ class BdeBuilder(Fnn, FnnTrainer):
         """
 
         for member in self.members:
-            super().train(model=member, x=x, y=y, optimizer=self.optimizer, epochs=epochs or self.epochs)
+            super().train(model=member, x=x, y=y, optimizer=self.optimizer, epochs=epochs)
         return self
 
     def predict_ensemble(self, x, include_members: bool = False):

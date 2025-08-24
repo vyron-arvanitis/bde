@@ -49,20 +49,20 @@ def main():
     bde = BdeBuilder(sizes, n_members=5, epochs=500, optimizer=optax.adam(1e-2))
     print(len(bde.members))
     # fit + predict
-    # bde.fit(x=data.x, y=data.y, epochs=500)
-    # bde_pred = bde.predict_ensemble(test_set.x, include_members=True)
-    # # print(out["ensemble_mean"])
-    # # print(out["ensemble_var"])
-    #
-    # print("keys:", list(bde_pred.keys()))  # ['ensemble_mean', 'ensemble_var']
-    # print("mean shape:", bde_pred["ensemble_mean"].shape)
-    # print("var shape:", bde_pred["ensemble_var"].shape)
-    #
-    # plot_pred_vs_true(y_pred=bde_pred["ensemble_mean"],
-    #                   y_true=test_set.y,
-    #                   y_pred_err=bde_pred["ensemble_var"],
-    #                   title="trial",
-    #                   savepath="to_be_deleted")
+    bde.fit(x=train_set.x, y=train_set.y, epochs=500)
+    bde_pred = bde.predict_ensemble(test_set.x, include_members=True)
+    # print(bde_pred["ensemble_mean"])
+    # print(bde_pred["ensemble_var"])
+
+    print("keys:", list(bde_pred.keys()))  # ['ensemble_mean', 'ensemble_var']
+    print("mean shape:", bde_pred["ensemble_mean"].shape)
+    print("var shape:", bde_pred["ensemble_var"].shape)
+
+    plot_pred_vs_true(y_pred=bde_pred["ensemble_mean"],
+                      y_true=test_set.y,
+                      y_pred_err=bde_pred["ensemble_var"],
+                      title="trial",
+                      savepath="to_be_deleted")
 
 
 if __name__ == "__main__":

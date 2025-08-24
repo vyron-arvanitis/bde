@@ -120,8 +120,8 @@ class FnnTrainer:
         - loss must implement Loss API (apply_reduced)
         """
         # lazy defaults TODO this is also not needed
-        # if loss is None:
-        #     loss = LossMSE()
+        if loss is None:
+            loss = self.default_loss()
 
         # init params #TODO: i think this is not needed
         # if getattr(model, "params", None) is None:
@@ -167,3 +167,7 @@ class FnnTrainer:
     @staticmethod
     def default_optimizer():
         return optax.adam(learning_rate=0.01)
+
+    @staticmethod
+    def default_loss():
+        return LossMSE()
