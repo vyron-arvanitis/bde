@@ -23,7 +23,7 @@ class Loss(ABC):
         -------
 
         """
-        ...
+        pass
 
     @staticmethod
     def _coerce(y_true: ArrayLike, y_pred: ArrayLike) -> tuple[Array, Array]:
