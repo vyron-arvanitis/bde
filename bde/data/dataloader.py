@@ -55,7 +55,6 @@ class DataLoader:
         return cls(data=data)
 
     def _infer_task(self) -> "TaskType":
-    def _infer_task(self) -> "TaskType":
         """This method is responsible for bringing the data in correct format according to the problem,
         is it a regression or classification problem?
 
