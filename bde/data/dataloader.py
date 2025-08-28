@@ -54,7 +54,7 @@ class DataLoader:
         """Schema-agnostic constructor: any keys you like."""
         return cls(data=data)
 
-    def infer_task(self) -> "TaskType":
+    def _infer_task(self) -> "TaskType":
         """This method is responsible for bringing the data in correct format according to the problem,
         is it a regression or classification problem?
 
@@ -62,7 +62,7 @@ class DataLoader:
         -------
 
         """
-        # TODO: figure out where you are going with this
+        # TODO: user decides the task
         pass
 
     @classmethod
@@ -86,7 +86,7 @@ class DataLoader:
         # TODO: implement normalization & shape checks; set fields accordingly
         pass
 
-    def validate(self):
+    def _validate(self):
         """This method ensures the shapes and the types of the data
 
 
@@ -95,7 +95,8 @@ class DataLoader:
 
         """
 
-        # TODO: code this method later
+        # TODO: maybe ensure teh dimensions are equal
+        # TODO: if user does not give data give warning and the gen data!
         pass
 
     def keys(self):
@@ -113,7 +114,7 @@ class DataLoader:
         -------
 
         """
-        # TODO: see if we will use sth like this!
+        # TODO: delete
         pass
 
     @property

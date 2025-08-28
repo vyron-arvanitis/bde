@@ -7,6 +7,13 @@ import numpy as np
 
 class DataPreProcessor:
     def __init__(self, data: DataLoader):
+        """
+        #TODO: documentation
+
+        Parameters
+        ----------
+        data
+        """
         self.data = data
 
     def norm_data(self, data: DataLoader) -> DataLoader:
@@ -25,6 +32,21 @@ class DataPreProcessor:
         pass
 
     def split(self, test_size=0.15, val_size=0.15, random_state=42, stratify=False):
+        """
+        #TODO: documentation
+
+        Parameters
+        ----------
+        test_size
+        val_size
+        random_state
+        stratify
+
+        Returns
+        -------
+
+        """
+        # tODO: only split in train and validate
         N = len(self.data)
         idx = np.arange(N)
         strat = (np.ravel(np.array(self.data.y)) if (stratify and self.data.y is not None) else None)
@@ -38,7 +60,7 @@ class DataPreProcessor:
         tr_idx, val_idx = train_test_split(
             trval_idx, test_size=val_rel, random_state=random_state, stratify=strat_trval
         )
-
+        
         # thanks to DataLoader.__getitem__, this returns subset loaders
         train_loader = self.data[tr_idx]
         val_loader = self.data[val_idx]
