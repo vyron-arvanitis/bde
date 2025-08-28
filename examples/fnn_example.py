@@ -24,11 +24,12 @@ def main():
     # true_W = jax.random.normal(k_W, (10, 1))
     # y_true = X_true @ true_W + 0.1 * jax.random.normal(k_eps, (1024, 1))
 
+    # these steps should be inside the bde builder
     data = DataLoader(seed=43, n_samples=500, n_features=10)  # creates automatically the gen data
     prep = DataPreProcessor(data)
-    train_set, val_set, test_set = prep.split()
+    train_set, val_set, test_set = prep.split() #TODO: we only need validation
 
-    sizes = [10, 64, 64, 1]
+    sizes = [10, 64, 64, 1] #TODO: for regression 2 nodes ( mean and var) and for classification user gives # of classes!
 
     # model = Fnn(sizes)
     # trainer = FnnTrainer()

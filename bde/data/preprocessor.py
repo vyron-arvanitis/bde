@@ -46,6 +46,7 @@ class DataPreProcessor:
         -------
 
         """
+        # tODO: only split in train and validate
         N = len(self.data)
         idx = np.arange(N)
         strat = (np.ravel(np.array(self.data.y)) if (stratify and self.data.y is not None) else None)
