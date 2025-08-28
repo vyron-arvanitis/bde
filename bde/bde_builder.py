@@ -56,7 +56,8 @@ class BdeBuilder(Fnn, FnnTrainer):
         ---------
         #TODO: documentation
         """
-
+        #TODO: this should get the dataloader and the datapreprocessor
+        #TODO: here comes the SAMPLING AS WELL
         for member in self.members:
             super().train(model=member, x=x, y=y, optimizer=self.optimizer, epochs=epochs,loss=None)
         return self
@@ -85,6 +86,10 @@ class BdeBuilder(Fnn, FnnTrainer):
                 (mean_pred, var_pred, member_preds)
             where member_preds has shape (n_members, n_samples, output_dim).
         """
+        #TODO: sklearn predict functions ... ??
+        #TODO: we do not only need point predictions but interval prediction
+        #TODO: predict(type_of_pred : interval, point ...
+        #TODO: we can also use https://docs.jax.dev/en/latest/_autosummary/jax.random.normal.html
         if not self.members:
             raise ValueError("Ensemble has no members. Call `fit` or "
                              "`deep_ensemble_creator` first.")
@@ -95,7 +100,7 @@ class BdeBuilder(Fnn, FnnTrainer):
             axis=0
         )  # (n_members, n_samples, output_dim)
 
-        ensemble_mean = jnp.mean(member_preds, axis=0)  # (N, D)
+        ensemble_mean = jnp.mean(member_preds, axis=0)  # (N, D) that is the point prediction
         ensemble_var = jnp.var(member_preds, axis=0)  # (N, D) epistemic
 
         out = {
