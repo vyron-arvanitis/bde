@@ -13,7 +13,7 @@ from bde.loss.loss import  LossMSE
 from bde.sampler.warmup import custom_mclmc_warmup
 from bde.sampler.probabilistic import ProbabilisticModel
 
-from bde.sampler.prior import Prior
+from bde.sampler.prior import Prior, PriorDist
 
 import sys
 import os
@@ -57,8 +57,8 @@ def main():
     bde = BdeBuilder(
         sizes, 
         n_members=1, 
-        epochs=1000, 
-        optimizer=optax.adam(1e-3)
+        epochs=100, 
+        optimizer=optax.adam(1e-5)
         )
     
     print("Number of FNNs in the BDE: ", len(bde.members))
@@ -67,11 +67,11 @@ def main():
     bde.fit(
         x=train_set.x, 
         y=train_set.y, 
-        epochs=1000
+        epochs=100
         )
     
     initial_params = bde.all_fnns["fnn_0"]
-    prior = Prior(loc=0.0, scale=1.0)
+    prior = PriorDist.STANDARDNORMAL.get_prior()
     model = ProbabilisticModel(module=bde.members[0], params=initial_params, prior=prior, n_batches=1)
 
     logdensity_fn = lambda params: model.log_unnormalized_posterior(params, x=train_set.x, y=train_set.y)
@@ -81,9 +81,9 @@ def main():
     warmup = custom_mclmc_warmup(
     logdensity_fn=logdensity_fn,
     diagonal_preconditioning=True,
-    step_size_init=1e-3,
-    desired_energy_var_start=1e-2,
-    desired_energy_var_end=1e-3,
+    step_size_init=1e-5,
+    desired_energy_var_start=1e-3,
+    desired_energy_var_end=1e-6,
     trust_in_estimate=1.5,
     num_effective_samples=100,
 )
@@ -91,7 +91,7 @@ def main():
 
     
     rng_key = jax.random.PRNGKey(1)
-    results = warmup.run(rng_key, position=initial_params, num_steps=10)
+    results = warmup.run(rng_key, position=initial_params, num_steps=1000)
     print("step_size:", results.parameters.step_size)
     print("L:", results.parameters.L)
 
