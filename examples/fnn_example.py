@@ -47,6 +47,13 @@ def main():
     X_test = jnp.array(X_test, dtype=jnp.float32)
     y_test = jnp.array(y_test, dtype=jnp.float32)
 
+    Xmu, Xstd = jnp.mean(X_train, 0), jnp.std(X_train, 0) + 1e-8
+    Ymu, Ystd = jnp.mean(y_train, 0), jnp.std(y_train, 0) + 1e-8
+
+    Xtr = (X_train - Xmu) / Xstd
+    Xte = (X_test  - Xmu) / Xstd
+    ytr = (y_train - Ymu) / Ystd
+    yte = (y_test  - Ymu) / Ystd
 
     sizes = [5, 16, 16, 2] #TODO: for regression 2 nodes ( mean and var) and for classification user gives # of classes!
 
@@ -72,15 +79,15 @@ def main():
         sizes, 
         n_members=1, 
         epochs=3000, 
-        optimizer=optax.adam(4e-3)
+        optimizer=optax.adam(1e-2)
         )
     
     print("Number of FNNs in the BDE: ", len(bde.members))
     
     # fit + predict
     bde.fit(
-        x=X_train, 
-        y=y_train, 
+        x=Xtr, 
+        y=ytr, 
         epochs=3000
         )
     
@@ -88,10 +95,9 @@ def main():
     prior = PriorDist.STANDARDNORMAL.get_prior()
     model = ProbabilisticModel(module=bde.members[0], params=initial_params, prior=prior, n_batches=1)
 
-    logdensity_fn = lambda params: model.log_unnormalized_posterior(params, x=X_train, y=y_train)
+    logdensity_fn = lambda params: model.log_unnormalized_posterior(params, x=Xtr, y=ytr)
     print(model.log_prior(initial_params))
-    print(model.log_likelihood(initial_params, X_train, y_train))
-    #bde_pred = bde.predict_ensemble(test_set.x, include_members=True)
+    print(model.log_likelihood(initial_params, Xtr, ytr))
 
     warmup = custom_mclmc_warmup(
     logdensity_fn=logdensity_fn,
@@ -101,7 +107,7 @@ def main():
     desired_energy_var_end=0.1,
     trust_in_estimate=1.5,
     num_effective_samples=100,
-)
+    )
     
     rng_key = jax.random.PRNGKey(1)
     results = warmup.run(rng_key, position=initial_params, num_steps=1000)
@@ -114,16 +120,18 @@ def main():
     positions, infos, state = sampler.sample(rng_key=rng_key, init_position = results.state.position, num_samples = 5, thinning=10)
     
     fnn = bde.members[0]
-    fnn.params = state.position
-    
-    pred = fnn.predict(X_test)                          # (N,2)
-    mu   = pred[..., 0:1]                          # (N,1)
-    sigma= 0.5 + 10.0 * jax.nn.sigmoid(pred[...,1:2])
-    y_true = jnp.ravel(y_test)
-    y_pred = jnp.ravel(mu)
-    yerr   = jnp.ravel(sigma) 
-    print("y_true shape: ", y_true.shape, "y_pred shape: ", y_pred.shape, "yerr shape: ", yerr.shape)
 
+    sampled_params = positions[-1]
+    pred = fnn.apply({'params': sampled_params}, Xte)
+    mu   = pred[..., 0:1]
+    sigma= 0.5 + 10.0 * jax.nn.sigmoid(pred[..., 1:2])
+    # un-normalize
+    y_pred = jnp.ravel(mu * Ystd + Ymu)
+    y_true = jnp.ravel(yte)
+    yerr  = jnp.ravel(sigma * Ystd)
+    print("y_true shape: ", y_true.shape, "y_pred shape: ", y_pred.shape, "yerr shape: ", yerr.shape)
+    
+    
 
 ########
     #print(bde_pred["ensemble_mean"])
