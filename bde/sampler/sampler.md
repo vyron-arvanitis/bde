@@ -18,7 +18,7 @@ $$
 K(p) = \frac{1}{2} p^\top M^{-1} p
 $$
 
-is the **kinetic energy**, with \(p\) an auxiliary momentum and \(M\) the mass matrix.  
+is the **kinetic energy**, with $p$ an auxiliary momentum and $M$ the mass matrix.  
 
 The sampler simulates Hamiltonian dynamics:
 
@@ -28,7 +28,7 @@ $$
 \frac{dp}{dt} = -\frac{\partial H}{\partial \theta} = -\nabla_\theta U(\theta),
 $$
 
-which in theory conserves the total energy \(H(\theta,p)\). In practice, numerical integration introduces an **energy error**
+which in theory conserves the total energy $H(\theta,p)$. In practice, numerical integration introduces an **energy error**
 
 $$
 \Delta H = H(\theta', p') - H(\theta, p),
@@ -38,8 +38,8 @@ and warmup/adaptation procedures aim to control this error.
 
 **Warmup**
 
-The warmup phase estimates and adapts the integrator step size \(\varepsilon\) for Hamiltonian dynamics. 
-Smaller step sizes correspond to more accurate numerical integration, ensuring smaller energy errors \(\Delta H\).  
+The warmup phase estimates and adapts the integrator step size $\varepsilon$ for Hamiltonian dynamics. 
+Smaller step sizes correspond to more accurate numerical integration, ensuring smaller energy errors $\Delta H$.  
 
 The discretized dynamics for one integration step are:
 
@@ -48,9 +48,9 @@ $$
 p_{t+1} \approx p_t - \varepsilon \nabla_\theta U(\theta_t),
 $$
 
-where \(U(\theta) = -\log p(\theta | \text{data})\) is the potential energy, and \(M\) is the mass matrix.  
+where $U(\theta) = -\log p(\theta | \text{data})$ is the potential energy, and $M$ is the mass matrix.  
 
-The total **trajectory length** in parameter space is given by \(L\) (number of integration steps), with total distance traveled approximately \(L \cdot \varepsilon\).
+The total **trajectory length** in parameter space is given by $L$ (number of integration steps), with total distance traveled approximately $L \cdot \varepsilon$.
 
 **make_L_step_size_adaptation**
 
@@ -93,18 +93,18 @@ $$
 \xi = \frac{(\Delta H)^2}{\text{dim} \times \text{desired variance}} + 10^{-8},
 $$
 
-where \(\Delta H\) is the energy change after one integration step, \(\text{dim}\) is the number of parameters, and \(\text{desired variance}\) is the target variance for \(\Delta H\).  
+where $\Delta H$ is the energy change after one integration step, $\text{dim}$ is the number of parameters, and $\text{desired variance}$ is the target variance for $\Delta H$.  
 
-- If \(\Delta H\) matches the target variance, we have \(\xi \approx 1\).  
-- If \(\Delta H\) is too large, \(\xi > 1\).  
-- If \(\Delta H\) is too small, \(\xi < 1\).  
+- If $\Delta H$ matches the target variance, we have $\xi \approx 1$.  
+- If $\Delta H$ is too large, $\xi > 1$.  
+- If $\Delta H$ is too small, $\xi < 1$.  
 
 We then define a `weight` used in the **weighted running average** for computing the new step size.  
 
-- Large \(\Delta H\) → small weight → this step has less influence on updating the step size.  
-- Small \(\Delta H\) → large weight → this step contributes more to the step size adaptation.  
+- Large $\Delta H$ → small weight → this step has less influence on updating the step size.  
+- Small $\Delta H$ → large weight → this step contributes more to the step size adaptation.  
 
-The parameter `trust_in_estimate` controls how aggressively we trust the observed \(\Delta H\):  
+The parameter `trust_in_estimate` controls how aggressively we trust the observed $\Delta H$:  
 - Larger `trust_in_estimate` → broader weighting → more aggressive step size updates.  
 - Smaller `trust_in_estimate` → conservative updates.
 
