@@ -449,19 +449,7 @@ def custom_mclmc_warmup(
     
     return AdaptationAlgorithm(run)
 
-def warmup_wrapper(Xtr, ytr, bde: BdeBuilder):
-
-    params_list = [m.params for m in bde.members]                 # length E
-    params_e = tree_map(lambda *p: jnp.stack(p, axis=0), *params_list)  # (E, ...)
-
-    prior = PriorDist.STANDARDNORMAL.get_prior()
-    proto_module = bde.members[0]   # same architecture for all members
-    model = ProbabilisticModel(module=proto_module,
-                           params=params_list[0],  # only for counting/printing
-                           prior=prior)
-
-    def logpost_one(params):
-        return model.log_unnormalized_posterior(params, x=Xtr, y=ytr)
+def warmup_bde(bde: BdeBuilder, logpost_one: Callable):
 
     adapt = custom_mclmc_warmup(logdensity_fn=logpost_one,
                                 diagonal_preconditioning=False,
@@ -475,9 +463,8 @@ def warmup_wrapper(Xtr, ytr, bde: BdeBuilder):
         ar = adapt.run(key, position, num_steps)
         return ar.state, ar.parameters
 
-    E = len(bde.members)
-    rng0 = jax.random.PRNGKey(0)
-    keys_e = jax.random.split(rng0, E)
+    rng = jax.random.PRNGKey(bde.seed)
+    keys_e = jax.random.split(rng, bde.n_members)
 
     num_steps = 1000  
 
@@ -485,7 +472,7 @@ def warmup_wrapper(Xtr, ytr, bde: BdeBuilder):
         lambda k, p: run_one(k, p, num_steps),
         in_axes=(0, 0),
         out_axes=(0, 0),
-    )(keys_e, params_e)
+    )(keys_e, bde.params_e)
 
     return AdaptationResults(
             states_e, mclmc_params_e
