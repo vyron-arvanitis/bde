@@ -21,7 +21,6 @@ class ProbabilisticModel:
         module: nn.Module,
         params: ParamTree,
         prior: Prior,
-        n_batches: int = 1,
     ):
         """Initialize the ProbabilisticModel class for Bayesian training.
 
@@ -40,7 +39,6 @@ class ProbabilisticModel:
         """
         self.module = module
         self.n_params = train_utils.count_params(params)
-        self.n_batches = n_batches
         self.prior = prior
 
     def __str__(self):
@@ -48,13 +46,8 @@ class ProbabilisticModel:
         return (
             f'{self.__class__.__name__}:\n'  # noqa
             f' | Params: {self.n_params}'
-            f' | Batches: {self.n_batches}\n'
             f' | Prior: {self.prior.name}'
         )
-
-    @property
-    def minibatch(self):
-        return self.n_batches > 1 ### no batches ###
 
     def log_prior(self, params: ParamTree) -> jax.Array:
         """Compute log prior for given parameters."""
@@ -118,5 +111,5 @@ class ProbabilisticModel:
         """
         return (
             self.log_prior(position)
-            + self.log_likelihood(position, x, y, **kwargs) * self.n_batches
+            + self.log_likelihood(position, x, y, **kwargs)
         )

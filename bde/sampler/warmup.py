@@ -19,8 +19,12 @@ from blackjax.base import (
 from blackjax.diagnostics import effective_sample_size
 from blackjax.util import pytree_size, streaming_average_update
 from jax.flatten_util import ravel_pytree
+from jax.tree_util import tree_map
 
 from bde.sampler.callbacks import progress_bar_scan, save_position
+from bde.sampler.probabilistic import ProbabilisticModel
+from bde.sampler.prior import Prior, PriorDist
+from bde.bde_builder import BdeBuilder
 
 def mclmc_find_L_and_step_size(
     mclmc_kernel,
@@ -444,6 +448,48 @@ def custom_mclmc_warmup(
         )
     
     return AdaptationAlgorithm(run)
+
+def warmup_wrapper(Xtr, ytr, bde: BdeBuilder):
+
+    params_list = [m.params for m in bde.members]                 # length E
+    params_e = tree_map(lambda *p: jnp.stack(p, axis=0), *params_list)  # (E, ...)
+
+    prior = PriorDist.STANDARDNORMAL.get_prior()
+    proto_module = bde.members[0]   # same architecture for all members
+    model = ProbabilisticModel(module=proto_module,
+                           params=params_list[0],  # only for counting/printing
+                           prior=prior)
+
+    def logpost_one(params):
+        return model.log_unnormalized_posterior(params, x=Xtr, y=ytr)
+
+    adapt = custom_mclmc_warmup(logdensity_fn=logpost_one,
+                                diagonal_preconditioning=False,
+                                desired_energy_var_start=0.5,
+                                desired_energy_var_end=0.1,
+                                trust_in_estimate=1.5,
+                                num_effective_samples=100,
+                                step_size_init=5e-3)
+
+    def run_one(key, position, num_steps):
+        ar = adapt.run(key, position, num_steps)
+        return ar.state, ar.parameters
+
+    E = len(bde.members)
+    rng0 = jax.random.PRNGKey(0)
+    keys_e = jax.random.split(rng0, E)
+
+    num_steps = 1000  
+
+    states_e, mclmc_params_e = jax.vmap(
+        lambda k, p: run_one(k, p, num_steps),
+        in_axes=(0, 0),
+        out_axes=(0, 0),
+    )(keys_e, params_e)
+
+    return AdaptationResults(
+            states_e, mclmc_params_e
+        )
     
 
 
