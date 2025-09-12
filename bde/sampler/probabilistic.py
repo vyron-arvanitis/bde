@@ -55,8 +55,6 @@ class ProbabilisticModel:
     @property
     def minibatch(self):
         return self.n_batches > 1 ### no batches ###
-    
-
 
     def log_prior(self, params: ParamTree) -> jax.Array:
         """Compute log prior for given parameters."""

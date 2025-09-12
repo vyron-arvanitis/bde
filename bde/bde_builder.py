@@ -1,9 +1,13 @@
 """this is a bde builder"""
+import jax
+import jax.numpy as jnp
+from jax.tree_util import tree_map, tree_structure
+
+import optax
 
 from .models.models import Fnn
 from .training.trainer import FnnTrainer
-import optax
-import jax.numpy as jnp
+
 from bde.sampler.my_types import ParamTree
 
 class BdeBuilder(Fnn, FnnTrainer):
@@ -50,27 +54,38 @@ class BdeBuilder(Fnn, FnnTrainer):
         """
 
         return [self.get_model(base_seed + i) for i in range(self.n_members)]
+    
+    def fit_members(self, x, y, optimizer=None, epochs=100, loss=None):
+        members = self.members
 
-    def fit(
-            self,
-            x,
-            y,
-            epochs: int = 100,
-            ):
-        """Train each member of the ensemble
+        opt = optimizer or self.default_optimizer()
+        loss_obj = loss or self.default_loss()
 
-        Parameters
-        ---------
-        #TODO: documentation
-        """
+        # Stack params across ensemble axis E
+        params_e = tree_map(lambda *ps: jnp.stack(ps, axis=0),
+                            *[m.params for m in members])  # (E, ...)
 
-        all_fnns: ParamTree = {} 
-        for i, member in enumerate(self.members): ## ask chatty for pmap instead of for loop, joblib
-            super().train(model=member, x=x, y=y, optimizer=self.optimizer, epochs=epochs,loss=None) 
-            all_fnns[f"fnn_{i}"] = member.params
-        
-        self.all_fnns = all_fnns 
-        return self
+        # All members share the same architecture; use one model for forward()
+        proto_model = members[0]
+
+        # Build single-member step, then vmapped step
+        loss_fn  = FnnTrainer.make_loss_fn(proto_model, loss_obj)
+        step_one = FnnTrainer.make_step(loss_fn, opt)
+        vstep    = FnnTrainer.make_vstep(step_one)
+
+        opt_state_e = jax.vmap(opt.init)(params_e)
+
+        self._reset_history()
+        for epoch in range(epochs):
+            params_e, opt_state_e, lvals_e = vstep(params_e, opt_state_e, x, y)
+            mean_loss = float(jnp.mean(lvals_e))
+            self.history["train_loss"].append(mean_loss)
+            if epoch % self.log_every == 0:
+                print(epoch, mean_loss)
+
+        for i, m in enumerate(members):
+            m.params = tree_map(lambda a: a[i], params_e)
+        return members
 
     def predict_ensemble(self, x, include_members: bool = False):
         """
