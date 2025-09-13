@@ -35,24 +35,26 @@ class FnnTrainer:
 
         """
         self.history = {"train_loss": []}
-    
+
     @staticmethod
     def make_loss_fn(model, loss_obj):
         # returns (params, x, y) -> scalar
         def loss_fn(p, xb, yb):
             return loss_obj(p, model, xb, yb)  # loss must call model.forward(p, xb)
+
         return loss_fn
-    
+
     @staticmethod
     def make_step(loss_fn, optimizer):
         @jax.jit
         def step(p, opt_state, xb, yb):
             lval, grads = jax.value_and_grad(loss_fn)(p, xb, yb)
-            updates, opt_state = optimizer.update(grads, opt_state, p) # optimizer is GradientTransformation
+            updates, opt_state = optimizer.update(grads, opt_state, p)  # optimizer is GradientTransformation
             p = optax.apply_updates(p, updates)
             return p, opt_state, lval
+
         return step
-    
+
     @staticmethod
     def make_vstep(step_one):
         # vmaps the single-member step across the leading ensemble axis
@@ -60,8 +62,9 @@ class FnnTrainer:
         def vstep(p_e, os_e, xb, yb):
             return jax.vmap(step_one, in_axes=(0, 0, None, None),
                             out_axes=(0, 0, 0))(p_e, os_e, xb, yb)
+
         return vstep
-    
+
     def fit_model(self, model, x, y, optimizer=None, epochs=100, loss=None):
         opt = optimizer or self.default_optimizer()
         loss_obj = loss or self.default_loss()
@@ -70,9 +73,9 @@ class FnnTrainer:
         params = model.params
         opt_state = opt.init(params)
 
-        loss_fn  = self.make_loss_fn(model, loss_obj)
+        loss_fn = self.make_loss_fn(model, loss_obj)
         step_one = self.make_step(loss_fn, opt)
-        
+
         for epoch in range(epochs):
             params, opt_state, lval = step_one(params, opt_state, x, y)
             self.history["train_loss"].append(float(lval))
@@ -81,6 +84,7 @@ class FnnTrainer:
 
         model.params = params
         return model
+
     def train(
             self,
             model,
@@ -89,7 +93,7 @@ class FnnTrainer:
             optimizer: Optional[optax.GradientTransformation] = None,
             epochs: int = 100,
             loss=None,
-            ):
+    ):
         """
         Generic training loop.
         - model.forward(params, x) must exist
@@ -106,7 +110,7 @@ class FnnTrainer:
 
         def loss_fn(p, x, y):
             return loss(p, model, x, y)
-          
+
         @jax.jit
         def step(params, opt_state, x, y):
             loss_val, grads = jax.value_and_grad(loss_fn)(params, x, y)
@@ -130,4 +134,3 @@ class FnnTrainer:
     @staticmethod
     def default_loss():
         return GaussianNLL()
-    

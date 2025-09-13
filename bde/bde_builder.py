@@ -10,6 +10,7 @@ from .training.trainer import FnnTrainer
 
 from bde.sampler.my_types import ParamTree
 
+
 class BdeBuilder(Fnn, FnnTrainer):
     # TODO: build the BdeBuilderClass
     def __init__(self, sizes, n_members, seed: int = 100):
@@ -20,7 +21,7 @@ class BdeBuilder(Fnn, FnnTrainer):
         self.seed = seed
 
         self.members = self.deep_ensemble_creator(seed=self.seed)
-    
+
     def get_model(self, seed: int) -> Fnn:
         """Create a single Fnn model and initialize its parameters
 
@@ -50,7 +51,7 @@ class BdeBuilder(Fnn, FnnTrainer):
         """
 
         return [self.get_model(seed + i) for i in range(self.n_members)]
-    
+
     def fit_members(self, x, y, epochs, optimizer=None, loss=None):
         members = self.members
 
@@ -64,9 +65,9 @@ class BdeBuilder(Fnn, FnnTrainer):
         # All members share the same architecture; use one model for forward()
         proto_model = members[0]
 
-        loss_fn  = FnnTrainer.make_loss_fn(proto_model, loss_obj)
+        loss_fn = FnnTrainer.make_loss_fn(proto_model, loss_obj)
         step_one = FnnTrainer.make_step(loss_fn, opt)
-        vstep    = FnnTrainer.make_vstep(step_one)
+        vstep = FnnTrainer.make_vstep(step_one)
 
         opt_state_e = jax.vmap(opt.init)(params_e)
 
@@ -81,8 +82,7 @@ class BdeBuilder(Fnn, FnnTrainer):
         for i, m in enumerate(members):
             m.params = tree_map(lambda a: a[i], params_e)
 
-        self.params_e = params_e #TODO: [@suggestion] add this in the __init__ we never create this attribute apart from here
-
+        self.params_e = params_e  # TODO: [@suggestion] add this in the __init__ we never create this attribute apart from here
 
         return members
 
@@ -110,10 +110,10 @@ class BdeBuilder(Fnn, FnnTrainer):
                 (mean_pred, var_pred, member_preds)
             where member_preds has shape (n_members, n_samples, output_dim).
         """
-        #TODO: sklearn predict functions ... ??
-        #TODO: we do not only need point predictions but interval prediction
-        #TODO: predict(type_of_pred : interval, point ...
-        #TODO: we can also use https://docs.jax.dev/en/latest/_autosummary/jax.random.normal.html
+        # TODO: sklearn predict functions ... ??
+        # TODO: we do not only need point predictions but interval prediction
+        # TODO: predict(type_of_pred : interval, point ...
+        # TODO: we can also use https://docs.jax.dev/en/latest/_autosummary/jax.random.normal.html
         if not self.members:
             raise ValueError("Ensemble has no members. Call `fit` or "
                              "`deep_ensemble_creator` first.")
@@ -135,19 +135,19 @@ class BdeBuilder(Fnn, FnnTrainer):
             out["member_means"] = member_means
         self.results = out
         return out
-    
+
     @staticmethod
     def predictive_accuracy(y, mu, sigma):
-    # Pulls
+        # Pulls
         pulls = (y - mu) / sigma
         pull_mean = jnp.mean(pulls)
         pull_std = jnp.std(pulls)
-    
-    # Coverage
+
+        # Coverage
         within_1sigma = jnp.mean(jnp.abs(y - mu) <= 1 * sigma)
         within_2sigma = jnp.mean(jnp.abs(y - mu) <= 2 * sigma)
         within_3sigma = jnp.mean(jnp.abs(y - mu) <= 3 * sigma)
-    
+
         return {
             "pull_mean": float(pull_mean),
             "pull_std": float(pull_std),
@@ -179,7 +179,6 @@ class BdeBuilder(Fnn, FnnTrainer):
             return self.results[item]
         else:
             raise AttributeError(f"{self.__class__.__name__} has no attribute '{item}' !")
-
 
     #
     # def store_ensemble_results(self, x, y=None, include_members: bool = True):
