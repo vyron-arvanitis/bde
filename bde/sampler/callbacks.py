@@ -44,7 +44,12 @@ def save_position(position: ParamTree, base: Path, idx: jnp.ndarray, n: int):
     return position
 
 
-def progress_bar_scan(n_steps: int, name: str):
+from functools import partial
+from tqdm.auto import tqdm
+import jax
+import jax.numpy as jnp
+
+def progress_bar_scan(n_steps: int, name: str, position: int, leave: bool = True) -> Callable:
     """Progress bar designed for lax.scan.
 
     Parameters:
@@ -87,6 +92,8 @@ def progress_bar_scan(n_steps: int, name: str):
             result = f(carry, xs)
             _update_progress_bar(n)
             return result
+
         return inner
 
     return _progress_bar_scan
+

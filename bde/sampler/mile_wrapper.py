@@ -57,25 +57,38 @@ class MileWrapper:
             dim = jax.flatten_util.ravel_pytree(init_positions_e)[0].shape[-1]
             sqrt_diag_e = jnp.ones((E, dim))
 
-        def sample_one(key, init_pos, L_i, step_i, sdc_i):
+        bar = progress_bar_scan(num_samples, name="Sampling", position=1, leave=True)
+
+        def sample_one(key, init_pos, L_i, step_i, sdc_i, member_id):
             keys = jax.random.split(key, num_samples + 1)
             state = self.init(init_pos, keys[0])
 
-            def one_step(st, k):
+            def one_step(st, xs):
+                _, k = xs
                 st, info = self.step(k, st, L=L_i, step_size=step_i, sqrt_diag_cov=sdc_i)
                 return st, (st.position, info)
+            
+            iters = jnp.arange(num_samples)
 
-            state, (positions, infos) = jax.lax.scan(one_step, state, keys[1:])
+            def run_bar(st): return jax.lax.scan(bar(one_step), st, (iters, keys[1:]))
+            def run_no (st): return jax.lax.scan(one_step,  st, (iters, keys[1:]))
+            
+            state, (positions, infos) = jax.lax.cond(member_id == 0, run_bar, run_no, state)
+
             if thinning > 1:
                 positions = jax.tree_util.tree_map(lambda x: x[::thinning], positions)
                 infos     = jax.tree_util.tree_map(lambda x: x[::thinning], infos)
-            return positions, infos, state
 
+            return positions, infos, state
+        
+        member_ids = jnp.arange(E)
+        
         positions_eT, infos_eT, states_e = jax.vmap(
             sample_one,
-            in_axes=(0, 0, 0, 0, 0),
+            in_axes=(0, 0, 0, 0, 0, 0),
             out_axes=(0, 0, 0),
-        )(rng_keys_e, init_positions_e, L_e, step_e, sqrt_diag_e)
+        )(rng_keys_e, init_positions_e, L_e, step_e, sqrt_diag_e, member_ids)
+        
 
         return (positions_eT, infos_eT, states_e) if store_states else (states_e.position, infos_eT, states_e)
 
