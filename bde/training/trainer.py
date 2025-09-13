@@ -48,7 +48,7 @@ class FnnTrainer:
         @jax.jit
         def step(p, opt_state, xb, yb):
             lval, grads = jax.value_and_grad(loss_fn)(p, xb, yb)
-            updates, opt_state = optimizer.update(grads, opt_state, p)
+            updates, opt_state = optimizer.update(grads, opt_state, p) # optimizer is GradientTransformation
             p = optax.apply_updates(p, updates)
             return p, opt_state, lval
         return step

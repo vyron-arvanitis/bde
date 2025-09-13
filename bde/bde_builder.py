@@ -77,11 +77,12 @@ class BdeBuilder(Fnn, FnnTrainer):
             self.history["train_loss"].append(mean_loss)
             if epoch % self.log_every == 0:
                 print(epoch, mean_loss)
-        
+
         for i, m in enumerate(members):
             m.params = tree_map(lambda a: a[i], params_e)
 
-        self.params_e = params_e
+        self.params_e = params_e #TODO: [@suggestion] add this in the __init__ we never create this attribute apart from here
+
 
         return members
 
