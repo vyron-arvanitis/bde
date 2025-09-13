@@ -3,18 +3,17 @@ import jax.numpy as jnp
 import blackjax
 from jax.tree_util import tree_map
 from jax.flatten_util import ravel_pytree
+from bde.sampler.callbacks import progress_bar_scan
 
 class MileWrapper:
     def __init__(self, logdensity_fn):
         self.logdensity_fn = logdensity_fn
-        # we parameterize the kernel at *step* time via sqrt_diag_cov, L, step_size
         self._kernel_builder = lambda sqrt_diag_cov: blackjax.mcmc.mclmc.build_kernel(
             logdensity_fn=self.logdensity_fn,
             integrator=blackjax.mcmc.integrators.isokinetic_mclachlan,
             sqrt_diag_cov=sqrt_diag_cov,
         )
 
-    # -------- single-chain API (unchanged) --------
     def init(self, position, rng_key):
         return blackjax.mcmc.mclmc.init(position=position,
                                         logdensity_fn=self.logdensity_fn,
@@ -22,29 +21,12 @@ class MileWrapper:
 
     def step(self, rng_key, state, L, step_size, sqrt_diag_cov=None):
         if sqrt_diag_cov is None:
-            # no preconditioning
             dim = ravel_pytree(state.position)[0].shape[0]
             sqrt_diag_cov = jnp.ones((dim,))
         kernel = self._kernel_builder(sqrt_diag_cov)
         next_state, info = kernel(rng_key=rng_key, state=state, L=L, step_size=step_size)
         return next_state, info
 
-    def sample(self, rng_key, init_position, num_samples, thinning=1, store_states=True, L=10.0, step_size=1e-2, sqrt_diag_cov=None):
-        keys = jax.random.split(rng_key, num_samples + 1)
-        state = self.init(init_position, keys[0])
-
-        def one_step(state, key):
-            state, info = self.step(key, state, L=L, step_size=step_size, sqrt_diag_cov=sqrt_diag_cov)
-            return state, (state.position, info)
-
-        state, (positions, infos) = jax.lax.scan(one_step, state, keys[1:])
-
-        if thinning > 1:
-            positions = jax.tree_util.tree_map(lambda x: x[::thinning], positions)
-
-        return (positions, infos, state) if store_states else (state.position, infos, state)
-
-    # -------- batched (vmapped) API --------
     def init_batched(self, positions_e, keys_e):
         """positions_e: pytree with leading axis E; keys_e: (E,) PRNGKey"""
         init_one = lambda pos, key: blackjax.mcmc.mclmc.init(position=pos,

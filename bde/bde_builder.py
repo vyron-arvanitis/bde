@@ -20,10 +20,6 @@ class BdeBuilder(Fnn, FnnTrainer):
         self.seed = seed
 
         self.members = self.deep_ensemble_creator(seed=self.seed)
-
-        self.params_e = None
-        self.all_fnns = {}
-        self.results = {}
     
     def get_model(self, seed: int) -> Fnn:
         """Create a single Fnn model and initialize its parameters
@@ -68,7 +64,6 @@ class BdeBuilder(Fnn, FnnTrainer):
         # All members share the same architecture; use one model for forward()
         proto_model = members[0]
 
-        # Build single-member step, then vmapped step
         loss_fn  = FnnTrainer.make_loss_fn(proto_model, loss_obj)
         step_one = FnnTrainer.make_step(loss_fn, opt)
         vstep    = FnnTrainer.make_vstep(step_one)

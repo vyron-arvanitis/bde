@@ -38,7 +38,6 @@ def mclmc_find_L_and_step_size(
     desired_energy_var_end: float = 5e-4,
     trust_in_estimate: float = 1.5,
     num_effective_samples: int = 150,
-    diagonal_preconditioning: bool = False,
 ):
     """
     Find the optimal value of the parameters for the MCLMC algorithm.
@@ -94,7 +93,6 @@ def mclmc_find_L_and_step_size(
         desired_energy_var_end=desired_energy_var_end,
         trust_in_estimate=trust_in_estimate,
         num_effective_samples=num_effective_samples,
-        diagonal_preconditioning=diagonal_preconditioning,
     )(state, params, part1_key)
 
     if tune3_steps != 0:
@@ -110,7 +108,6 @@ def make_L_step_size_adaptation(
     dim: int,
     tune1_steps: int,
     tune2_steps: int,
-    diagonal_preconditioning: bool,
     desired_energy_var_start: float,
     desired_energy_var_end: float,
     trust_in_estimate: float,
@@ -268,17 +265,6 @@ def make_L_step_size_adaptation(
             variances = x_squared_average - jnp.square(x_average)
             # jax.debug.print('Average variances: {x}', x=jnp.mean(variances))
             L = jnp.sqrt(jnp.sum(variances))
-            if diagonal_preconditioning:
-                sqrt_diag_cov = jnp.sqrt(variances)
-                params = params._replace(sqrt_diag_cov=sqrt_diag_cov)
-                L = jnp.sqrt(dim)
-
-                # readjust the stepsize
-                steps = tune2_steps // 3  # we do some small number of steps
-                keys = jax.random.split(final_key, steps)
-                state, params, _, (_, average) = run_steps(
-                    xs=(jnp.ones(steps), keys), state=state, params=params
-                )
 
         return state, MCLMCAdaptationState(L, params.step_size, sqrt_diag_cov)
 
@@ -365,7 +351,6 @@ def handle_nans(previous_state, next_state, step_size, step_size_max, kinetic_ch
 
 def custom_mclmc_warmup(
     logdensity_fn: Callable,
-    diagonal_preconditioning: bool = True, #cut this method out 
     desired_energy_var_start: float = 5e-4,
     desired_energy_var_end: float = 1e-4,
     trust_in_estimate: float = 1.5,
@@ -380,8 +365,6 @@ def custom_mclmc_warmup(
     logdensity_fn
         The log density probability density function from which we wish to
         sample.
-    diagonal_preconditioning
-        Whether we should use diagonal preconditioning.
     desired_energy_var_start
         The desired energy variance at the start of the linear decay schedule.
     desired_energy_var_end
@@ -397,7 +380,6 @@ def custom_mclmc_warmup(
     AdaptationResults
         The current state of the chain and the parameters for the sampler.
     """
-    diagonal_preconditioning = diagonal_preconditioning
 
     def kernel(sqrt_diag_cov):
         """Build the MCLMC kernel."""
@@ -431,7 +413,6 @@ def custom_mclmc_warmup(
             mclmc_kernel=kernel,
             state=initial_state,
             rng_key=rng_key,
-            diagonal_preconditioning=diagonal_preconditioning,
             step_size_init=step_size_init,
             tune1_steps=int(num_steps * phase_ratio[0]),
             tune2_steps=int(num_steps * phase_ratio[1]),
@@ -449,27 +430,31 @@ def custom_mclmc_warmup(
     
     return AdaptationAlgorithm(run)
 
-def warmup_bde(bde: BdeBuilder, logpost_one: Callable):
+def warmup_bde(bde: BdeBuilder, 
+               logpost_one: Callable,
+               step_size_init: float,
+               desired_energy_var_start: float = 0.5,
+               desired_energy_var_end: float = 0.1,
+               warmup_steps: int = 1000,
+               ) -> AdaptationResults:
 
     adapt = custom_mclmc_warmup(logdensity_fn=logpost_one,
-                                diagonal_preconditioning=False,
-                                desired_energy_var_start=0.5,
-                                desired_energy_var_end=0.1,
+                                desired_energy_var_start=desired_energy_var_start,
+                                desired_energy_var_end=desired_energy_var_end,
                                 trust_in_estimate=1.5,
                                 num_effective_samples=100,
-                                step_size_init=5e-3)
+                                step_size_init=step_size_init
+                                )
 
-    def run_one(key, position, num_steps):
-        ar = adapt.run(key, position, num_steps)
+    def run_one(key, position, warmup_steps):
+        ar = adapt.run(key, position, warmup_steps)
         return ar.state, ar.parameters
 
     rng = jax.random.PRNGKey(bde.seed)
     keys_e = jax.random.split(rng, bde.n_members)
 
-    num_steps = 50000
-
     states_e, mclmc_params_e = jax.vmap(
-        lambda k, p: run_one(k, p, num_steps),
+        lambda k, p: run_one(k, p, warmup_steps),
         in_axes=(0, 0),
         out_axes=(0, 0),
     )(keys_e, bde.params_e)

@@ -87,7 +87,6 @@ def progress_bar_scan(n_steps: int, name: str):
             result = f(carry, xs)
             _update_progress_bar(n)
             return result
-
         return inner
 
     return _progress_bar_scan

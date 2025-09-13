@@ -10,7 +10,7 @@ import jax.numpy as jnp
 from jax.tree_util import tree_map, tree_leaves
 
 from functools import partial
-
+import optax
 
 class BDE:
     def __init__(self, 
@@ -24,28 +24,32 @@ class BDE:
         self.bde = BdeBuilder(sizes, n_members, seed)
         self.members = self.bde.members
 
-    def train(self, X, y, epochs, optimizer):
+    def train(self, 
+              X, 
+              y, 
+              epochs, 
+              n_samples, 
+              warmup_steps, 
+              lr=1e-3, 
+              n_thinning=10
+              ):
 
-    # 1) Fit members (vectorized in your trainer)
-        self.bde.fit_members(x=X, y=y, optimizer=optimizer, epochs=epochs)
+        self.bde.fit_members(x=X, y=y, optimizer=optax.adam(lr), epochs=epochs)
 
-    # 2) Probabilistic model with a *template* params (one member is enough)
         prior = PriorDist.STANDARDNORMAL.get_prior()
         proto = self.bde.members[0]
         pm = ProbabilisticModel(module=proto, params=proto.params, prior=prior)
 
-    # Single-chain log-density (accepts `position`!)
         logpost_one = partial(pm.log_unnormalized_posterior, x=X, y=y)
 
-    # 3) Warmup the ensemble (vmapped inside your warmup)
-        warm = warmup_bde(self.bde, logpost_one)
+        warm = warmup_bde(self.bde, logpost_one, step_size_init=lr, warmup_steps=warmup_steps)
 
         init_positions_e = warm.state.position        # pytree with leading E
         tuned = warm.parameters                       # MCLMCAdaptationState (vmapped)
 
         E = tree_leaves(init_positions_e)[0].shape[0]
-        rng0 = jax.random.PRNGKey(int(self.seed))
-        rng_keys_e = jax.vmap(lambda i: jax.random.fold_in(rng0, i))(jnp.arange(E))
+        rng = jax.random.PRNGKey(int(self.seed))
+        rng_keys_e = jax.vmap(lambda i: jax.random.fold_in(rng, i))(jnp.arange(E))
 
         # 5) Normalize tuned hyperparam shapes
         L_e = tuned.L if jnp.ndim(tuned.L) == 1 else jnp.full((E,), tuned.L)
@@ -57,8 +61,8 @@ class BDE:
         positions_eT, infos_eT, states_e = sampler.sample_batched(
             rng_keys_e=rng_keys_e,
             init_positions_e=init_positions_e,
-            num_samples=10000,
-            thinning=10,
+            num_samples=n_samples,
+            thinning=n_thinning,
             L_e=L_e,
             step_e=step_e,
             sqrt_diag_e=sqrt_diag_e,
