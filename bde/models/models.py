@@ -10,7 +10,7 @@ from bde.data.dataloader import DataLoader
 class Fnn:
     """Single FNN that can optionally train itself on init."""
 
-    def __init__(self, sizes, init_seed=0, act_fn="relu"):
+    def __init__(self, sizes, init_seed=0, *, act_fn):
         """
         #TODO: documentation
 
@@ -22,7 +22,7 @@ class Fnn:
         super().__init__()  # init the trainer side (history, etc.)
         self.sizes = sizes
         self.params = self.init_mlp(seed=init_seed)
-        self.act_fn= self._get_activation(act_fn)
+        self.act_fn = self._get_activation(act_fn)
 
     def init_mlp(self, seed):
         """
@@ -64,10 +64,10 @@ class Fnn:
             x = self.act_fn(x)
         W, b = params[-1]
         return jnp.dot(x, W) + b
-    
-    def apply(self, variables, x, **kwargs): 
-        """Mimic Flax API: variables['params'] contains weights.""" 
-        params = variables["params"] 
+
+    def apply(self, variables, x, **kwargs):
+        """Mimic Flax API: variables['params'] contains weights."""
+        params = variables["params"]
         return self.forward(params, x, **kwargs)
 
     @staticmethod

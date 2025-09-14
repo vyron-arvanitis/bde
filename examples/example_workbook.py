@@ -42,7 +42,7 @@ bde = BDE(
     n_members=2,
     sizes=sizes,
     seed=0,
-    activation="hard_tanh") #TODO: [@BUG] nothing is chaning when altering activations!
+    activation="mish")
 
 bde.train(
     X=Xtr,
@@ -54,19 +54,6 @@ bde.train(
     n_thinning=1,
 )
 
-""" mish
-0 1.8975260257720947
-100 1.0781774520874023
-200 0.7577052116394043
-300 0.5568079352378845
-400 0.4186803102493286"""
-"""relu
-0 1.8975260257720947
-100 1.0781774520874023
-200 0.7577052116394043
-300 0.5568079352378845
-400 0.4186803102493286
-"""
 means, sigmas = bde.evaluate(Xte)
 
 
