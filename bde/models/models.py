@@ -93,10 +93,11 @@ class Fnn:
             "glu": nn.glu,
             "squareplus": nn.squareplus,
             "mish": nn.mish,
-            "identity": nn.identity,
         }
         try:
             return available_activation[activation]
         except KeyError:
-            raise ValueError(f"Please choose a correct activation function!"
-                             f"The available ones are {available_activation.keys()}")
+            raise ValueError(
+                f"Unsupported activation function: '{activation}'.\n"
+                f"Available options: {', '.join(available_activation.keys())}"
+            )

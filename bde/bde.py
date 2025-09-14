@@ -18,7 +18,7 @@ class BDE:
                  n_members,
                  sizes,
                  seed,
-                 activation
+                 activation: str = "relu"
                  ):
         self.sizes = sizes
         self.n_members = n_members

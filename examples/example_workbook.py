@@ -1,7 +1,6 @@
-
 import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 import jax.numpy as jnp
 import optax
@@ -17,11 +16,11 @@ import numpy as np
 
 data = fetch_openml(name="airfoil_self_noise", as_frame=True)
 
-X = data.data.values   # shape (1503, 5)
+X = data.data.values  # shape (1503, 5)
 y = data.target.values.reshape(-1, 1)  # shape (1503, 1)
 
 X_train, X_test, y_train, y_test = train_test_split(
-X, y, test_size=0.2, random_state=42)
+    X, y, test_size=0.2, random_state=42)
 
 # Convert to JAX arrays
 X_train = jnp.array(X_train, dtype=jnp.float32)
@@ -33,28 +32,43 @@ Xmu, Xstd = jnp.mean(X_train, 0), jnp.std(X_train, 0) + 1e-8
 Ymu, Ystd = jnp.mean(y_train, 0), jnp.std(y_train, 0) + 1e-8
 
 Xtr = (X_train - Xmu) / Xstd
-Xte = (X_test  - Xmu) / Xstd
+Xte = (X_test - Xmu) / Xstd
 ytr = (y_train - Ymu) / Ystd
-yte = (y_test  - Ymu) / Ystd
+yte = (y_test - Ymu) / Ystd
 
 sizes = [5, 16, 16, 2]
 
 bde = BDE(
-        n_members=2,
-        sizes=sizes,
-        seed=0)
+    n_members=2,
+    sizes=sizes,
+    seed=0,
+    activation="hard_tanh") #TODO: [@BUG] nothing is chaning when altering activations!
 
 bde.train(
-        X=Xtr,
-        y=ytr,
-        epochs=2,
-        lr=1e-3,
-        warmup_steps=3,
-        n_samples=5,
-        n_thinning=1,
-        )
+    X=Xtr,
+    y=ytr,
+    epochs=500,
+    lr=1e-3,
+    warmup_steps=3,
+    n_samples=5,
+    n_thinning=1,
+)
 
+""" mish
+0 1.8975260257720947
+100 1.0781774520874023
+200 0.7577052116394043
+300 0.5568079352378845
+400 0.4186803102493286"""
+"""relu
+0 1.8975260257720947
+100 1.0781774520874023
+200 0.7577052116394043
+300 0.5568079352378845
+400 0.4186803102493286
+"""
 means, sigmas = bde.evaluate(Xte)
+
 
 #
 # y_pred_sampled = means * Ystd + Ymu
@@ -84,10 +98,9 @@ means, sigmas = bde.evaluate(Xte)
 # ax2.set_xlabel("True"); ax2.set_ylabel("Pull"); ax2.set_ylim(-3,3); ax2.grid(True)
 
 
-
 def coverage_count(y_true, mu, sigma, k=1):
     sigma = jnp.maximum(sigma, 1e-8)
-    mask = jnp.abs(y_true - mu) <= k * sigma   # True if within k·σ
+    mask = jnp.abs(y_true - mu) <= k * sigma  # True if within k·σ
     return int(jnp.count_nonzero(mask)), float(jnp.mean(mask))
 
 # examples:
