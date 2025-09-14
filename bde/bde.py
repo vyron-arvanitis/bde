@@ -17,12 +17,13 @@ class BDE:
     def __init__(self,
                  n_members,
                  sizes,
-                 seed
+                 seed,
+                 activation
                  ):
         self.sizes = sizes
         self.n_members = n_members
         self.seed = seed
-        self.bde = BdeBuilder(sizes, n_members, seed)
+        self.bde = BdeBuilder(sizes, n_members, seed, act_fn=activation)
         self.members = self.bde.members
         self.positions_eT = None  # will be set after training + sampling
 

@@ -13,14 +13,13 @@ from bde.sampler.my_types import ParamTree
 
 class BdeBuilder(Fnn, FnnTrainer):
     # TODO: build the BdeBuilderClass
-    def __init__(self, sizes, n_members, seed: int = 100):
-        Fnn.__init__(self, sizes)
+    def __init__(self, sizes, n_members, seed: int = 100, act_fn="relu"):
+        Fnn.__init__(self, sizes, act_fn=act_fn)
         FnnTrainer.__init__(self)
         self.sizes = sizes
         self.n_members = n_members
         self.seed = seed
         self.params_e = None  # will be set after training
-
         self.members = self.deep_ensemble_creator(seed=self.seed)
 
     def get_model(self, seed: int) -> Fnn:

@@ -42,8 +42,7 @@ sizes = [5, 16, 16, 2]
 bde = BDE(
         n_members=2,
         sizes=sizes,
-        seed=0
-        )
+        seed=0)
 
 bde.train(
         X=Xtr,
