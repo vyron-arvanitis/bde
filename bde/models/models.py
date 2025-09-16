@@ -58,6 +58,7 @@ class Fnn:
         -------
 
         """
+        #TODO: [@later] have a validation of input layer and number of features
         for (W, b) in params[:-1]:
             x = jnp.dot(x, W) + b
             #x = jax.nn.relu(x)

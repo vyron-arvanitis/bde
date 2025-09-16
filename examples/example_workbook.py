@@ -41,7 +41,7 @@ Xte = (X_test  - Xmu) / Xstd
 ytr = (y_train - Ymu) / Ystd
 yte = (y_test  - Ymu) / Ystd
 
-sizes = [5, 16, 16, 2]
+sizes = [5, 16, 16, 2] # TODO: [@later] allow user to configure only hidden layers
 
 bde = BDE(
         n_members=11,
