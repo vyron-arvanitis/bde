@@ -54,10 +54,10 @@ bde = BDE(
 bde.train(
         X=Xtr,
         y=ytr,
-        epochs=1000,
+        epochs=100,
         lr=1e-3,
         warmup_steps=500,
-        n_samples=1000,
+        n_samples=100,
         n_thinning=10,
         )
 

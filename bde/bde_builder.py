@@ -10,16 +10,18 @@ from .training.trainer import FnnTrainer
 
 from bde.sampler.my_types import ParamTree
 from bde.sampler.utils import _infer_dim_from_position_example, _pad_axis0, _reshape_to_devices
+from bde.task import TaskType
 
 
 class BdeBuilder(Fnn, FnnTrainer):
     # TODO: build the BdeBuilderClass
-    def __init__(self, sizes, n_members, seed: int = 100, act_fn="relu"):
+    def __init__(self, sizes, n_members, task: TaskType, seed: int = 100, act_fn="relu"):
         Fnn.__init__(self, sizes, act_fn=act_fn)
         FnnTrainer.__init__(self)
         self.sizes = sizes
         self.n_members = n_members
         self.seed = seed
+        self.task = task
         self.params_e = None  # will be set after training
         self.members = self.deep_ensemble_creator(seed=self.seed, act_fn=act_fn)
 
@@ -54,10 +56,8 @@ class BdeBuilder(Fnn, FnnTrainer):
 
         return [self.get_model(seed + i, act_fn=act_fn) for i in range(self.n_members)]
 
-
     def fit_members(self, x, y, epochs, optimizer=None, loss=None):
-        members = self.members
-        E = len(members)
+        E = len(self.members)
         print("backend:", jax.default_backend())
         print("devices:", jax.devices())
         print("local_device_count:", jax.local_device_count())
@@ -65,52 +65,53 @@ class BdeBuilder(Fnn, FnnTrainer):
         print("Kernel devices:", D)
 
         opt = optimizer or self.default_optimizer()
-        loss_obj = loss or self.default_loss()
+        loss_obj = loss or self.default_loss(self.task)
 
-    # Stack params across ensemble axis E
-        params_e = tree_map(lambda *ps: jnp.stack(ps, axis=0), *[m.params for m in members])  # (E, ...)
-        proto_model = members[0]
-        loss_fn = FnnTrainer.make_loss_fn(proto_model, loss_obj)   # (params, x, y) -> scalar
-        step_one = FnnTrainer.make_step(loss_fn, opt)              # (params, opt_state, x, y) -> (params, opt_state, loss)
+        # Stack params across ensemble axis E
+        params_e = tree_map(lambda *ps: jnp.stack(ps, axis=0), *[m.params for m in self.members])  # (E, ...)
+        proto_model = self.members[0]
+        loss_fn = FnnTrainer.make_loss_fn(proto_model, loss_obj)  # (params, x, y) -> scalar
+        step_one = FnnTrainer.make_step(loss_fn, opt)  # (params, opt_state, x, y) -> (params, opt_state, loss)
 
-        pad = (D - (E% max(D, 1))) % max(D, 1)
+        pad = (D - (E % max(D, 1))) % max(D, 1)
         E_pad = E + pad
         E_per = E_pad // max(D, 1)
         params_e = tree_map(lambda a: _pad_axis0(a, pad), params_e)
         params_de = tree_map(lambda a: a.reshape(D, E_per, *a.shape[1:]), params_e)
 
-    # Per-device init of optimizer states (vectorized over local chunk)
+        # Per-device init of optimizer states (vectorized over local chunk)
         def init_chunk(params_chunk):
-            return jax.vmap(opt.init)(params_chunk) 
-        
+            return jax.vmap(opt.init)(params_chunk)
+
         opt_state_de = jax.pmap(init_chunk, in_axes=0, out_axes=0)(params_de)
 
-    # One device does a local vmap over its chunk
+        # One device does a local vmap over its chunk
         def step_chunk(params_chunk, opt_state_chunk, x_b, y_b):
             def step_member(p, s):
                 return step_one(p, s, x_b, y_b)  # pure, no host I/O
+
             new_params, new_states, losses = jax.vmap(step_member)(params_chunk, opt_state_chunk)
             return new_params, new_states, losses
 
-    # pmapped step across devices; broadcast data to all devices (in_axes=None)
+        # pmapped step across devices; broadcast data to all devices (in_axes=None)
         pstep = jax.pmap(step_chunk, in_axes=(0, 0, None, None), out_axes=(0, 0, 0))
 
         self._reset_history()
         for epoch in range(epochs):
             params_de, opt_state_de, lvals_de = pstep(params_de, opt_state_de, x, y)
-        # lvals_de shape: (D, E_per). Log mean loss (host side)
+            # lvals_de shape: (D, E_per). Log mean loss (host side)
             mean_loss = float(jnp.mean(jax.device_get(lvals_de)))
             self.history["train_loss"].append(mean_loss)
             if epoch % self.log_every == 0:
                 print(epoch, mean_loss)
 
-    # Stitch back to (E, ...) then write into members
+        # Stitch back to (E, ...) then write into members
         params_e_final = tree_map(lambda a: a.reshape(E_pad, *a.shape[2:])[:E], params_de)
-        for i, m in enumerate(members):
+        for i, m in enumerate(self.members):
             m.params = tree_map(lambda a: a[i], params_e_final)
 
         self.params_e = params_e_final
-        return members
+        return self.members
 
     def keys(self):
         """

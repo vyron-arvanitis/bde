@@ -20,22 +20,23 @@ class BDE:
                  sizes,
                  seed,
                  *,
-                 task : TaskType =None,
-                 loss : BaseLoss,
+                 task: TaskType = None,
+                 loss: BaseLoss,
                  activation: str = "relu"
                  ):
         self.sizes = sizes
         self.n_members = n_members
         self.seed = seed
 
-        #TODO: this of a better way to write this
+        # TODO: this of a better way to write this
         self.task = task
         if task is None:
             self.task = TaskType.infer_task
 
-        self.task.validate_loss(loss)
+        self.loss = loss
+        self.task.validate_loss(self.loss)
 
-        self.bde = BdeBuilder(sizes, n_members, seed, act_fn=activation)
+        self.bde = BdeBuilder(self.sizes, self.n_members, self.task, self.seed, act_fn=activation)
         self.members = self.bde.members
         self.positions_eT = None  # will be set after training + sampling
 
@@ -48,7 +49,7 @@ class BDE:
               lr=1e-3,
               n_thinning=10
               ):
-        self.bde.fit_members(x=X, y=y, optimizer=optax.adam(lr), epochs=epochs)
+        self.bde.fit_members(x=X, y=y, optimizer=optax.adam(lr), epochs=epochs, loss=self.loss)
 
         prior = PriorDist.STANDARDNORMAL.get_prior()
         proto = self.bde.members[0]

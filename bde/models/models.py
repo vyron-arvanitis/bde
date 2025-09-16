@@ -2,12 +2,24 @@ import jax
 import jax.numpy as jnp
 
 import jax.nn as nn
+from abc import ABC, abstractmethod
 from bde.data.dataloader import DataLoader
 from bde.training.trainer import FnnTrainer
 from bde.data.dataloader import DataLoader
 
 
-class Fnn:
+class BaseModel(ABC):
+    name: str
+
+    @property
+    @abstractmethod
+    def name(self) -> str: ...
+
+    @abstractmethod
+    def forward(self, params, x): ...
+
+
+class Fnn(BaseModel):
     """Single FNN that can optionally train itself on init."""
 
     def __init__(self, sizes, init_seed=0, *, act_fn):
@@ -23,6 +35,10 @@ class Fnn:
         self.sizes = sizes
         self.params = self.init_mlp(seed=init_seed)
         self.act_fn = self._get_activation(act_fn)
+
+    @property
+    def name(self) -> str:
+        return "Fnn"
 
     def init_mlp(self, seed):
         """
@@ -58,10 +74,10 @@ class Fnn:
         -------
 
         """
-        #TODO: [@later] have a validation of input layer and number of features
+        # TODO: [@later] have a validation of input layer and number of features
         for (W, b) in params[:-1]:
             x = jnp.dot(x, W) + b
-            #x = jax.nn.relu(x)
+            # x = jax.nn.relu(x)
             x = self.act_fn(x)
         W, b = params[-1]
         return jnp.dot(x, W) + b

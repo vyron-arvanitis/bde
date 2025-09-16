@@ -3,7 +3,9 @@ import jax.numpy as jnp
 import jax.scipy.stats as stats
 
 import optax
-from bde.loss.loss import GaussianNLL
+from bde.models.models import BaseModel
+from bde.data.dataloader import TaskType
+from bde.loss.loss import *
 
 from typing import (
     Any,
@@ -37,7 +39,7 @@ class FnnTrainer:
         self.history = {"train_loss": []}
 
     @staticmethod
-    def make_loss_fn(model, loss_obj):
+    def make_loss_fn(model: BaseModel, loss_obj : BaseLoss):
         # returns (params, x, y) -> scalar
         def loss_fn(p, x, y):
             preds = model.forward(p, x)
@@ -134,5 +136,10 @@ class FnnTrainer:
         return optax.adam(learning_rate=0.01)
 
     @staticmethod
-    def default_loss():
-        return GaussianNLL()
+    def default_loss(task : TaskType):
+        if task == TaskType.REGRESSION:
+            return GaussianNLL()
+        elif task == TaskType.CLASSIFICATION:
+            return CategoricalCrossEntropy()
+        else:
+            raise ValueError(f"Not an available task type was given!")
