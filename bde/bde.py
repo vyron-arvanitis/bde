@@ -44,9 +44,14 @@ class Bde(BaseEstimator):
         self.lr = lr
         self.n_thinning = n_thinning
 
-        self.bde = BdeBuilder(self.sizes, self.n_members, self.task, self.seed, act_fn=activation)
-        self.members = self.bde.members
+        if self.sizes is not None:
+            self._build_bde()
+
         self.positions_eT = None  # will be set after training + sampling
+
+    def _build_bde(self):
+        self.bde = BdeBuilder(self.sizes, self.n_members, self.task, self.seed, act_fn=self.activation)
+        self.members = self.bde.members
 
     def fit(self, X, y, ):
         self.bde.fit_members(x=X, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
@@ -132,8 +137,7 @@ class Bde(BaseEstimator):
             raise ValueError(f"Unknown task {self.task}")
 
 
-
-#TODO: [@angelos] maybe put them in another file?
+# TODO: [@angelos] maybe put them in another file?
 class BdeRegressor(Bde, RegressorMixin):
     def __init__(self,
                  n_members=5,

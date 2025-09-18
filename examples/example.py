@@ -50,7 +50,7 @@ def regression_example():
         n_samples=100,
         n_thinning=10
     )
-
+    print(f"the params are {regressor.get_params()}") # get_params is from sk learn!!
     regressor.fit(X=Xtr, y=ytr)
 
     means, sigmas = regressor.predict(Xte, mean_and_std=True)
