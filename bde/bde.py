@@ -132,6 +132,8 @@ class Bde(BaseEstimator):
             raise ValueError(f"Unknown task {self.task}")
 
 
+
+#TODO: [@angelos] maybe put them in another file?
 class BdeRegressor(Bde, RegressorMixin):
     def __init__(self,
                  n_members=5,
