@@ -17,40 +17,39 @@ import optax
 from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 
 
-# TODO: [@task] Integration tests for BDERegressor and BDEClassifier
-class _BdeCore:
-    def __init__(self,
-                 n_members,
-                 sizes,
-                 seed,
-                 *,
+class Bde(BaseEstimator):
+    def __init__(self, n_members=5,
+                 sizes=None,
+                 seed=0,
                  task: TaskType = None,
-                 loss: BaseLoss,
-                 activation: str = "relu"
+                 loss: BaseLoss = None,
+                 activation="relu",
+                 epochs=100,
+                 n_samples=100,
+                 warmup_steps=50,
+                 lr=1e-3,
+                 n_thinning=10
                  ):
-        self.sizes = sizes
-        self.n_members = n_members
-        self.seed = seed
 
-        # TODO: this of a better way to write this
+        self.n_members = n_members
+        self.sizes = sizes
+        self.seed = seed
         self.task = task
         self.loss = loss
-        self.task.validate_loss(self.loss)
+        self.task.validate_loss(self.loss)  # validate loss function
+        self.activation = activation
+        self.epochs = epochs
+        self.n_samples = n_samples
+        self.warmup_steps = warmup_steps
+        self.lr = lr
+        self.n_thinning = n_thinning
 
         self.bde = BdeBuilder(self.sizes, self.n_members, self.task, self.seed, act_fn=activation)
         self.members = self.bde.members
         self.positions_eT = None  # will be set after training + sampling
 
-    def train(self,
-              X,
-              y,
-              epochs,
-              n_samples,
-              warmup_steps,
-              lr=1e-3,
-              n_thinning=10
-              ):
-        self.bde.fit_members(x=X, y=y, optimizer=optax.adam(lr), epochs=epochs, loss=self.loss)
+    def fit(self, X, y, ):
+        self.bde.fit_members(x=X, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
 
         prior = PriorDist.STANDARDNORMAL.get_prior()
         proto = self.bde.members[0]
@@ -58,7 +57,7 @@ class _BdeCore:
 
         logpost_one = partial(pm.log_unnormalized_posterior, x=X, y=y)
 
-        warm = warmup_bde(self.bde, logpost_one, step_size_init=lr, warmup_steps=warmup_steps)
+        warm = warmup_bde(self.bde, logpost_one, step_size_init=self.lr, warmup_steps=self.warmup_steps)
 
         init_positions_e = warm.state.position  # pytree with leading E
         tuned = warm.parameters  # MCLMCAdaptationState (vmapped)
@@ -76,8 +75,8 @@ class _BdeCore:
         positions_eT, infos_eT, states_e = sampler.sample_batched(
             rng_keys_e=rng_keys_e,
             init_positions_e=init_positions_e,
-            num_samples=n_samples,
-            thinning=n_thinning,
+            num_samples=self.n_samples,
+            thinning=self.n_thinning,
             L_e=L_e,
             step_e=step_e,
             sqrt_diag_e=sqrt_diag_e,
@@ -85,6 +84,7 @@ class _BdeCore:
         )
 
         self.positions_eT = positions_eT  # TODO: [@suggestion] maybe we should create this attribute in the __init__
+        return self
 
     def evaluate(self,
                  Xte,
@@ -132,51 +132,7 @@ class _BdeCore:
             raise ValueError(f"Unknown task {self.task}")
 
 
-class BDE(BaseEstimator):
-    def __init__(self,
-                 n_members=5,
-                 sizes=None,
-                 seed=0,
-                 task: TaskType = None,
-                 loss: BaseLoss = None,
-                 activation="relu",
-                 epochs=100,
-                 n_samples=100,
-                 warmup_steps=50,
-                 lr=1e-3,
-                 n_thinning=10):
-        self.n_members = n_members
-        self.sizes = sizes
-        self.seed = seed
-        self.task = task
-        self.loss = loss
-        self.activation = activation
-        self.epochs = epochs
-        self.n_samples = n_samples
-        self.warmup_steps = warmup_steps
-        self.lr = lr
-        self.n_thinning = n_thinning
-        self._impl = None
-
-    def fit(self, X, y):
-        self._impl = _BdeCore(
-            n_members=self.n_members,
-            sizes=self.sizes,
-            seed=self.seed,
-            task=self.task,
-            loss=self.loss,
-            activation=self.activation,
-        )
-        self._impl.train(X, y,
-                         epochs=self.epochs,
-                         n_samples=self.n_samples,
-                         warmup_steps=self.warmup_steps,
-                         lr=self.lr,
-                         n_thinning=self.n_thinning)
-        return self
-
-
-class BdeRegressor(BDE, RegressorMixin):
+class BdeRegressor(Bde, RegressorMixin):
     def __init__(self,
                  n_members=5,
                  sizes=None,
@@ -203,7 +159,7 @@ class BdeRegressor(BDE, RegressorMixin):
         )
 
     def predict(self, X, mean_and_std=False, credible_intervals=None, raw=False):
-        out = self._impl.evaluate(
+        out = self.evaluate(
             X,
             mean_and_std=mean_and_std,
             credible_intervals=credible_intervals,
@@ -224,10 +180,10 @@ class BdeRegressor(BDE, RegressorMixin):
           - N = number of test points
           - 2 = (mu, sigma_param)
         """
-        return self._impl.evaluate(X, raw=True)["raw"]
+        return self.evaluate(X, raw=True)["raw"]
 
 
-class BdeClassifier(BDE, ClassifierMixin):
+class BdeClassifier(Bde, ClassifierMixin):
     def __init__(self,
                  n_members=5,
                  sizes=None,
@@ -254,11 +210,11 @@ class BdeClassifier(BDE, ClassifierMixin):
         )
 
     def predict(self, X):
-        out = self._impl.evaluate(X)
+        out = self.evaluate(X)
         return out["labels"]
 
     def predict_proba(self, X):
-        out = self._impl.evaluate(X, probabilities=True)
+        out = self.evaluate(X, probabilities=True)
         return out["probs"]
 
     def get_raw_predictions(self, X):
@@ -270,4 +226,4 @@ class BdeClassifier(BDE, ClassifierMixin):
           - N = number of test points
           - C = number of classes (logits before softmax)
         """
-        return self._impl.evaluate(X, raw=True)["raw"]
+        return self.evaluate(X, raw=True)["raw"]

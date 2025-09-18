@@ -4,7 +4,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=5"
 
-from bde._bdecore import BdeRegressor, BdeClassifier
+from bde.bde import BdeRegressor, BdeClassifier
 from bde.task import TaskType
 from bde.loss.loss import *
 from sklearn.datasets import fetch_openml, load_iris
@@ -80,6 +80,7 @@ def regression_example():
         savepath="plots_regression",
     )
 
+
 def classification_example():
     iris = load_iris()
     X = iris.data.astype("float32")
@@ -146,5 +147,5 @@ def classification_example():
 
 
 if __name__ == "__main__":
-    regression_example()
-    # classification_example()
+    # regression_example()
+    classification_example()
