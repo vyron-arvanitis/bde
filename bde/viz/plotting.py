@@ -1,8 +1,10 @@
 """This here has some plotters!"""
 
 import matplotlib.pyplot as plt
-import os
-
+from sklearn.metrics import confusion_matrix
+from sklearn.calibration import calibration_curve
+from sklearn.metrics import roc_curve, auc
+import seaborn as sns
 import numpy as np
 import os
 import matplotlib.gridspec as gridspec
@@ -72,4 +74,52 @@ def plot_pred_vs_true(y_pred, y_true, title, savepath,y_pred_err=None,):
     if savepath is not None:
         os.makedirs(savepath, exist_ok=True)
         plt.savefig(os.path.join(savepath, f"{title}.png"), bbox_inches="tight")
+    plt.close(fig)
+
+def plot_confusion_matrix(y_true, y_pred, classes, title, savepath=None):
+    cm = confusion_matrix(y_true, y_pred, labels=classes)
+    fig, ax = plt.subplots(figsize=(7, 7))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=classes, yticklabels=classes, ax=ax)
+    ax.set_xlabel("Predicted label")
+    ax.set_ylabel("True label")
+    ax.set_title(title)
+
+    if savepath is not None:
+        os.makedirs(savepath, exist_ok=True)
+        plt.savefig(os.path.join(savepath, f"{title}_confusion.png"), bbox_inches="tight")
+    plt.close(fig)
+
+def plot_reliability_curve(y_true, y_proba, n_bins=10, title="", savepath=None):
+    prob_true, prob_pred = calibration_curve(y_true, y_proba, n_bins=n_bins)
+    fig, ax = plt.subplots(figsize=(7, 7))
+    ax.plot(prob_pred, prob_true, "s-", label="Calibration curve")
+    ax.plot([0, 1], [0, 1], "k--", label="Perfectly calibrated")
+    ax.set_xlabel("Predicted probability")
+    ax.set_ylabel("True fraction of positives")
+    ax.set_title(title)
+    ax.legend()
+    ax.grid(True)
+
+    if savepath is not None:
+        os.makedirs(savepath, exist_ok=True)
+        plt.savefig(os.path.join(savepath, f"{title}_calibration.png"), bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_roc_curve(y_true, y_proba, title="", savepath=None):
+    fpr, tpr, _ = roc_curve(y_true, y_proba)
+    roc_auc = auc(fpr, tpr)
+    fig, ax = plt.subplots(figsize=(7, 7))
+    ax.plot(fpr, tpr, color="darkorange", lw=2, label=f"ROC curve (area = {roc_auc:.2f})")
+    ax.plot([0, 1], [0, 1], "k--", lw=2)
+    ax.set_xlim([0.0, 1.0])
+    ax.set_ylim([0.0, 1.05])
+    ax.set_xlabel("False Positive Rate")
+    ax.set_ylabel("True Positive Rate")
+    ax.set_title(title)
+    ax.legend(loc="lower right")
+
+    if savepath is not None:
+        os.makedirs(savepath, exist_ok=True)
+        plt.savefig(os.path.join(savepath, f"{title}_roc.png"), bbox_inches="tight")
     plt.close(fig)
