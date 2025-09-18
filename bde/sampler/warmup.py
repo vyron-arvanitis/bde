@@ -454,7 +454,7 @@ def warmup_bde(
     bde: BdeBuilder,
     logpost_one,
     step_size_init: float,
-    desired_energy_var_start: float = 0.5,
+    desired_energy_var_start: float = 0.5, #TODO: [@task] Include in user input
     desired_energy_var_end: float = 0.1,
     warmup_steps: int = 1000,
 ) -> AdaptationResults:

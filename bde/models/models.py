@@ -110,6 +110,7 @@ class Fnn(BaseModel):
             "glu": nn.glu,
             "squareplus": nn.squareplus,
             "mish": nn.mish,
+            "identity": lambda x: x,
         }
         try:
             return available_activation[activation]

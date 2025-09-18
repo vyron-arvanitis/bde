@@ -37,7 +37,6 @@ class BDEPredictor:  # TODO: [@question] Maybe merge with BDE Builder class
             mean_probs = jnp.mean(probs, axis=(0, 1))  # average over ensemble and samples
             preds_cls = jnp.argmax(mean_probs, axis=-1)
             return mean_probs, preds_cls
-
         else:
             raise ValueError(f"Unknown task {self.task}")
 
@@ -74,3 +73,5 @@ class BDEPredictor:  # TODO: [@question] Maybe merge with BDE Builder class
             "coverage_2σ": float(within_2sigma),
             "coverage_3σ": float(within_3sigma),
         }
+    
+    #credible intervals arg "q" for quantile 

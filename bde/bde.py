@@ -13,7 +13,7 @@ from bde.task import TaskType
 from functools import partial
 import optax
 
-
+#TODO: [@task] Integration tests for BDERegressor and BDEClassifier
 class BDE:
     def __init__(self,
                  n_members,
@@ -88,3 +88,55 @@ class BDE:
     def evaluate(self, Xte):
         predictor = BDEPredictor(self.bde, self.positions_eT, Xte=Xte, task=self.task)
         return predictor.get_preds()
+
+class BDERegressor(BDE):
+    def __init__(self,
+                 n_members,
+                 sizes,
+                 seed,
+                 *,
+                 task: TaskType = None,
+                 loss: BaseLoss,
+                 activation: str = "relu"
+                 ):
+        self.sizes = sizes
+        self.n_members = n_members
+        self.seed = seed
+
+        # TODO: this of a better way to write this
+        self.task = task
+        if task is None:
+            self.task = TaskType.infer_task
+
+        self.loss = loss
+        self.task.validate_loss(self.loss)
+
+        self.bde = BdeBuilder(self.sizes, self.n_members, self.task, self.seed, act_fn=activation)
+        self.members = self.bde.members
+        self.positions_eT = None  # will be set after training + sampling
+
+class BDEClassifier(BDE):
+    def __init__(self,
+                 n_members,
+                 sizes,
+                 seed,
+                 *,
+                 task: TaskType = None,
+                 loss: BaseLoss,
+                 activation: str = "relu"
+                 ):
+        self.sizes = sizes
+        self.n_members = n_members
+        self.seed = seed
+
+        # TODO: this of a better way to write this
+        self.task = task
+        if task is None:
+            self.task = TaskType.infer_task
+
+        self.loss = loss
+        self.task.validate_loss(self.loss)
+
+        self.bde = BdeBuilder(self.sizes, self.n_members, self.task, self.seed, act_fn=activation)
+        self.members = self.bde.members
+        self.positions_eT = None  # will be set after training + sampling
