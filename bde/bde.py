@@ -18,7 +18,8 @@ from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 
 
 class Bde(BaseEstimator):
-    def __init__(self, n_members=5,
+    def __init__(self, 
+                 n_members=5,
                  hidden_layers=None,
                  seed=0,
                  task: TaskType = None,
@@ -28,7 +29,10 @@ class Bde(BaseEstimator):
                  n_samples=100,
                  warmup_steps=50,
                  lr=1e-3,
-                 n_thinning=10
+                 n_thinning=10,
+                 desired_energy_var_start=0.5,
+                 desired_energy_var_end=0.1,
+                 step_size_init: int = None
                  ):
 
         self.n_members = n_members
@@ -43,6 +47,9 @@ class Bde(BaseEstimator):
         self.warmup_steps = warmup_steps
         self.lr = lr
         self.n_thinning = n_thinning
+        self.step_size_init = step_size_init if step_size_init is not None else lr
+        self.desired_energy_var_start = desired_energy_var_start
+        self.desired_energy_var_end = desired_energy_var_end
 
         if self.hidden_layers is not None:
             self._build_bde()
@@ -53,7 +60,7 @@ class Bde(BaseEstimator):
         self.bde = BdeBuilder(self.hidden_layers, self.n_members, self.task, self.seed, act_fn=self.activation)
         self.members = self.bde.members
 
-    def fit(self, X, y, ):
+    def fit(self, X, y):
         self.bde.fit_members(x=X, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
 
         prior = PriorDist.STANDARDNORMAL.get_prior()
@@ -62,7 +69,14 @@ class Bde(BaseEstimator):
 
         logpost_one = partial(pm.log_unnormalized_posterior, x=X, y=y)
 
-        warm = warmup_bde(self.bde, logpost_one, step_size_init=self.lr, warmup_steps=self.warmup_steps)
+        warm = warmup_bde(
+            self.bde, 
+            logpost_one, 
+            step_size_init=self.step_size_init, 
+            warmup_steps=self.warmup_steps, 
+            desired_energy_var_start=self.desired_energy_var_start,
+            desired_energy_var_end=self.desired_energy_var_end,
+            )
 
         init_positions_e = warm.state.position  # pytree with leading E
         tuned = warm.parameters  # MCLMCAdaptationState (vmapped)

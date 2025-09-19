@@ -454,9 +454,9 @@ def warmup_bde(
     bde: BdeBuilder,
     logpost_one,
     step_size_init: float,
-    desired_energy_var_start: float = 0.5, #TODO: [@task] Include in user input
-    desired_energy_var_end: float = 0.1,
-    warmup_steps: int = 1000,
+    desired_energy_var_start: float, #TODO: [@task] Include in user input
+    desired_energy_var_end: float,
+    warmup_steps: int,
 ) -> AdaptationResults:
     # Build the warmup adapter (same as your current code)
     adapt = custom_mclmc_warmup(
