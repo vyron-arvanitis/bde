@@ -82,7 +82,7 @@ class Fnn(BaseModel):
         W, b = params[-1]
         return jnp.dot(x, W) + b
 
-    def apply(self, variables, x, **kwargs):
+    def apply(self, variables, x, **kwargs): #TODO: this is not used somewhere relevant!
         """Mimic Flax API: variables['params'] contains weights."""
         params = variables["params"]
         return self.forward(params, x, **kwargs)

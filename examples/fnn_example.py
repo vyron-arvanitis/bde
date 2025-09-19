@@ -58,7 +58,7 @@ def main():
 
     sizes = [5, 16, 16, 2] #TODO: for regression 2 nodes ( mean and var) and for classification user gives # of classes!
 
-    # model = Fnn(sizes)
+    # model = Fnn(hidden_layers)
     # trainer = FnnTrainer()
     # trainer.train(
     #     model=model,

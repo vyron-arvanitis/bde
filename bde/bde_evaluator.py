@@ -11,34 +11,34 @@ class BDEPredictor:  # TODO: [@question] Maybe merge with BDE Builder class
         self.Xte = Xte
         self.task = task
 
-    def get_preds(self):
+    def get_raw_preds(self):
         # pure apply using explicit params (no mutation of model.params)
         def apply_with_params(p):
             return self.model.forward(p, self.Xte)  # (N, 2)
 
-        preds = jax.vmap(  # over ensemble members
+        return jax.vmap(  # over ensemble members
             jax.vmap(apply_with_params, in_axes=0),  # over samples
             in_axes=0
         )(self.positions)
 
-        if self.task == TaskType.REGRESSION:
-            mu = preds[..., 0]
-            sigma = jax.nn.softplus(preds[..., 1]) + 1e-6
-            mu_mean = jnp.mean(mu, axis=(0, 1))
-            var_ale = jnp.mean(sigma ** 2, axis=(0, 1))
-            var_epi = jnp.var(mu, axis=(0, 1))
-            std_total = jnp.sqrt(var_ale + var_epi)
-
-            return mu_mean, std_total
-
-        elif self.task == TaskType.CLASSIFICATION:
-            logits = preds  # (E, T, N, C)
-            probs = jax.nn.softmax(logits, axis=-1)
-            mean_probs = jnp.mean(probs, axis=(0, 1))  # average over ensemble and samples
-            preds_cls = jnp.argmax(mean_probs, axis=-1)
-            return mean_probs, preds_cls
-        else:
-            raise ValueError(f"Unknown task {self.task}")
+        # if self.task == TaskType.REGRESSION:
+        #     mu = preds[..., 0]
+        #     sigma = jax.nn.softplus(preds[..., 1]) + 1e-6
+        #     mu_mean = jnp.mean(mu, axis=(0, 1))
+        #     var_ale = jnp.mean(sigma ** 2, axis=(0, 1))
+        #     var_epi = jnp.var(mu, axis=(0, 1))
+        #     std_total = jnp.sqrt(var_ale + var_epi)
+        #
+        #     return mu_mean, std_total
+        #
+        # elif self.task == TaskType.CLASSIFICATION:
+        #     logits = preds  # (E, T, N, C)
+        #     probs = jax.nn.softmax(logits, axis=-1)
+        #     mean_probs = jnp.mean(probs, axis=(0, 1))  # average over ensemble and samples
+        #     preds_cls = jnp.argmax(mean_probs, axis=-1)
+        #     return mean_probs, preds_cls
+        # else:
+        #     raise ValueError(f"Unknown task {self.task}")
 
     def get_preds_per_member(self):
         def apply_with_params(p):
@@ -73,5 +73,5 @@ class BDEPredictor:  # TODO: [@question] Maybe merge with BDE Builder class
             "coverage_2σ": float(within_2sigma),
             "coverage_3σ": float(within_3sigma),
         }
-    
-    #credible intervals arg "q" for quantile 
+
+    # credible intervals arg "q" for quantile

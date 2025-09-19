@@ -32,6 +32,3 @@ class TaskType(Enum):
                 f"{loss.__class__.__name__} not allowed for task {self.value}. "
                 f"Allowed: {[cls.__name__ for cls in allowed[self]]}"
             )
-    @staticmethod
-    def infer_task():
-        pass

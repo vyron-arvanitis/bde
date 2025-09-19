@@ -29,8 +29,7 @@ class Rmse(BaseLoss):
 
 
 class GaussianNLL(BaseLoss):
-    def __init__(self, min_sigma=1e-6,
-                 map_fn=jax.nn.softplus):  # TODO: [@question] why do we use softplus for the sigma??
+    def __init__(self, min_sigma=1e-6, map_fn=jax.nn.softplus):
         self.min_sigma = min_sigma
         self.map_fn = map_fn
 

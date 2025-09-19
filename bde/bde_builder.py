@@ -13,19 +13,28 @@ from bde.sampler.utils import _infer_dim_from_position_example, _pad_axis0, _res
 from bde.task import TaskType
 
 
-class BdeBuilder(Fnn, FnnTrainer):
+class BdeBuilder(FnnTrainer):
     # TODO: build the BdeBuilderClass
-    def __init__(self, sizes, n_members, task: TaskType, seed: int = 100, act_fn="relu"):
-        Fnn.__init__(self, sizes, act_fn=act_fn)
+    def __init__(self,
+                 hidden_sizes,
+                 n_members,
+                 task: TaskType,
+                 seed: int = 100,
+                 act_fn: str = "relu"):
+
+        # Fnn.__init__(self, hidden_layers=hidden_sizes, act_fn=act_fn)
         FnnTrainer.__init__(self)
-        self.sizes = sizes
+        self.hidden_sizes = hidden_sizes
         self.n_members = n_members
         self.seed = seed
         self.task = task
         self.params_e = None  # will be set after training
-        self.members = self.deep_ensemble_creator(seed=self.seed, act_fn=act_fn)
+        self.members = None  #
+        self.act_fn = act_fn
 
-    def get_model(self, seed: int, *, act_fn) -> Fnn:
+        self.results = {}
+
+    def get_model(self, seed: int, *, act_fn, sizes) -> Fnn:
         """Create a single Fnn model and initialize its parameters
 
         Parameters
@@ -39,9 +48,9 @@ class BdeBuilder(Fnn, FnnTrainer):
 
         """
 
-        return Fnn(self.sizes, init_seed=seed, act_fn=act_fn)
+        return Fnn(sizes=sizes, init_seed=seed, act_fn=act_fn)
 
-    def deep_ensemble_creator(self, seed: int = 0, *, act_fn) -> list[Fnn]:
+    def deep_ensemble_creator(self, seed: int = 0, *, act_fn, sizes: list[int] = None) -> list[Fnn]:
         """Create an ensemble of ``n_members`` FNN models.
 
         Each member is initialized with a different random seed to encourage
@@ -54,9 +63,22 @@ class BdeBuilder(Fnn, FnnTrainer):
             List of initialized FNN models comprising the ensemble.
         """
 
-        return [self.get_model(seed + i, act_fn=act_fn) for i in range(self.n_members)]
+        return [self.get_model(seed + i, act_fn=act_fn, sizes=sizes) for i in range(self.n_members)]
 
     def fit_members(self, x, y, epochs, optimizer=None, loss=None):
+        n_features = x.shape[1]
+        if self.task == TaskType.REGRESSION:
+            n_outputs = 2
+        elif self.task == TaskType.CLASSIFICATION:
+            n_outputs = int(y.max()) + 1
+        else:
+            raise ValueError(f"Unknown task {self.task} !")
+
+        full_sizes = [n_features] + self.hidden_sizes + [n_outputs]
+
+        if self.members is None:
+            self.members = self.deep_ensemble_creator(seed=self.seed, act_fn=self.act_fn, sizes=full_sizes)
+
         E = len(self.members)
         print("backend:", jax.default_backend())
         print("devices:", jax.devices())
@@ -136,30 +158,3 @@ class BdeBuilder(Fnn, FnnTrainer):
             return self.results[item]
         else:
             raise AttributeError(f"{self.__class__.__name__} has no attribute '{item}' !")
-
-    #
-    # def store_ensemble_results(self, x, y=None, include_members: bool = True):
-    #     """
-    #     Cache ensemble predictions and, optionally, compute MSEs.
-    #
-    #     Returns
-    #     -------
-    #     dict
-    #         Keys: "ensemble_mean", "ensemble_var", optional "member_means",
-    #               optional "y", "ensemble_mse", "member_mse".
-    #     """
-    #     res = self.predict_ensemble(x, include_members=include_members)
-    #
-    #     if y is not None:
-    #         res["y"] = y
-    #         # Ensemble MSE (no params object for ensemble)
-    #         res["ensemble_mse"] = jnp.mean((res["ensemble_mean"] - y) ** 2)
-    #         # Per-member MSEs
-    #         member_mse = [
-    #             super().mse_loss(self, m.params, x, y) for m in self.members
-    #         ]
-    #         # stack to (n_members,) or (n_members, out_dim) depending on y shape
-    #         res["member_mse"] = jnp.stack(member_mse, axis=0)
-    #
-    #     self.results = res
-    #     return res
