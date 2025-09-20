@@ -18,7 +18,7 @@ from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 
 
 class Bde(BaseEstimator):
-    def __init__(self, 
+    def __init__(self,
                  n_members=5,
                  hidden_layers=None,
                  seed=0,
@@ -60,14 +60,14 @@ class Bde(BaseEstimator):
 
     def _build_bde(self):
         self.bde = BdeBuilder(
-            hidden_sizes=self.hidden_layers, 
-            patience=self.patience, 
-            n_members=self.n_members, 
-            task=self.task, 
-            seed=self.seed, 
+            hidden_sizes=self.hidden_layers,
+            patience=self.patience,
+            n_members=self.n_members,
+            task=self.task,
+            seed=self.seed,
             act_fn=self.activation
-            )
-        
+        )
+
         self.members = self.bde.members
 
     def fit(self, X, y):
@@ -80,13 +80,13 @@ class Bde(BaseEstimator):
         logpost_one = partial(pm.log_unnormalized_posterior, x=X, y=y)
 
         warm = warmup_bde(
-            self.bde, 
-            logpost_one, 
-            step_size_init=self.step_size_init, 
-            warmup_steps=self.warmup_steps, 
+            self.bde,
+            logpost_one,
+            step_size_init=self.step_size_init,
+            warmup_steps=self.warmup_steps,
             desired_energy_var_start=self.desired_energy_var_start,
             desired_energy_var_end=self.desired_energy_var_end,
-            )
+        )
 
         init_positions_e = warm.state.position  # pytree with leading E
         tuned = warm.parameters  # MCLMCAdaptationState (vmapped)
@@ -121,7 +121,8 @@ class Bde(BaseEstimator):
                  credible_intervals: list[float] | None = None,
                  raw: bool = False,
                  probabilities: bool = False):
-        predictor = BDEPredictor(self.bde.members[0], self.positions_eT, Xte=Xte, task=self.task) #TODO: [@angelos] think of somehting better I dont think that works fine
+        predictor = BDEPredictor(self.bde.members[0], self.positions_eT, Xte=Xte,
+                                 task=self.task)  # TODO: [@angelos] think of somehting better I dont think that works fine
         raw_preds = predictor.get_raw_preds()
         if self.task == TaskType.REGRESSION:
             mu = raw_preds[..., 0]
