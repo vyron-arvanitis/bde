@@ -78,34 +78,39 @@ class Bde(BaseEstimator):
         pm = ProbabilisticModel(module=proto, params=proto.params, prior=prior, task=self.task)
         return partial(pm.log_unnormalized_posterior, x=x, y=y)
 
-    def fit(self, x: ArrayLike, y: ArrayLike):
-        self.bde.fit_members(x=x, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
-
-        logpost_one = self._build_log_post(x, y)
-
+    def _warmup_sampler(self, logpost):
         warm = warmup_bde(
             self.bde,
-            logpost_one,
+            logpost,
             step_size_init=self.step_size_init,
             warmup_steps=self.warmup_steps,
             desired_energy_var_start=self.desired_energy_var_start,
             desired_energy_var_end=self.desired_energy_var_end,
         )
 
-        init_positions_e = warm.state.position  # pytree with leading E
-        tuned = warm.parameters  # MCLMCAdaptationState (vmapped)
+        return warm.state.position, warm.parameters  # (pytree with leading E,  MCLMCAdaptationState)
 
-        E = tree_leaves(init_positions_e)[0].shape[0]
+    def _generate_rng_keys(self, num_chains: int):
         rng = jax.random.PRNGKey(int(self.seed))
-        rng_keys_e = jax.vmap(lambda i: jax.random.fold_in(rng, i))(jnp.arange(E))
+        return jax.vmap(lambda i: jax.random.fold_in(rng, i))(jnp.arange(num_chains))
 
-        # Normalize tuned hyperparam shapes
-        L_e = tuned.L if jnp.ndim(tuned.L) == 1 else jnp.full((E,), tuned.L)
-        step_e = tuned.step_size if jnp.ndim(tuned.step_size) == 1 else jnp.full((E,), tuned.step_size)
+    @staticmethod
+    def _normalize_tuned_parameters(tuned, num_chains: int):
+        L_e = tuned.L if jnp.ndim(tuned.L) == 1 else jnp.full((num_chains,), tuned.L)
+        step_e = tuned.step_size if jnp.ndim(tuned.step_size) == 1 else jnp.full((num_chains,), tuned.step_size)
         sqrt_diag_e = tuned.sqrt_diag_cov
+        return L_e, step_e, sqrt_diag_e
 
-        sampler = MileWrapper(logpost_one)
-        positions_eT, infos_eT, states_e = sampler.sample_batched(
+    def _draw_samples(self,
+                      logpost,
+                      rng_keys_e,
+                      init_positions_e,
+                      L_e,
+                      step_e,
+                      sqrt_diag_e,
+                      ):
+        sampler = MileWrapper(logpost)
+        positions_eT, _, _ = sampler.sample_batched(
             rng_keys_e=rng_keys_e,
             init_positions_e=init_positions_e,
             num_samples=self.n_samples,
@@ -115,8 +120,28 @@ class Bde(BaseEstimator):
             sqrt_diag_e=sqrt_diag_e,
             store_states=True,
         )
+        return positions_eT
 
-        self.positions_eT = positions_eT  # TODO: [@suggestion] maybe we should create this attribute in the __init__
+    def fit(self, x: ArrayLike, y: ArrayLike):
+
+        self.bde.fit_members(x=x, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
+
+        logpost_one = self._build_log_post(x, y)
+        init_positions_e, tuned = self._warmup_sampler(logpost_one)
+
+        num_chains = tree_leaves(init_positions_e)[0].shape[0]
+        rng_keys_e = self._generate_rng_keys(num_chains)
+        L_e, step_e, sqrt_diag_e = self._normalize_tuned_parameters(tuned, num_chains)
+
+        self.positions_eT = self._draw_samples(
+            logpost_one,
+            rng_keys_e,
+            init_positions_e,
+            L_e,
+            step_e,
+            sqrt_diag_e,
+        )
+
         return self
 
     def evaluate(self,
@@ -200,30 +225,8 @@ class BdeRegressor(Bde, RegressorMixin):
 
 
 class BdeClassifier(Bde, ClassifierMixin):
-    def __init__(self,
-                 n_members=5,
-                 hidden_layers=None,
-                 seed=0,
-                 loss: BaseLoss = None,
-                 activation="relu",
-                 epochs=100,
-                 n_samples=100,
-                 warmup_steps=50,
-                 lr=1e-3,
-                 n_thinning=10):
-        super().__init__(
-            n_members=n_members,
-            hidden_layers=hidden_layers,
-            seed=seed,
-            task=TaskType.CLASSIFICATION,  # fixed
-            loss=loss,
-            activation=activation,
-            epochs=epochs,
-            n_samples=n_samples,
-            warmup_steps=warmup_steps,
-            lr=lr,
-            n_thinning=n_thinning,
-        )
+    def __init__(self, **kwargs):
+        super().__init__(task=TaskType.CLASSIFICATION, **kwargs)
 
     def predict(self, x: ArrayLike):
         out = self.evaluate(x)
