@@ -15,32 +15,33 @@ import optax
 from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 from typing import Any, Protocol, cast
 
+
 class _WarmupState(Protocol):
     """Protocol for warmup states exposing the current position."""
 
     position: Any
 
 
-class Bde(BaseEstimator):
+class Bde:
     def __init__(self,
-                 n_members: int = 5,
-                 hidden_layers: list = None,
+                 n_members: int = 2,
+                 hidden_layers: list[int] | None = None,
                  seed: int = 0,
                  task: TaskType = None,
                  loss: BaseLoss = None,
                  activation: str = "relu",
-                 epochs: int = 100,
+                 epochs: int = 20,
                  patience: int = 25,
-                 n_samples: int = 100,
+                 n_samples: int = 10,
                  warmup_steps: int = 50,
                  lr: float = 1e-3,
-                 n_thinning: int = 10,
+                 n_thinning: int = 2,
                  desired_energy_var_start: float = 0.5,
                  desired_energy_var_end: float = 0.1,
                  step_size_init: int = None
                  ):
         self.n_members = n_members
-        self.hidden_layers = hidden_layers
+        self.hidden_layers = [4, 4] if hidden_layers is None else hidden_layers
         self.seed = seed
         self.task = task
         self.loss = loss
@@ -57,10 +58,7 @@ class Bde(BaseEstimator):
         self.desired_energy_var_start = desired_energy_var_start
         self.desired_energy_var_end = desired_energy_var_end
 
-        if self.hidden_layers is not None:
-            self._build_bde()
-
-        self.positions_eT = None  # will be set after training + sampling
+        # self.positions_eT = None  # will be set after training + sampling TODO: [@remove]
 
     def _build_bde(self):
         self.bde = BdeBuilder(
@@ -138,6 +136,7 @@ class Bde(BaseEstimator):
         )
 
     def fit(self, x: ArrayLike, y: ArrayLike):
+        self._build_bde()
         self.bde.fit_members(x=x, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
 
         logpost_one = self._build_log_post(x, y)
@@ -155,6 +154,8 @@ class Bde(BaseEstimator):
             step_e,
             sqrt_diag_e,
         )
+
+        self.is_fitted = True
 
         return self
 
@@ -192,7 +193,7 @@ class Bde(BaseEstimator):
 
 
 # TODO: [@angelos] maybe put them in another file?
-class BdeRegressor(Bde, RegressorMixin):
+class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
     def __init__(self, **kwargs):
         if "task" in kwargs:
             raise TypeError("'task' cannot be overridden for BdeRegressor; it is fixed to regression.")
@@ -228,7 +229,7 @@ class BdeRegressor(Bde, RegressorMixin):
         return super().get_raw_predictions(x)
 
 
-class BdeClassifier(Bde, ClassifierMixin):
+class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
     def __init__(self, **kwargs):
         if "task" in kwargs:
             raise TypeError("'task' cannot be overridden for BdeClassifier; it is fixed to classification.")
