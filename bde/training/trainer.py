@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import jax.scipy.stats as stats
 
 import optax
-from bde.data.dataloader import TaskType
+from bde.task import TaskType
 from bde.loss.loss import *
 
 from sklearn.model_selection import train_test_split

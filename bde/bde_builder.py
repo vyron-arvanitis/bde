@@ -4,7 +4,7 @@ import jax.numpy as jnp
 from jax.tree_util import tree_map, tree_structure
 
 import optax
-
+from typing import Any, Callable
 from .models.models import Fnn
 from .training.trainer import FnnTrainer
 from .training.callbacks import EarlyStoppingCallback
@@ -12,6 +12,35 @@ from .training.callbacks import EarlyStoppingCallback
 from bde.sampler.my_types import ParamTree
 from bde.sampler.utils import _infer_dim_from_position_example, _pad_axis0, _reshape_to_devices
 from bde.task import TaskType
+from .loss.loss import BaseLoss
+
+from dataclasses import dataclass
+
+
+@dataclass
+class TrainingComponents:
+    optimizer: optax.GradientTransformation
+    loss_obj: BaseLoss
+    loss_fn: Callable[[ParamTree, jnp.ndarray, jnp.ndarray], jnp.ndarray]
+    step_fn: Callable[
+        [ParamTree, optax.OptState, jnp.ndarray, jnp.ndarray], tuple[ParamTree, optax.OptState, jnp.ndarray]]
+
+
+@dataclass
+class DistributedTrainingState:
+    params_de: ParamTree
+    opt_state_de: ParamTree
+    pstep: Callable[
+        [ParamTree, ParamTree, jnp.ndarray, jnp.ndarray, jnp.ndarray], tuple[ParamTree, ParamTree, jnp.ndarray]]
+    peval: Callable[[ParamTree, jnp.ndarray, jnp.ndarray], jnp.ndarray]
+    ensemble_size: int
+
+
+@dataclass
+class TrainingLoopResult:
+    params_de: ParamTree
+    opt_state_de: ParamTree
+    callback_state: Any
 
 
 class BdeBuilder(FnnTrainer):
@@ -70,59 +99,56 @@ class BdeBuilder(FnnTrainer):
 
         return [self.get_model(seed + i, act_fn=act_fn, sizes=sizes) for i in range(self.n_members)]
 
-    def fit_members(self, x, y, epochs, optimizer=None, loss=None):
-        # Setup task
+    def _determine_output_dim(self, y) -> int:
         if self.task == TaskType.REGRESSION:
-            n_outputs = 2
+            return 2
         elif self.task == TaskType.CLASSIFICATION:
-            n_outputs = int(y.max()) + 1
+            return int(y.max()) + 1
         else:
             raise ValueError(f"Unknown task {self.task} !")
 
-        # Setup FNN sizes
+    def _build_full_sizes(self, x, y) -> list[int]:
         n_features = x.shape[1]
-        full_sizes = [n_features] + self.hidden_sizes + [n_outputs]
+        return [n_features] + self.hidden_sizes + [self._determine_output_dim(y)]
 
-        # Setup members
+    def _ensure_member_initialization(self, full_sizes: list):
         if self.members is None:
             self.members = self.deep_ensemble_creator(seed=self.seed, act_fn=self.act_fn, sizes=full_sizes)
 
-        # train and validation sets for early stopping
-        x_train, x_val, y_train, y_val = super().split_train_val(x, y)
-
-        # Setup training objects
+    def _create_training_components(self, optimizer, loss: BaseLoss):
         proto_model = self.members[0]
         opt = optimizer or self.default_optimizer()
         loss_obj = loss or self.default_loss(self.task)
-        loss_fn = FnnTrainer.make_loss_fn(proto_model, loss_obj)  # (params, x, y) -> scalar
-        step_one = FnnTrainer.make_step(loss_fn, opt)  # (params, opt_state, x, y) -> (params, opt_state, loss)
+        loss_fn = FnnTrainer.make_loss_fn(proto_model, loss_obj)
+        step_one = FnnTrainer.make_step(loss_fn, opt)
+        return TrainingComponents(opt, loss_obj, loss_fn, step_one)
 
-        # Setup paramtree
-        params_e = tree_map(lambda *ps: jnp.stack(ps, axis=0), *[m.params for m in self.members])  # (E, ...)
+    def _create_callback(self) -> EarlyStoppingCallback:
+        return EarlyStoppingCallback(
+            patience=self.patience,
+            min_delta=self.min_delta,
+            eval_every=self.eval_every,
+        )
 
-        # Distribute members to devices via padding
-        E = len(self.members)
-        D = jax.local_device_count()
-
-        print("Kernel devices:", D)
-
-        pad = (D - (E % max(D, 1))) % max(D, 1)
-        E_pad = E + pad
-        E_per = E_pad // max(D, 1)
-
+    def _prepare_distributed_state(self, components: TrainingComponents) -> DistributedTrainingState:
+        params_e = tree_map(lambda *ps: jnp.stack(ps, axis=0), *[m.params for m in self.members])
+        ensemble_size = len(self.members)
+        device_count = jax.local_device_count()
+        print("Kernel devices:", device_count)
+        pad = (device_count - (ensemble_size % max(device_count, 1))) % max(device_count, 1)
+        ensemble_padded = ensemble_size + pad
+        members_per_device = ensemble_padded // max(device_count, 1)
         params_e = tree_map(lambda a: _pad_axis0(a, pad), params_e)
-        params_de = tree_map(lambda a: a.reshape(D, E_per, *a.shape[1:]), params_e)
+        params_de = tree_map(lambda a: a.reshape(device_count, members_per_device, *a.shape[1:]), params_e)
 
-        # Per-device init of optimizer states (vectorized over local chunk)
         def init_chunk(params_chunk):
-            return jax.vmap(opt.init)(params_chunk)
+            return jax.vmap(components.optimizer.init)(params_chunk)
 
         opt_state_de = jax.pmap(init_chunk, in_axes=0, out_axes=0)(params_de)
 
-        # One device does a local vmap over its chunk
         def step_chunk(params_chunk, opt_state_chunk, x_b, y_b, stopped_chunk):
             def step_member(p, s):
-                return step_one(p, s, x_b, y_b)
+                return components.step_fn(p, s, x_b, y_b)
 
             new_params, new_states, losses = jax.vmap(step_member)(params_chunk, opt_state_chunk)
 
@@ -137,36 +163,41 @@ class BdeBuilder(FnnTrainer):
 
         def eval_chunk(params_chunk, x_b, y_b):
             def loss_member(p):
-                return loss_fn(p, x_b, y_b)
+                return components.loss_fn(p, x_b, y_b)
 
             return jax.vmap(loss_member)(params_chunk)
 
         pstep = jax.pmap(step_chunk, in_axes=(0, 0, None, None, 0), out_axes=(0, 0, 0))
         peval = jax.pmap(eval_chunk, in_axes=(0, None, None), out_axes=0)
 
-        # Setup training loop
-        self._reset_history()
-        callback = EarlyStoppingCallback(
-            patience=self.patience,
-            min_delta=self.min_delta,
-            eval_every=self.eval_every,
-        )
-        callback_state = callback.initialize(params_de)
+        return DistributedTrainingState(params_de, opt_state_de, pstep, peval, ensemble_size)
 
-        # Training loop
+    def _training_loop(
+            self,
+            state: DistributedTrainingState,
+            callback: EarlyStoppingCallback,
+            callback_state,
+            x_train,
+            y_train,
+            x_val,
+            y_val,
+            epochs: int,
+    ) -> TrainingLoopResult:
+        params_de = state.params_de
+        opt_state_de = state.opt_state_de
+
         for epoch in range(epochs):
             stopped_de = callback.stopped_mask(callback_state)
-            params_de, opt_state_de, lvals_de = pstep(params_de, opt_state_de, x_train, y_train, stopped_de)
+            params_de, opt_state_de, lvals_de = state.pstep(params_de, opt_state_de, x_train, y_train, stopped_de)
             train_mean = float(jnp.mean(jax.device_get(lvals_de)))
             self.history["train_loss"].append(train_mean)
             if epoch % self.log_every == 0:
                 print(epoch, train_mean)
 
-            if (x_val is not None) and (y_val is not None) and callback.should_evaluate(epoch):
-                val_lvals_de = peval(params_de, x_val, y_val)
+            should_eval = (x_val is not None) and (y_val is not None) and callback.should_evaluate(epoch)
+            if should_eval:
+                val_lvals_de = state.peval(params_de, x_val, y_val)
                 callback_state = callback.update(callback_state, epoch, params_de, val_lvals_de)
-
-                # Note: This output considers the dummy members aswell, which will be later neglected
                 if epoch % 100 == 0:
                     n_active = callback.active_members(callback_state)
                     print(f"[epoch {epoch}] active members: {n_active}")
@@ -174,13 +205,35 @@ class BdeBuilder(FnnTrainer):
                 if callback.all_stopped(callback_state):
                     print(f"All members stopped by epoch {epoch}.")
                     break
+        return TrainingLoopResult(params_de, opt_state_de, callback_state)
 
-        # Output stop epochs
-        stop_epoch_e = callback.stop_epochs(callback_state, ensemble_size=E)
+    def fit_members(self, x, y, epochs, optimizer=None, loss=None):
+
+        full_sizes = self._build_full_sizes(x, y)
+        self._ensure_member_initialization(full_sizes)
+        x_train, x_val, y_train, y_val = super().split_train_val(x, y)  # for early stopping
+
+        components = self._create_training_components(optimizer, loss)
+        state = self._prepare_distributed_state(components)
+        self._reset_history()
+        callback = self._create_callback()
+        callback_state = callback.initialize(state.params_de)
+
+        loop_result = self._training_loop(
+            state,
+            callback,
+            callback_state,
+            x_train,
+            y_train,
+            x_val,
+            y_val,
+            epochs,
+        )
+        stop_epoch_e = callback.stop_epochs(loop_result.callback_state, ensemble_size=state.ensemble_size)
         for m_id, ep in enumerate(list(map(int, jax.device_get(stop_epoch_e)))):
             print(f"member {m_id}: {'stopped at epoch ' + str(ep) if ep >= 0 else 'ran full training'}")
 
-        params_e_final = callback.best_params(callback_state, ensemble_size=E)
+        params_e_final = callback.best_params(loop_result.callback_state, ensemble_size=state.ensemble_size)
         for i, m in enumerate(self.members):
             m.params = tree_map(lambda a: a[i], params_e_final)
         self.params_e = params_e_final
