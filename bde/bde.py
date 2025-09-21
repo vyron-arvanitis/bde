@@ -9,6 +9,7 @@ from bde.sampler.warmup import warmup_bde
 from bde.sampler.mile_wrapper import MileWrapper
 import jax
 import jax.numpy as jnp
+from jax.typing import ArrayLike
 from jax.tree_util import tree_map, tree_leaves
 from bde.task import TaskType
 from functools import partial
@@ -18,20 +19,20 @@ from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 
 class Bde(BaseEstimator):
     def __init__(self,
-                 n_members=5,
-                 hidden_layers=None,
-                 seed=0,
+                 n_members: int = 5,
+                 hidden_layers: list = None,
+                 seed: int = 0,
                  task: TaskType = None,
                  loss: BaseLoss = None,
-                 activation="relu",
-                 epochs=100,
-                 patience=25,
-                 n_samples=100,
-                 warmup_steps=50,
-                 lr=1e-3,
-                 n_thinning=10,
-                 desired_energy_var_start=0.5,
-                 desired_energy_var_end=0.1,
+                 activation: str = "relu",
+                 epochs: int = 100,
+                 patience: int = 25,
+                 n_samples: int = 100,
+                 warmup_steps: int = 50,
+                 lr: float = 1e-3,
+                 n_thinning: int = 10,
+                 desired_energy_var_start: float = 0.5,
+                 desired_energy_var_end: float = 0.1,
                  step_size_init: int = None
                  ):
 
@@ -69,14 +70,14 @@ class Bde(BaseEstimator):
 
         self.members = self.bde.members
 
-    def fit(self, X, y):
-        self.bde.fit_members(x=X, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
+    def fit(self, x: ArrayLike, y: ArrayLike):
+        self.bde.fit_members(x=x, y=y, optimizer=optax.adam(self.lr), epochs=self.epochs, loss=self.loss)
 
         prior = PriorDist.STANDARDNORMAL.get_prior()
         proto = self.bde.members[0]
         pm = ProbabilisticModel(module=proto, params=proto.params, prior=prior, task=self.task)
 
-        logpost_one = partial(pm.log_unnormalized_posterior, x=X, y=y)
+        logpost_one = partial(pm.log_unnormalized_posterior, x=x, y=y)
 
         warm = warmup_bde(
             self.bde,
@@ -115,12 +116,12 @@ class Bde(BaseEstimator):
         return self
 
     def evaluate(self,
-                 Xte,
+                 xte: ArrayLike,
                  mean_and_std: bool = False,
                  credible_intervals: list[float] | None = None,
                  raw: bool = False,
                  probabilities: bool = False):
-        predictor = BDEPredictor(self.bde.members[0], self.positions_eT, Xte=Xte,
+        predictor = BDEPredictor(self.bde.members[0], self.positions_eT, Xte=xte,
                                  task=self.task)  # TODO: [@angelos] think of somehting better I dont think that works fine
         raw_preds = predictor.get_raw_preds()
         if self.task == TaskType.REGRESSION:
@@ -239,15 +240,15 @@ class BdeClassifier(Bde, ClassifierMixin):
             n_thinning=n_thinning,
         )
 
-    def predict(self, X):
-        out = self.evaluate(X)
+    def predict(self, x: ArrayLike):
+        out = self.evaluate(x)
         return out["labels"]
 
-    def predict_proba(self, X):
-        out = self.evaluate(X, probabilities=True)
+    def predict_proba(self, x: ArrayLike):
+        out = self.evaluate(x, probabilities=True)
         return out["probs"]
 
-    def get_raw_predictions(self, X):
+    def get_raw_predictions(self, x: ArrayLike):
         """Return raw ensemble predictions.
 
         Shape: (E, T, N, C), where:
@@ -256,4 +257,4 @@ class BdeClassifier(Bde, ClassifierMixin):
           - N = number of test points
           - C = number of classes (logits before softmax)
         """
-        return self.evaluate(X, raw=True)["raw"]
+        return self.evaluate(x, raw=True)["raw"]

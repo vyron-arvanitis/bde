@@ -41,7 +41,7 @@ class DataLoader:
             self.data = {k: jnp.asarray(v) for k, v in data.items()}
 
     def _data_gen(self) -> dict[str, jnp.ndarray]:
-        """Generate a simple linear regression dataset: y = X @ w + noise."""
+        """Generate a simple linear regression dataset: y = x @ w + noise."""
         key = jax.random.PRNGKey(self.seed)
         k_x, k_w, k_eps = jax.random.split(key, 3)
         x = jax.random.normal(k_x, (self.n_samples, self.n_features))
@@ -69,7 +69,7 @@ class DataLoader:
         Notes
         -----
         - Implementation should normalize to jax.numpy arrays,
-          ensure X shape (N, D) and y shape (N, 1) if provided,
+          ensure x shape (N, D) and y shape (N, 1) if provided,
           and store `task` or leave it None for later inference.
         """
         # TODO: implement normalization & shape checks; set fields accordingly

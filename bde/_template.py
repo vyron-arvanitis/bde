@@ -32,17 +32,17 @@ class TemplateEstimator(BaseEstimator):
         Number of features seen during :term:`fit`.
 
     feature_names_in_ : ndarray of shape (`n_features_in_`,)
-        Names of features seen during :term:`fit`. Defined only when `X`
+        Names of features seen during :term:`fit`. Defined only when `x`
         has feature names that are all strings.
 
     Examples
     --------
     >>> from bde import TemplateEstimator
     >>> import numpy as np
-    >>> X = np.arange(100).reshape(100, 1)
+    >>> x = np.arange(100).reshape(100, 1)
     >>> y = np.zeros((100, ))
     >>> estimator = TemplateEstimator()
-    >>> estimator.fit(X, y)
+    >>> estimator.fit(x, y)
     TemplateEstimator()
     """
 
@@ -132,16 +132,16 @@ class TemplateClassifier(ClassifierMixin, BaseEstimator):
         Number of features seen during :term:`fit`.
 
     feature_names_in_ : ndarray of shape (`n_features_in_`,)
-        Names of features seen during :term:`fit`. Defined only when `X`
+        Names of features seen during :term:`fit`. Defined only when `x`
         has feature names that are all strings.
 
     Examples
     --------
     >>> from sklearn.datasets import load_iris
     >>> from bde import TemplateClassifier
-    >>> X, y = load_iris(return_X_y=True)
-    >>> clf = TemplateClassifier().fit(X, y)
-    >>> clf.predict(X)
+    >>> x, y = load_iris(return_X_y=True)
+    >>> clf = TemplateClassifier().fit(x, y)
+    >>> clf.predict(x)
     array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
            0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -241,7 +241,7 @@ class TemplateTransformer(TransformerMixin, BaseEstimator):
         Number of features seen during :term:`fit`.
 
     feature_names_in_ : ndarray of shape (`n_features_in_`,)
-        Names of features seen during :term:`fit`. Defined only when `X`
+        Names of features seen during :term:`fit`. Defined only when `x`
         has feature names that are all strings.
     """
 
@@ -289,7 +289,7 @@ class TemplateTransformer(TransformerMixin, BaseEstimator):
         -------
         X_transformed : array, shape (n_samples, n_features)
             The array containing the element-wise square roots of the values
-            in ``X``.
+            in ``x``.
         """
         # Since this is a stateless transformer, we should not call `check_is_fitted`.
         # Common test will check for this particularly.

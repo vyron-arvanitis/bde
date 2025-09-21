@@ -46,8 +46,8 @@ class TrainingLoopResult:
 
 class BdeBuilder(FnnTrainer):
     def __init__(self,
-                 hidden_sizes,
-                 n_members,
+                 hidden_sizes: list,
+                 n_members: int,
                  task: TaskType,
                  seed: int,
                  act_fn: str,

@@ -52,7 +52,7 @@ def regression_example():
     )
 
     print(f"the params are {regressor.get_params()}")  # get_params is from sk learn!!
-    regressor.fit(X=Xtr, y=ytr)
+    regressor.fit(x=Xtr, y=ytr)
 
     means, sigmas = regressor.predict(Xte, mean_and_std=True)
 
@@ -109,7 +109,7 @@ def classification_example():
         n_thinning=5
     )
 
-    classifier.fit(X=Xtr, y=ytr)
+    classifier.fit(x=Xtr, y=ytr)
 
     preds = classifier.predict(Xte)
     probs = classifier.predict_proba(Xte)
