@@ -3,6 +3,7 @@ import jax.numpy as jnp
 from typing import Any
 from jax import tree_util
 
+
 @dataclass
 class EarlyStoppingState:
     """This class will act as a container for storing values of per-member early stopping"""
@@ -78,17 +79,20 @@ class EarlyStoppingCallback:
 
         return (epoch % self.eval_every) == 0
 
-    def all_stopped(self, state: EarlyStoppingState) -> bool:
+    @staticmethod
+    def all_stopped(state: EarlyStoppingState) -> bool:
         """Return True if all members have triggered early stopping."""
 
         return bool(jnp.all(state.stopped_de))
 
-    def active_members(self, state: EarlyStoppingState) -> int:
+    @staticmethod
+    def active_members(state: EarlyStoppingState) -> int:
         """Number of members that are still training."""
 
         return int(jnp.sum(~state.stopped_de))
 
-    def stopped_mask(self, state: EarlyStoppingState) -> jnp.ndarray:
+    @staticmethod
+    def stopped_mask(state: EarlyStoppingState) -> jnp.ndarray:
         """Return a mask over (device, member) axes for stopped members."""
 
         return state.stopped_de

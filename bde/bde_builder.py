@@ -169,20 +169,6 @@ class BdeBuilder(FnnTrainer):
 
             if (x_val is not None) and (y_val is not None) and callback.should_evaluate(epoch):
                 val_lvals_de = peval(params_de, x_val, y_val)
-                #
-                # improved = val_lvals_de < (best_metric_de - self.min_delta)   # (D, E_per)
-                # best_metric_de       = jnp.where(improved, val_lvals_de, best_metric_de)
-                # epochs_no_improve_de = jnp.where(improved, 0, epochs_no_improve_de + 1)
-                #
-                # def select_best(new_leaf, old_leaf):
-                #     expand = (None,) * (new_leaf.ndim - improved.ndim)  # broadcast (D, E_per) over leaf
-                #     mask = improved[(...,) + expand]
-                #     return jnp.where(mask, new_leaf, old_leaf)
-                # best_params_de = jax.tree_util.tree_map(select_best, params_de, best_params_de)
-                #
-                # newly_stopped = (epochs_no_improve_de >= self.patience) & (~stopped_de)
-                # stopped_de = stopped_de | newly_stopped
-                # stop_epoch_de = jnp.where(newly_stopped, jnp.int32(epoch), stop_epoch_de)
                 callback_state = callback.update(callback_state, epoch, params_de, val_lvals_de)
 
                 # Note: This output considers the dummy members aswell, which will be later neglected

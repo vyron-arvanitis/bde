@@ -190,9 +190,9 @@ def make_L_step_size_adaptation(
         params_new = params._replace(step_size=step_size)
 
         adaptive_state = (time, x_average, step_size_max)
-        
-        jax.debug.print("step {i} | ok={ok} | step_size={eps} | dE={dE}",
-                        i=step_number, ok=success, eps=params.step_size, dE=energy_change)
+        #
+        # jax.debug.print("step {i} | ok={ok} | step_size={eps} | dE={dE}",
+        #                 i=step_number, ok=success, eps=params.step_size, dE=energy_change)
 
         return state, params_new, adaptive_state, success
 
