@@ -1,7 +1,7 @@
 """this is a bde builder"""
-import jax, jaxlib
+import jax
 import jax.numpy as jnp
-from jax.tree_util import tree_map, tree_structure
+from jax.tree_util import tree_map
 
 import optax
 from typing import Any, Callable
@@ -15,6 +15,7 @@ from bde.task import TaskType
 from .loss.loss import BaseLoss
 
 from dataclasses import dataclass
+from jax.typing import ArrayLike
 
 
 @dataclass
@@ -99,7 +100,7 @@ class BdeBuilder(FnnTrainer):
 
         return [self.get_model(seed + i, act_fn=act_fn, sizes=sizes) for i in range(self.n_members)]
 
-    def _determine_output_dim(self, y) -> int:
+    def _determine_output_dim(self, y: ArrayLike) -> int:
         if self.task == TaskType.REGRESSION:
             return 2
         elif self.task == TaskType.CLASSIFICATION:
@@ -107,7 +108,7 @@ class BdeBuilder(FnnTrainer):
         else:
             raise ValueError(f"Unknown task {self.task} !")
 
-    def _build_full_sizes(self, x, y) -> list[int]:
+    def _build_full_sizes(self, x: ArrayLike, y: ArrayLike) -> list[int]:
         n_features = x.shape[1]
         return [n_features] + self.hidden_sizes + [self._determine_output_dim(y)]
 
@@ -141,12 +142,12 @@ class BdeBuilder(FnnTrainer):
         params_e = tree_map(lambda a: _pad_axis0(a, pad), params_e)
         params_de = tree_map(lambda a: a.reshape(device_count, members_per_device, *a.shape[1:]), params_e)
 
-        def init_chunk(params_chunk):
+        def init_chunk(params_chunk: Any) -> jax.vmap:
             return jax.vmap(components.optimizer.init)(params_chunk)
 
         opt_state_de = jax.pmap(init_chunk, in_axes=0, out_axes=0)(params_de)
 
-        def step_chunk(params_chunk, opt_state_chunk, x_b, y_b, stopped_chunk):
+        def step_chunk(params_chunk: Any, opt_state_chunk, x_b, y_b, stopped_chunk):
             def step_member(p, s):
                 return components.step_fn(p, s, x_b, y_b)
 
@@ -177,10 +178,10 @@ class BdeBuilder(FnnTrainer):
             state: DistributedTrainingState,
             callback: EarlyStoppingCallback,
             callback_state,
-            x_train,
-            y_train,
-            x_val,
-            y_val,
+            x_train: ArrayLike,
+            y_train: ArrayLike,
+            x_val: ArrayLike,
+            y_val: ArrayLike,
             epochs: int,
     ) -> TrainingLoopResult:
         params_de = state.params_de
@@ -207,7 +208,7 @@ class BdeBuilder(FnnTrainer):
                     break
         return TrainingLoopResult(params_de, opt_state_de, callback_state)
 
-    def fit_members(self, x, y, epochs, optimizer=None, loss=None):
+    def fit_members(self, x: ArrayLike, y: ArrayLike, epochs: int, optimizer=None, loss: BaseLoss = None):
 
         full_sizes = self._build_full_sizes(x, y)
         self._ensure_member_initialization(full_sizes)
