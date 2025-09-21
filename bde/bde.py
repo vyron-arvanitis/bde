@@ -15,7 +15,6 @@ import optax
 from sklearn.base import BaseEstimator, RegressorMixin, ClassifierMixin
 from typing import Any, Protocol, cast
 
-
 class _WarmupState(Protocol):
     """Protocol for warmup states exposing the current position."""
 
@@ -45,7 +44,8 @@ class Bde(BaseEstimator):
         self.seed = seed
         self.task = task
         self.loss = loss
-        self.task.validate_loss(self.loss)  # validate loss function
+        if self.task is not None and self.loss is not None:
+            self.task.validate_loss(self.loss)
         self.activation = activation
         self.epochs = epochs
         self.patience = patience
