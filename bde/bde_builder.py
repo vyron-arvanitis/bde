@@ -146,11 +146,6 @@ class BdeBuilder(FnnTrainer):
 
         # Setup training loop
         self._reset_history()
-        # best_params_de = params_de
-        # best_metric_de = jnp.full((D, E_per), jnp.inf)
-        # epochs_no_improve_de = jnp.zeros((D, E_per), dtype=jnp.int32)
-        # stopped_de = jnp.zeros((D, E_per), dtype=bool)
-        # stop_epoch_de = -jnp.ones((D, E_per), dtype=jnp.int32)
         callback = EarlyStoppingCallback(
             patience=self.patience,
             min_delta=self.min_delta,

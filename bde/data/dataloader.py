@@ -7,10 +7,10 @@ import jax.numpy as jnp
 import numpy as np
 
 
-class TaskType:
-    """Holder for task types."""
-    REGRESSION = "regression"
-    CLASSIFICATION = "classification"
+# class TaskType:
+#     """Holder for task types."""
+#     REGRESSION = "regression"
+#     CLASSIFICATION = "classification"
 
 
 class DataLoader:
