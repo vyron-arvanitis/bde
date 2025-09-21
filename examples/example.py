@@ -151,5 +151,5 @@ def classification_example():
 
 
 if __name__ == "__main__":
-    classification_example()
+    # classification_example()
     regression_example()

@@ -1,5 +1,7 @@
 from abc import abstractclassmethod
 
+from pandas.core.window.doc import kwargs_scipy
+
 from bde.bde_builder import BdeBuilder
 from bde.bde_evaluator import BDEPredictor
 from bde.loss.loss import BaseLoss
@@ -166,34 +168,15 @@ class Bde(BaseEstimator):
 
 # TODO: [@angelos] maybe put them in another file?
 class BdeRegressor(Bde, RegressorMixin):
-    def __init__(self,
-                 n_members=5,
-                 hidden_layers=None,
-                 seed=0,
-                 loss: BaseLoss = None,
-                 activation="relu",
-                 epochs=100,
-                 n_samples=100,
-                 warmup_steps=50,
-                 lr=1e-3,
-                 n_thinning=10):
-        super().__init__(
-            n_members=n_members,
-            hidden_layers=hidden_layers,
-            seed=seed,
-            task=TaskType.REGRESSION,  # fixed
-            loss=loss,
-            activation=activation,
-            epochs=epochs,
-            n_samples=n_samples,
-            warmup_steps=warmup_steps,
-            lr=lr,
-            n_thinning=n_thinning,
-        )
+    def __init__(self, **kwargs):
+        super().__init__(task=TaskType.REGRESSION, **kwargs)
 
-    def predict(self, X, mean_and_std=False, credible_intervals=None, raw=False):
+    def predict(self,
+                x: ArrayLike, mean_and_std: bool = False,
+                credible_intervals: list[float] = None,
+                raw: bool = False):
         out = self.evaluate(
-            X,
+            x,
             mean_and_std=mean_and_std,
             credible_intervals=credible_intervals,
             raw=raw,
@@ -204,7 +187,7 @@ class BdeRegressor(Bde, RegressorMixin):
             return out["mean"], out["credible_intervals"]
         return out["mean"]
 
-    def get_raw_predictions(self, X):
+    def get_raw_predictions(self, x: ArrayLike):
         """Return raw ensemble predictions.
 
         Shape: (E, T, N, 2), where:
@@ -213,7 +196,7 @@ class BdeRegressor(Bde, RegressorMixin):
           - N = number of test points
           - 2 = (mu, sigma_param)
         """
-        return self.evaluate(X, raw=True)["raw"]
+        return self.evaluate(x, raw=True)["raw"]
 
 
 class BdeClassifier(Bde, ClassifierMixin):
