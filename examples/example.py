@@ -41,10 +41,10 @@ def regression_example():
 
     regressor = BdeRegressor(
         hidden_layers=[16, 16],
-        n_members=24,
+        n_members=4,
         seed=0,
         loss=GaussianNLL(),
-        epochs=10000,
+        epochs=1000,
         lr=1e-3,
         warmup_steps=500,
         n_samples=100,
@@ -151,5 +151,5 @@ def classification_example():
 
 
 if __name__ == "__main__":
-    # regression_example()
+    classification_example()
     regression_example()
