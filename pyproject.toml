@@ -42,8 +42,17 @@ platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 [tool.pixi.dependencies]
 python = ">=3.9"
 scikit-learn = ">=1.4.2"
+numpy = ">=1.26.4"
+scipy = ">=1.16.2"
+tqdm = ">=4.67.1"
+matplotlib = ">=3.8.4"
+seaborn = ">=0.13.2"
 
 [tool.pixi.pypi-dependencies]
+jax = ">=0.4.28"
+flax = ">=0.8.2"
+optax = ">=0.2.1"
+blackjax = "==0.9.6"
 bde = { path=".", editable=true }
 
 [tool.pixi.feature.lint.dependencies]
