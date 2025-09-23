@@ -1,0 +1,116 @@
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.12.3, pytest-8.2.0, pluggy-1.5.0 -- /home/vyron/Desktop/LMU/ADL/bde/.pixi/envs/test/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /home/vyron/Desktop/LMU/ADL/bde
+configfile: pyproject.toml
+plugins: cov-5.0.0
+[1mcollecting ... [0mcollected 11 items / 6 errors
+
+==================================== ERRORS ====================================
+[31m[1m_________________________ ERROR collecting bde/bde.py __________________________[0m
+[31mImportError while importing test module '/home/vyron/Desktop/LMU/ADL/bde/bde/bde.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/bde.py:6: in <module>
+    from bde.sampler.warmup import warmup_bde
+bde/sampler/warmup.py:12: in <module>
+    from blackjax.adaptation.base import AdaptationResults
+E   ModuleNotFoundError: No module named 'blackjax.adaptation.base'[0m
+[31m[1m____________________ ERROR collecting bde/sampler/warmup.py ____________________[0m
+[31mImportError while importing test module '/home/vyron/Desktop/LMU/ADL/bde/bde/sampler/warmup.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/sampler/warmup.py:12: in <module>
+    from blackjax.adaptation.base import AdaptationResults
+E   ModuleNotFoundError: No module named 'blackjax.adaptation.base'[0m
+[31m[1m____________________ ERROR collecting bde/tests/test_bde.py ____________________[0m
+[31mImportError while importing test module '/home/vyron/Desktop/LMU/ADL/bde/bde/tests/test_bde.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/tests/test_bde.py:9: in <module>
+    from bde.bde import BdeRegressor, BdeClassifier, Bde
+bde/bde.py:6: in <module>
+    from bde.sampler.warmup import warmup_bde
+bde/sampler/warmup.py:12: in <module>
+    from blackjax.adaptation.base import AdaptationResults
+E   ModuleNotFoundError: No module named 'blackjax.adaptation.base'[0m
+[31m[1m____________________ ERROR collecting bde/tests/test_bde.py ____________________[0m
+[31mImportError while importing test module '/home/vyron/Desktop/LMU/ADL/bde/bde/tests/test_bde.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/tests/test_bde.py:9: in <module>
+    from bde.bde import BdeRegressor, BdeClassifier, Bde
+bde/bde.py:6: in <module>
+    from bde.sampler.warmup import warmup_bde
+bde/sampler/warmup.py:12: in <module>
+    from blackjax.adaptation.base import AdaptationResults
+E   ModuleNotFoundError: No module named 'blackjax.adaptation.base'[0m
+[31m[1m__________________ ERROR collecting bde/tests/test_common.py ___________________[0m
+[31mImportError while importing test module '/home/vyron/Desktop/LMU/ADL/bde/bde/tests/test_common.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/tests/test_common.py:13: in <module>
+    @parametrize_with_checks([est() for _, est in all_estimators()])
+bde/utils/discovery.py:77: in all_estimators
+    module = import_module(module_name)
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/bde.py:6: in <module>
+    from bde.sampler.warmup import warmup_bde
+bde/sampler/warmup.py:12: in <module>
+    from blackjax.adaptation.base import AdaptationResults
+E   ModuleNotFoundError: No module named 'blackjax.adaptation.base'[0m
+[31m[1m__________________ ERROR collecting bde/tests/test_common.py ___________________[0m
+[31mImportError while importing test module '/home/vyron/Desktop/LMU/ADL/bde/bde/tests/test_common.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/tests/test_common.py:13: in <module>
+    @parametrize_with_checks([est() for _, est in all_estimators()])
+bde/utils/discovery.py:77: in all_estimators
+    module = import_module(module_name)
+.pixi/envs/test/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+bde/bde.py:6: in <module>
+    from bde.sampler.warmup import warmup_bde
+bde/sampler/warmup.py:12: in <module>
+    from blackjax.adaptation.base import AdaptationResults
+E   ModuleNotFoundError: No module named 'blackjax.adaptation.base'[0m
+[33m=============================== warnings summary ===============================[0m
+.pixi/envs/test/lib/python3.12/site-packages/coverage/inorout.py:456
+  /home/vyron/Desktop/LMU/ADL/bde/.pixi/envs/test/lib/python3.12/site-packages/coverage/inorout.py:456: CoverageWarning: --include is ignored because --source is set (include-ignored)
+    self.warn("--include is ignored because --source is set", slug="include-ignored")
+
+.pixi/envs/test/lib/python3.12/site-packages/jaxopt/__init__.py:59
+  /home/vyron/Desktop/LMU/ADL/bde/.pixi/envs/test/lib/python3.12/site-packages/jaxopt/__init__.py:59: DeprecationWarning: JAXopt is no longer maintained. See https://docs.jax.dev/en/latest/ for alternatives.
+    warnings.warn(
+
+.pixi/envs/test/lib/python3.12/site-packages/jax/experimental/host_callback.py:34
+  /home/vyron/Desktop/LMU/ADL/bde/.pixi/envs/test/lib/python3.12/site-packages/jax/experimental/host_callback.py:34: UserWarning: jax.experimental.host_callback is deprecated and will be removed in JAX v0.8.0
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform linux, python 3.12.3-final-0 -----------
+Coverage XML written to file coverage.xml
+
+[36m[1m=========================== short test summary info ============================[0m
+[31mERROR[0m bde/bde.py
+[31mERROR[0m bde/sampler/warmup.py
+[31mERROR[0m bde/tests/test_bde.py
+[31mERROR[0m bde/tests/test_bde.py
+[31mERROR[0m bde/tests/test_common.py
+[31mERROR[0m bde/tests/test_common.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 6 errors during collection !!!!!!!!!!!!!!!!!!!!
+[31m======================== [33m3 warnings[0m, [31m[1m6 errors[0m[31m in 4.83s[0m[31m =========================[0m
