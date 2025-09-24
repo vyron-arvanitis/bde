@@ -41,7 +41,7 @@ class BdePredictor:  # TODO: [@question] Maybe merge with BDE Builder class
         -------
         mu, sigma:
         """
-        preds = self.get_raw_preds() # (E, T, N, 2)
+        preds = self.get_raw_preds()  # (E, T, N, 2)
         mu = preds[..., 0]
         sigma = jax.nn.softplus(preds[..., 1]) + 1e-6
         return mu, sigma
