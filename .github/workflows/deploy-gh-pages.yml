@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - main
+    - 46-docs-dependencies-pipeline
   pull_request:
     branches:
       - main
