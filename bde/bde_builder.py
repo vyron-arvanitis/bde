@@ -116,6 +116,8 @@ class BdeBuilder(FnnTrainer):
 
     def _ensure_member_initialization(self, full_sizes: list):
         if self.members is None:
+            if self.n_members < 1:
+                raise ValueError("n_members must be at leat 1 to build the ensemble!")
             self.members = self._deep_ensemble_creator(seed=self.seed, act_fn=self.act_fn, sizes=full_sizes)
 
     def _create_training_components(self, optimizer, loss: BaseLoss):

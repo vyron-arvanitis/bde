@@ -220,6 +220,7 @@ class Bde:
         -------
 
         """
+
         check_is_fitted(self)
         if not getattr(self._bde, "members", None):
             raise RuntimeError("BDE members are not initialized; ensure 'fit' has been executed successfully.")
@@ -265,7 +266,6 @@ class Bde:
         x_checked = jnp.asarray(x_np)
         y_checked = jnp.asarray(y_prepared)
 
-
         self._resolved_step_size_init = (
             self.step_size_init if self.step_size_init is not None else self.lr
         )
@@ -307,6 +307,34 @@ class Bde:
             "multioutput": False,
         }
 
+    def _validate_evaluate_tags(
+            self,
+            *,
+            mean_and_std: bool = False,
+            credible_intervals: list[float] | None = None,
+            raw: bool = False,
+            probabilities: bool = False,
+    ):
+        if self.task == TaskType.REGRESSION:
+            if probabilities:
+                raise ValueError("'probabilities' predictions are only supported for classification tasks.")
+            if mean_and_std and credible_intervals:
+                raise ValueError("'mean_and_std' and 'credible_intervals' cannot be requested together.")
+            if raw and credible_intervals:
+                raise ValueError("'raw' and 'credible_intervals' cannot be requested together.")
+            if raw and mean_and_std:
+                raise ValueError("'raw' and 'mean_and_std' cannot be requested together.")
+            return
+
+        if self.task == TaskType.CLASSIFICATION:
+            if mean_and_std:
+                raise ValueError("'mean_and_std' predictions are not available for classification tasks.")
+            if credible_intervals:
+                raise ValueError("'credible_intervals' predictions are not available for classification tasks.")
+            return
+
+        raise ValueError(f"Unsupported task type {self.task}")
+
     def evaluate(
             self,
             xte: ArrayLike,
@@ -332,6 +360,12 @@ class Bde:
         xte_np = validate_predict_data(self, xte)
         xte_jnp = jnp.asarray(xte_np)
         predictor = self._make_predictor(xte_jnp)
+        self._validate_evaluate_tags(
+            mean_and_std=mean_and_std,
+            credible_intervals=credible_intervals,
+            raw=raw,
+            probabilities=probabilities,
+        )
         return predictor.predict(
             mean_and_std=mean_and_std,
             credible_intervals=credible_intervals,
