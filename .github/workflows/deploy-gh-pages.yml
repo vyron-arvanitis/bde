@@ -5,6 +5,7 @@ on:
     branches:
     - main
     - 46-docs-dependencies-pipeline
+    - 48-documentation
   pull_request:
     branches:
       - main

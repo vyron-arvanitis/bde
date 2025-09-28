@@ -12,7 +12,7 @@ from bde.bde import BdeRegressor, BdeClassifier, Bde
 from bde.bde_builder import BdeBuilder
 
 from bde.task import TaskType
-from bde.models.models import Fnn
+from bde.models import Fnn
 
 
 class TestBdeRegressor(unittest.TestCase):
