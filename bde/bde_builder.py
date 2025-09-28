@@ -103,6 +103,18 @@ class BdeBuilder(FnnTrainer):
         return [self.get_model(seed + i, act_fn=act_fn, sizes=sizes) for i in range(self.n_members)]
 
     def _determine_output_dim(self, y: ArrayLike) -> int:
+        """Infer the output dimension for the ensemble from the targets.
+
+        Parameters
+        ----------
+        y : ArrayLike
+            Target values used to determine the output width.
+
+        Returns
+        -------
+        int
+            Number of output units required for the configured task.
+        """
         if self.task == TaskType.REGRESSION:
             return 2
         elif self.task == TaskType.CLASSIFICATION:
@@ -111,6 +123,21 @@ class BdeBuilder(FnnTrainer):
             raise ValueError(f"Unknown task {self.task} !")
 
     def _build_full_sizes(self, x: ArrayLike, y: ArrayLike) -> list[int]:
+        """Compute the layer sizes for each fully-connected ensemble member.
+
+        Parameters
+        ----------
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features). Only the feature dimension
+            is used here.
+        y : ArrayLike
+            Target values that determine the output dimension via `_determine_output_dim`.
+
+        Returns
+        -------
+        list[int]
+            Full list of layer sizes `[n_features, *hidden_sizes, n_outputs]`.
+        """
         n_features = x.shape[1]
         return [n_features] + self.hidden_sizes + [self._determine_output_dim(y)]
 
@@ -188,6 +215,32 @@ class BdeBuilder(FnnTrainer):
             y_val: ArrayLike,
             epochs: int,
     ) -> TrainingLoopResult:
+        """Run the distributed training loop with optional validation.
+
+        Parameters
+        ----------
+        state : DistributedTrainingState
+            Packed parameters, optimizer state, and pmap'ed step/eval functions.
+        callback : EarlyStoppingCallback
+            Early stopping controller that decides when members should freeze.
+        callback_state : Any
+            Mutable state tracked by the callback.
+        x_train : ArrayLike
+            Training features broadcast to every ensemble member.
+        y_train : ArrayLike
+            Training targets aligned with `x_train`.
+        x_val : ArrayLike
+            Validation features used for early stopping. May be `None`.
+        y_val : ArrayLike
+            Validation targets used by the callback. May be `None`.
+        epochs : int
+            Maximum number of epochs to run.
+
+        Returns
+        -------
+        TrainingLoopResult
+            Final distributed parameters, optimizer state, and callback state.
+        """
         params_de = state.params_de
         opt_state_de = state.opt_state_de
 
@@ -213,6 +266,26 @@ class BdeBuilder(FnnTrainer):
         return TrainingLoopResult(params_de, opt_state_de, callback_state)
 
     def fit_members(self, x: ArrayLike, y: ArrayLike, epochs: int, optimizer=None, loss: BaseLoss = None):
+        """Train every ensemble member on the provided dataset.
+
+        Parameters
+        ----------
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features).
+        y : ArrayLike
+            Target array broadcastable to the model output.
+        epochs : int
+            Maximum number of training epochs.
+        optimizer : optax.GradientTransformation | None
+            Custom optimizer; defaults to `default_optimizer` when `None`.
+        loss : BaseLoss | None
+            Loss object; defaults to `default_loss` for the configured task when `None`.
+
+        Returns
+        -------
+        list[Fnn]
+            The trained ensemble members with updated parameters.
+        """
 
         full_sizes = self._build_full_sizes(x, y)
         self._ensure_member_initialization(full_sizes)

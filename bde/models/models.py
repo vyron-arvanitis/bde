@@ -63,17 +63,19 @@ class Fnn(BaseModel):
         return params
 
     def forward(self, params, x):
-        """
-        #TODO: documentation
+        """Run a forward pass of the network.
 
         Parameters
         ----------
-        params
-        x
+        params : list[tuple[jax.Array, jax.Array]]
+            Sequence of `(weights, bias)` pairs produced by `_init_mlp`.
+        x : ArrayLike
+            Input batch shaped (n_samples, n_features).
 
         Returns
         -------
-
+        jax.Array
+            Model outputs with shape (n_samples, output_dim).
         """
         # TODO: [@later] have a validation of input layer and number of features
         act_fn = self._get_activation(self.activation_name)

@@ -1,4 +1,9 @@
-"""Adapted from (...) Type definitions for the mile module. This is used from @MILE."""
+"""Central type aliases shared across the sampler subpackage.
+
+`ParamTree` captures the nested pytree of model parameters, `FileTree` mirrors the
+directory layout when persisting samples (kept for potential future use), and
+`PRNGKey` annotates JAX pseudo-random keys.
+"""
 import typing
 from pathlib import Path
 from typing import (

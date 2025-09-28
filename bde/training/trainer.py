@@ -68,12 +68,29 @@ class FnnTrainer:
     
     @staticmethod
     def split_train_val(X, y, *, train_size=0.85, val_size=0.15, random_state=42, stratify=False, shuffle=True):
-        """
-        Split x, y into train/validation sets.
+        """Split features and targets into training and validation subsets.
+
+        Parameters
+        ----------
+        X : ArrayLike
+            Feature matrix shaped (n_samples, n_features).
+        y : ArrayLike
+            Target array aligned with `X`.
+        train_size : float
+            Legacy alias for the training fraction. Ignored when `val_size` is given.
+        val_size : float
+            Fraction of samples reserved for validation. Must lie in (0, 1).
+        random_state : int
+            Seed forwarded to `train_test_split`.
+        stratify : bool
+            Whether to stratify by the label distribution.
+        shuffle : bool
+            Whether to shuffle before splitting.
 
         Returns
         -------
-        X_train, X_val, y_train, y_val
+        tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]
+            Training features, validation features, training targets, validation targets.
         """
         # prefer val_size; keep train_size for backward-compat
         if val_size is None and train_size is not None:

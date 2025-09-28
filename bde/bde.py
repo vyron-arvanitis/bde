@@ -103,16 +103,19 @@ class Bde:
         self.members_ = self._bde.members
 
     def _build_log_post(self, x: ArrayLike, y: ArrayLike):
-        """
+        """Construct the log-posterior callable for the ensemble.
 
         Parameters
         ----------
-        x
-        y
+        x : ArrayLike
+            Feature matrix that the posterior conditions on.
+        y : ArrayLike
+            Targets associated with `x`.
 
         Returns
         -------
-
+        Callable
+            Function mapping parameter states to their unnormalized log posterior.
         """
         prior = PriorDist.STANDARDNORMAL.get_prior()
         proto = self._bde.members[0]
@@ -210,15 +213,24 @@ class Bde:
         return positions_eT
 
     def _make_predictor(self, x: ArrayLike) -> BdePredictor:
-        """
+        """Create a predictor helper configured for the provided features.
 
         Parameters
         ----------
-        x
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features) to evaluate.
 
         Returns
         -------
+        BdePredictor
+            Lightweight wrapper exposing ensemble prediction utilities.
 
+        Raises
+        ------
+        NotFittedError
+            If `fit` has not been called yet.
+        RuntimeError
+            If the underlying builder did not initialize ensemble members.
         """
 
         check_is_fitted(self)
@@ -234,30 +246,36 @@ class Bde:
 
     @staticmethod
     def _prepare_targets(y_checked: ArrayLike) -> ArrayLike:
-        """This method is to be overwritten in the BdeClassifier class in order to prepare the labels for classification
+        """Prepare target values before training.
 
         Parameters
         ----------
-        y_checked
+        y_checked : ArrayLike
+            Target array validated by `validate_fit_data`.
 
         Returns
         -------
-
+        ArrayLike
+            Possibly transformed targets. The base implementation is identity and
+            subclasses can override it (e.g. to one-hot encode classification labels).
         """
 
         return y_checked
 
     def fit(self, x: ArrayLike, y: ArrayLike):
-        """
+        """Fit the Bayesian Deep Ensemble on the provided dataset.
 
         Parameters
         ----------
-        x
-        y
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features).
+        y : ArrayLike
+            Target array with shape compatible to the configured task.
 
         Returns
         -------
-
+        Bde
+            The fitted estimator.
         """
 
         x_np, y_np = validate_fit_data(self, x, y)
@@ -343,19 +361,26 @@ class Bde:
             raw: bool = False,
             probabilities: bool = False,
     ):
-        """
+        """Evaluate the fitted ensemble under different output modes.
 
         Parameters
         ----------
-        xte
-        mean_and_std
-        credible_intervals
-        raw
-        probabilities
+        xte : ArrayLike
+            Feature matrix for which predictions are requested.
+        mean_and_std : bool
+            When `True`, return both the predictive mean and standard deviation.
+        credible_intervals : list[float] | None
+            Credible interval levels in (0, 1). In regression mode mutually exclusive
+            with `mean_and_std`.
+        raw : bool
+            Return the raw ensemble outputs without aggregation.
+        probabilities : bool
+            Return class probabilities (classification only).
 
         Returns
         -------
-
+        dict[str, ArrayLike]
+            Mapping containing the requested prediction artifacts.
         """
         xte_np = validate_predict_data(self, xte)
         xte_jnp = jnp.asarray(xte_np)
