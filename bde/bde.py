@@ -25,7 +25,7 @@ from bde.data.utils import (
     validate_fit_data,
     validate_predict_data,
 )
-from bde.sampler.my_types import ParamTree
+from bde.sampler.types import ParamTree
 
 
 class _WarmupState(Protocol):
@@ -333,6 +333,21 @@ class Bde:
             raw: bool = False,
             probabilities: bool = False,
     ):
+        """This method validates the tags parsed into the evaluate method, makes sure no two competing tags are given.
+
+        Parameters
+        ----------
+        mean_and_std : bool
+            When `True`, return both the predictive mean and standard deviation.
+        credible_intervals : list[float] | None
+            Credible interval levels in (0, 1). In regression mode mutually exclusive
+            with `mean_and_std`.
+        raw : bool
+            Return the raw ensemble outputs without aggregation.
+        probabilities : bool
+            Return class probabilities (classification only).
+        """
+
         if self.task == TaskType.REGRESSION:
             if probabilities:
                 raise ValueError("'probabilities' predictions are only supported for classification tasks.")
@@ -382,6 +397,7 @@ class Bde:
         dict[str, ArrayLike]
             Mapping containing the requested prediction artifacts.
         """
+
         xte_np = validate_predict_data(self, xte)
         xte_jnp = jnp.asarray(xte_np)
         predictor = self._make_predictor(xte_jnp)

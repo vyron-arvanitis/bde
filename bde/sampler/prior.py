@@ -7,8 +7,8 @@ import jax.numpy as jnp
 import jax.scipy.stats as stats
 from jax.flatten_util import ravel_pytree
 
-from bde.sampler.my_types import ParamTree
-from bde.sampler.my_types import BaseStrEnum
+from bde.sampler.types import ParamTree
+from bde.sampler.types import BaseStrEnum
 
 
 class PriorDist(BaseStrEnum):

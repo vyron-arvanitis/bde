@@ -9,7 +9,7 @@ from .models.models import Fnn
 from .training.trainer import FnnTrainer
 from .training.callbacks import EarlyStoppingCallback
 
-from bde.sampler.my_types import ParamTree
+from bde.sampler.types import ParamTree
 from bde.sampler.utils import _infer_dim_from_position_example, _pad_axis0, _reshape_to_devices
 from bde.task import TaskType
 from .loss.loss import BaseLoss

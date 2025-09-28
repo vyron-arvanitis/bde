@@ -13,7 +13,7 @@ import jax.numpy as jnp
 from jax.tree_util import tree_map
 from jax.flatten_util import ravel_pytree
 
-from bde.sampler.my_types import ParamTree
+from bde.sampler.types import ParamTree
 
 logger = logging.getLogger(__name__)
 

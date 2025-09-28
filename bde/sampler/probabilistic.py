@@ -8,7 +8,7 @@ import jax.scipy.stats as stats
 
 import bde.sampler.utils as train_utils
 from bde.sampler.prior import Prior
-from bde.sampler.my_types import ParamTree
+from bde.sampler.types import ParamTree
 from bde.task import TaskType
 
 logger = logging.getLogger(__name__)

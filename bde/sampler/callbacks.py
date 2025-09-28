@@ -9,7 +9,7 @@ import jax.numpy as jnp
 import numpy as np
 from tqdm import tqdm
 
-from bde.sampler.my_types import ParamTree
+from bde.sampler.types import ParamTree
 from bde.sampler.utils import get_flattened_keys
 
 logger = logging.getLogger(__name__)
