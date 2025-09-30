@@ -11,9 +11,9 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
 
-from bde.bde import BdeRegressor, BdeClassifier
+from bde import BdeRegressor, BdeClassifier
 from bde.task import TaskType
-from bde.loss.loss import *
+from bde.loss import *
 from sklearn.datasets import fetch_openml, load_iris
 from sklearn.model_selection import train_test_split
 import jax.numpy as jnp
@@ -26,6 +26,7 @@ def regression_example():
 
     X = data.data.values  # shape (1503, 5)
     y = data.target.values.reshape(-1, 1)  # shape (1503, 1)
+
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42)
