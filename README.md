@@ -174,7 +174,6 @@ The high-level estimators follow this flow during `fit` and evaluation:
 - Sampler utilities (`bde/sampler/*`) draw posterior samples and cache them for downstream prediction.
 - `Bde.evaluate` / predictor utilities (`bde/bde_evaluator.py`) aggregate samples into means, intervals, and probabilities.
 
-
 ```mermaid
 flowchart TD
 
@@ -214,8 +213,5 @@ flowchart TD
         P --> Out[Predictions (mean, std, intervals, probs, raw)]
     end
 
-
-Mathematical Background
------------------------
 
 
