@@ -36,7 +36,7 @@ def regression_example():
     X_train = jnp.array(X_train, dtype=jnp.float32)
     y_train = jnp.array(y_train, dtype=jnp.float32).ravel()
     X_test = jnp.array(X_test, dtype=jnp.float32)
-    y_test = jnp.array(y_test, dtype=jnp.float32)
+    y_test = jnp.array(y_test, dtype=jnp.float32).ravel()
 
     Xmu, Xstd = jnp.mean(X_train, 0), jnp.std(X_train, 0) + 1e-8
     Ymu, Ystd = jnp.mean(y_train, 0), jnp.std(y_train, 0) + 1e-8
