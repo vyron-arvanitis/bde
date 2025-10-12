@@ -9,7 +9,7 @@ from jax.flatten_util import ravel_pytree
 from jax.tree_util import tree_leaves, tree_map
 
 from .types import ParamTree
-from .utils import _infer_dim_from_position_example, _pad_axis0, _reshape_to_devices
+from .utils import infer_dim_from_position_example, pad_axis0, _reshape_to_devices
 
 
 class MileWrapper:
@@ -124,7 +124,7 @@ class MileWrapper:
             raise RuntimeError("No devices available for sampling.")
 
         if sqrt_diag_e is None:
-            dim = _infer_dim_from_position_example(init_positions_e)
+            dim = infer_dim_from_position_example(init_positions_e)
             sqrt_diag_e = jnp.ones((E, dim))
 
         pad = (device_count - (E % max(device_count, 1))) % max(device_count, 1)
@@ -132,7 +132,7 @@ class MileWrapper:
         members_per_device = E_pad // max(device_count, 1)
 
         def pad_array(arr):
-            return _pad_axis0(arr, pad)
+            return pad_axis0(arr, pad)
 
         rng_keys_e = pad_array(rng_keys_e)
         L_e = pad_array(L_e)

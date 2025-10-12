@@ -95,7 +95,7 @@ def impute_nan(params: ParamTree, value: float = 0.0) -> ParamTree:
     """Impute NaNs in the parameter tree with a value."""
     return jax.tree.map(lambda x: jnp.where(jnp.isnan(x), value, x), params)
 
-def _infer_dim_from_position_example(pos_e):
+def infer_dim_from_position_example(pos_e):
     """Return the flattened dimensionality of a single ensemble element.
 
     Parameters
@@ -113,7 +113,7 @@ def _infer_dim_from_position_example(pos_e):
     return flat.shape[0]
 
 
-def _pad_axis0(a, pad):
+def pad_axis0(a, pad):
     """Pad the leading axis by repeating the first element.
 
     Parameters

@@ -10,12 +10,15 @@ from .training.trainer import FnnTrainer
 from .training.callbacks import EarlyStoppingCallback, NullCallback
 
 from bde.sampler.types import ParamTree
-from bde.sampler.utils import _pad_axis0
+from bde.sampler.utils import pad_axis0
 from bde.task import TaskType
 from .loss import BaseLoss
 
 from dataclasses import dataclass
 from jax.typing import ArrayLike
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -90,8 +93,6 @@ class BdeBuilder(FnnTrainer):
         self.eval_every = 1  # Check epochs for early stopping
         self.keep_best = True
         self.min_delta = 1e-9
-
-        self.results = {}
 
     @staticmethod
     def get_model(seed: int, *, act_fn: str, sizes: list[int]) -> Fnn:
@@ -234,11 +235,11 @@ class BdeBuilder(FnnTrainer):
         params_e = tree_map(lambda *ps: jnp.stack(ps, axis=0), *[m.params for m in self.members])
         ensemble_size = len(self.members)
         device_count = jax.local_device_count()
-        print("Kernel devices:", device_count)
+        logger.info("Kernel devices:", device_count)
         pad = (device_count - (ensemble_size % max(device_count, 1))) % max(device_count, 1)
         ensemble_padded = ensemble_size + pad
         members_per_device = ensemble_padded // max(device_count, 1)
-        params_e = tree_map(lambda a: _pad_axis0(a, pad), params_e)
+        params_e = tree_map(lambda a: pad_axis0(a, pad), params_e)
         params_de = tree_map(lambda a: a.reshape(device_count, members_per_device, *a.shape[1:]), params_e)
 
         def init_chunk(params_chunk: Any) -> jax.vmap:
@@ -390,14 +391,6 @@ class BdeBuilder(FnnTrainer):
             m.params = tree_map(lambda a: a[i], params_e_final)
         self.params_e = params_e_final
         return self.members
-
-    def keys(self):
-        """
-        Return the keys currently  in `self.results`.
-        """
-        if not self.results:
-            raise ValueError("No results saved. Call `predict_ensemble(..., cache=True)` first!")
-        return list(self.results.keys())
 
     def __getattr__(self, item):
         """Fallback to cached results when available."""

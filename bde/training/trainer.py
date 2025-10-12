@@ -1,6 +1,5 @@
 import jax
 import jax.numpy as jnp
-import jax.scipy.stats as stats
 
 import optax
 from bde.task import TaskType
@@ -25,7 +24,6 @@ class FnnTrainer:
         self.history = {}
         self.log_every = 100
         self.keep_best = False
-        self.default_optimizer = self.default_optimizer
 
     def _reset_history(self):
         """
@@ -56,15 +54,6 @@ class FnnTrainer:
 
         return step
 
-    @staticmethod
-    def make_vstep(step_one):
-        # vmaps the single-member step across the leading ensemble axis
-        @jax.jit
-        def vstep(p_e, os_e, xb, yb):
-            return jax.vmap(step_one, in_axes=(0, 0, None, None),
-                            out_axes=(0, 0, 0))(p_e, os_e, xb, yb)
-
-        return vstep
     
     @staticmethod
     def split_train_val(X, y, *, train_size=0.85, val_size=0.15, random_state=42, stratify=False, shuffle=True):
