@@ -468,10 +468,6 @@ class Bde:
             raw=raw,
             probabilities=probabilities,
         )
-    #TODO: merge this with the evaluate
-    def get_raw_predictions(self, x: ArrayLike):
-        """Return raw ensemble predictions for a given input batch."""
-        return self.evaluate(x, raw=True)["raw"]
 
 
 # TODO: [@angelos] maybe put them in another file?
@@ -487,7 +483,7 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
             loss: BaseLoss | None = None,
             activation: str = "relu",
             epochs: int = 20,
-            patience: int = 25, #TODO: set default to None-> No early stopping  else if patience do
+            patience: int = 25,  # TODO: set default to None-> No early stopping  else if patience do
             n_samples: int = 10,
             warmup_steps: int = 50,
             lr: float = 1e-3,
@@ -525,23 +521,13 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
             credible_intervals=credible_intervals,
             raw=raw,
         )
+        if raw:
+            return out["raw"]
         if mean_and_std:
             return out["mean"], out["std"]  # both (N,) for regression
         if credible_intervals:
             return out["mean"], out["credible_intervals"]  # mean (N,), intervals (Q, N)
         return out["mean"]  # (N,) regression predictive mean
-
-    def get_raw_predictions(self, x: ArrayLike):
-        """Return raw ensemble predictions.
-
-        Shape: (E, T, N, 2), where:
-          - E = ensemble members
-          - T = posterior samples per member
-          - N = number of test points
-          - 2 = (mu, sigma_param)
-        """
-
-        return super().get_raw_predictions(x)
 
 
 class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
@@ -594,7 +580,9 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
         self.classes_ = np.asarray(encoder.classes_)
         return encoded.astype(np.int32)
 
-    def predict(self, x: ArrayLike):
+    def predict(self, x: ArrayLike, raw: bool = False):
+        if raw:
+            return self.evaluate(x, raw=True)["raw"]
         labels = np.asarray(self.evaluate(x)["labels"])
         if not hasattr(self, "label_encoder_"):
             return labels
@@ -603,14 +591,3 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
     def predict_proba(self, x: ArrayLike):
         probs = np.asarray(self.evaluate(x, probabilities=True)["probs"])
         return probs
-
-    def get_raw_predictions(self, x: ArrayLike):
-        """Return raw ensemble predictions.
-
-        Shape: (E, T, N, C), where:
-          - E = ensemble members
-          - T = posterior samples per member
-          - N = number of test points
-          - C = number of classes (logits before softmax)
-        """
-        return super().get_raw_predictions(x)

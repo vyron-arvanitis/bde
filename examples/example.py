@@ -65,6 +65,8 @@ def regression_example():
     )
 
     mean, intervals = regressor.predict(Xte, credible_intervals=[0.9, 0.95])
+    raw = regressor.predict(Xte, raw=True)
+    print(f"The shape of the raw predictions are {raw.shape}") #(ensemble members, n_samples, n_data, (mu,sigma))
 
     print("Credible intervals shape:", intervals.shape)  # (len(q), N)
 
@@ -119,36 +121,38 @@ def classification_example():
     savepath = "plots_classification"
     classes = list(range(3))  # [0,1,2]
 
-    # 1. Confusion matrix
-    plot_confusion_matrix(
-        y_true=jnp.array(yte),
-        y_pred=jnp.array(preds),
-        classes=classes,
-        title="Iris Confusion Matrix",
-        savepath=savepath,
-    )
-
-    # 2. Reliability curve (per class, e.g. class 0)
-    plot_reliability_curve(
-        y_true=(jnp.array(yte) == 0).astype(int),
-        y_proba=jnp.array(probs)[:, 0],  # probability of class 0
-        n_bins=10,
-        title="Iris Calibration Curve (class 0)",
-        savepath=savepath,
-    )
-
-    # 3. ROC curve (per class, e.g. class 0)
-    plot_roc_curve(
-        y_true=(jnp.array(yte) == 0).astype(int),
-        y_proba=jnp.array(probs)[:, 0],
-        title="Iris ROC Curve (class 0 vs rest)",
-        savepath=savepath,
-    )
+    # # 1. Confusion matrix
+    # plot_confusion_matrix(
+    #     y_true=jnp.array(yte),
+    #     y_pred=jnp.array(preds),
+    #     classes=classes,
+    #     title="Iris Confusion Matrix",
+    #     savepath=savepath,
+    # )
+    #
+    # # 2. Reliability curve (per class, e.g. class 0)
+    # plot_reliability_curve(
+    #     y_true=(jnp.array(yte) == 0).astype(int),
+    #     y_proba=jnp.array(probs)[:, 0],  # probability of class 0
+    #     n_bins=10,
+    #     title="Iris Calibration Curve (class 0)",
+    #     savepath=savepath,
+    # )
+    #
+    # # 3. ROC curve (per class, e.g. class 0)
+    # plot_roc_curve(
+    #     y_true=(jnp.array(yte) == 0).astype(int),
+    #     y_proba=jnp.array(probs)[:, 0],
+    #     title="Iris ROC Curve (class 0 vs rest)",
+    #     savepath=savepath,
+    # )
 
     score = classifier.score(Xtr, ytr)
     print(f"the sklearn score is {score}")
+    raw = classifier.predict(Xte, raw=True)
+    print(f"The shape of the raw predictions are {raw.shape}")  # (ensemble members, n_samples, n_data, n_classes))
 
 
 if __name__ == "__main__":
-    # classification_example()
+    classification_example()
     regression_example()
