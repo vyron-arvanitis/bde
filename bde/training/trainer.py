@@ -15,6 +15,7 @@ from typing import (
     Tuple,
 )
 
+
 class FnnTrainer:
 
     def __init__(self):
@@ -37,11 +38,12 @@ class FnnTrainer:
         self.history = {"train_loss": []}
 
     @staticmethod
-    def make_loss_fn(model, loss_obj : BaseLoss):
+    def make_loss_fn(model, loss_obj: BaseLoss):
         # returns (params, x, y) -> scalar
         def loss_fn(p, x, y):
             preds = model.forward(p, x)
-            return loss_obj(preds, y) # loss must call model.forward(p, xb)
+            return loss_obj(preds, y)  # loss must call model.forward(p, xb)
+
         return loss_fn
 
     @staticmethod
@@ -55,7 +57,6 @@ class FnnTrainer:
 
         return step
 
-    
     @staticmethod
     def split_train_val(X, y, *, train_size=0.85, val_size=0.15, random_state=42, stratify=False, shuffle=True):
         """Split features and targets into training and validation subsets.
@@ -107,7 +108,7 @@ class FnnTrainer:
         return optax.adam(learning_rate=0.01)
 
     @staticmethod
-    def default_loss(task : TaskType):
+    def default_loss(task: TaskType):
         if task == TaskType.REGRESSION:
             return GaussianNLL()
         elif task == TaskType.CLASSIFICATION:

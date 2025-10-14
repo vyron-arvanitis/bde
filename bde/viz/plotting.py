@@ -10,8 +10,7 @@ import os
 import matplotlib.gridspec as gridspec
 
 
-
-def plot_pred_vs_true(y_pred, y_true, title, savepath,y_pred_err=None,):
+def plot_pred_vs_true(y_pred, y_true, title, savepath, y_pred_err=None, ):
     """
     #TODO: documentation
     Parameters
@@ -76,6 +75,7 @@ def plot_pred_vs_true(y_pred, y_true, title, savepath,y_pred_err=None,):
         plt.savefig(os.path.join(savepath, f"{title}.png"), bbox_inches="tight")
     plt.close(fig)
 
+
 def plot_confusion_matrix(y_true, y_pred, classes, title, savepath=None):
     cm = confusion_matrix(y_true, y_pred, labels=classes)
     fig, ax = plt.subplots(figsize=(7, 7))
@@ -88,6 +88,7 @@ def plot_confusion_matrix(y_true, y_pred, classes, title, savepath=None):
         os.makedirs(savepath, exist_ok=True)
         plt.savefig(os.path.join(savepath, f"{title}_confusion.png"), bbox_inches="tight")
     plt.close(fig)
+
 
 def plot_reliability_curve(y_true, y_proba, n_bins=10, title="", savepath=None):
     prob_true, prob_pred = calibration_curve(y_true, y_proba, n_bins=n_bins)

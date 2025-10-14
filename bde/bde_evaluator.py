@@ -25,7 +25,8 @@ class BdePredictor:
         Task associated with the ensemble (regression or classification).
     """
 
-    def __init__(self, forward_fn: Callable[[ParamTree, ArrayLike], jax.Array], positions_eT: ParamTree, xte: ArrayLike, task: TaskType):
+    def __init__(self, forward_fn: Callable[[ParamTree, ArrayLike], jax.Array], positions_eT: ParamTree, xte: ArrayLike,
+                 task: TaskType):
         self._forward = forward_fn
         self.positions = positions_eT  # (E, T, ...)
         self.xte = xte
@@ -83,7 +84,8 @@ class BdePredictor:
         std_total_e = jnp.sqrt(var_ale_e + var_epi_e)
         return mu_mean_e, std_total_e
 
-    def _predict_regression(self, *, mean_and_std: bool, credible_intervals: list[float] | None, raw: bool) -> dict[str, jax.Array]:
+    def _predict_regression(self, *, mean_and_std: bool, credible_intervals: list[float] | None, raw: bool) -> dict[
+        str, jax.Array]:
         """Aggregate regression predictions under different output modalities.
 
         Parameters

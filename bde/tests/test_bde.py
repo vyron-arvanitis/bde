@@ -122,7 +122,6 @@ class TestBdeClassifier(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "n_members must be at leat 1 to build the ensemble!"):
             self.clf_1.fit(self.x, self.y)
 
-
     def test_evaluate_raw_returns_expected_shape(self):
         raw_out = self.clf._evaluate(self.x, raw=True)
         self.assertIn("raw", raw_out)

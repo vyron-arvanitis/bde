@@ -69,7 +69,7 @@ def all_estimators(type_filter=None):
     # packages
     with ignore_warnings(category=FutureWarning):
         for _, module_name, _ in pkgutil.walk_packages(
-            path=[root], prefix="bde."
+                path=[root], prefix="bde."
         ):
             module_parts = module_name.split(".")
             if any(part in _MODULE_TO_IGNORE for part in module_parts):
@@ -147,7 +147,7 @@ def all_displays():
     # packages
     with ignore_warnings(category=FutureWarning):
         for _, module_name, _ in pkgutil.walk_packages(
-            path=[root], prefix="bde.utils."
+                path=[root], prefix="bde.utils."
         ):
             module_parts = module_name.split(".")
             if any(part in _MODULE_TO_IGNORE for part in module_parts):

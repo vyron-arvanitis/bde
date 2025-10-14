@@ -35,12 +35,12 @@ class MileWrapper:
         )
 
     def step(
-        self,
-        rng_key: jax.Array,
-        state,
-        L: jax.Array,
-        step_size: jax.Array,
-        sqrt_diag_cov: jax.Array | None = None,
+            self,
+            rng_key: jax.Array,
+            state,
+            L: jax.Array,
+            step_size: jax.Array,
+            sqrt_diag_cov: jax.Array | None = None,
     ):
         """Advance one chain by a single MCLMC step."""
         if sqrt_diag_cov is None:
@@ -56,12 +56,12 @@ class MileWrapper:
         return jax.vmap(init_one)(positions_e, keys_e)
 
     def _step_batched(
-        self,
-        keys_e: jax.Array,
-        states_e,
-        L_e: jax.Array,
-        step_e: jax.Array,
-        sqrt_diag_e: jax.Array | None = None,
+            self,
+            keys_e: jax.Array,
+            states_e,
+            L_e: jax.Array,
+            step_e: jax.Array,
+            sqrt_diag_e: jax.Array | None = None,
     ):
         """Advance all ensemble members by one step (vectorised over members)."""
         if sqrt_diag_e is None:
@@ -76,15 +76,15 @@ class MileWrapper:
         return jax.vmap(step_one, in_axes=(0, 0, 0, 0, 0))(keys_e, states_e, L_e, step_e, sqrt_diag_e)
 
     def sample_batched(
-        self,
-        rng_keys_e: jax.Array,
-        init_positions_e: ParamTree,
-        num_samples: int,
-        thinning: int = 1,
-        L_e: jax.Array | None = None,
-        step_e: jax.Array | None = None,
-        sqrt_diag_e: jax.Array | None = None,
-        store_states: bool = True,
+            self,
+            rng_keys_e: jax.Array,
+            init_positions_e: ParamTree,
+            num_samples: int,
+            thinning: int = 1,
+            L_e: jax.Array | None = None,
+            step_e: jax.Array | None = None,
+            sqrt_diag_e: jax.Array | None = None,
+            store_states: bool = True,
     ) -> tuple:
         """Draw samples for every ensemble member in parallel.
 

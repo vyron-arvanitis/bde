@@ -35,6 +35,7 @@ FileTree: typing.TypeAlias = dict[str, typing.Union[Path, 'FileTree']]
 # A `PRNGKey` is a uint32 array of shape (2,) produced by `jax.random.PRNGKey`.
 PRNGKey = jax.Array
 
+
 class CustomEnumMeta(enum.EnumMeta):
     """Custom Enum Meta Class for Better Error Handling."""
 
@@ -60,6 +61,7 @@ if sys.version_info >= (3, 11):
             """Return the string representation of the Enum."""
             return self.value
 
+
     class BaseIntEnum(enum.IntEnum, metaclass=CustomEnumMeta):
         """BaseEnum Class for implementing custom Enum classes."""
 
@@ -75,6 +77,7 @@ else:
         def __str__(self):
             """Return the string representation of the Enum."""
             return self.value
+
 
     class BaseIntEnum(int, BaseEnum):
         """BaseEnum Class for implementing custom Enum classes."""

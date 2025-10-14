@@ -2,7 +2,8 @@
 import jax
 import jax.numpy as jnp
 
-#check lppd
+
+# check lppd
 class metrics:
     def __init__(self, y_true, y_pred, sigma):
         self.y_true = y_true
@@ -11,12 +12,12 @@ class metrics:
 
     def mae(self):
         return jnp.mean(jnp.abs(self.y_true - self.y_pred))
-    
-    def rmse(self): 
-        return jnp.sqrt(jnp.mean((self.y_true - self.y_pred)**2))
-    
+
+    def rmse(self):
+        return jnp.sqrt(jnp.mean((self.y_true - self.y_pred) ** 2))
+
     def predictive_accuracy(self, sigma1=True, sigma2=False, sigma3=False):
-    # Pulls
+        # Pulls
         pulls = (self.y_true - self.y_pred) / self.sigma
         pull_mean = jnp.mean(pulls)
         pull_std = jnp.std(pulls)
@@ -25,11 +26,11 @@ class metrics:
             "pull_std": float(pull_std),
         }
 
-    # Coverage
+        # Coverage
         flags = {1: sigma1, 2: sigma2, 3: sigma3}
         for i, enabled in flags.items():
             if enabled:
                 cov = jnp.mean(jnp.abs(self.y_true - self.y_pred) <= i * self.sigma)
                 outs[f"coverage_{i}σ"] = float(cov)
-        
+
         return outs

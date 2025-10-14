@@ -14,6 +14,7 @@ from bde.sampler.utils import get_flattened_keys
 
 logger = logging.getLogger(__name__)
 
+
 def save_position(position: ParamTree, base: Path, idx: jnp.ndarray, n: int):
     """Save the position of the model.
 
@@ -43,6 +44,7 @@ def save_position(position: ParamTree, base: Path, idx: jnp.ndarray, n: int):
     )
     return position
 
+
 def progress_bar_scan(n_steps: int, name: str, position: int, leave: bool = True) -> Callable:
     pbar = tqdm(total=int(n_steps), desc=name, position=position, leave=leave)
 
@@ -52,6 +54,7 @@ def progress_bar_scan(n_steps: int, name: str, position: int, leave: bool = True
             carry2, ys = f(carry, xs)
             jax.debug.callback(lambda _i: pbar.update(1), i, ordered=True)
             return carry2, ys
+
         return inner
 
     def finish(x):
@@ -61,5 +64,3 @@ def progress_bar_scan(n_steps: int, name: str, position: int, leave: bool = True
 
     _progress_bar_scan.finish = finish
     return _progress_bar_scan
-
-

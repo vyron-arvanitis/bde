@@ -8,7 +8,7 @@ from bde.bde import Bde  # import the base class
 
 FAST_BDE_KWARGS = dict(
     n_members=2,
-    hidden_layers = [2,2],
+    hidden_layers=[2, 2],
     epochs=2,
     warmup_steps=5,
     n_samples=1,
@@ -23,7 +23,7 @@ for _, Est in all_estimators():
     else:
         estimators.append(Est())
 
+
 @parametrize_with_checks(estimators)
 def test_estimators(estimator, check, request):
     check(estimator)
-

@@ -22,14 +22,20 @@ class Rmse(BaseLoss):
     def name(self) -> str:
         return "rmse"
 
-    def __call__(self, preds, y_true):
+    def __call__(self,
+                 preds: ArrayLike,
+                 y_true: ArrayLike
+                 ):
         mu = preds[..., 0:1]
         rmse = (mu - y_true) ** 2
         return jnp.mean(rmse)
 
 
 class GaussianNLL(BaseLoss):
-    def __init__(self, min_sigma=1e-6, map_fn=jax.nn.softplus):
+    def __init__(self,
+                 min_sigma=1e-6,
+                 map_fn=jax.nn.softplus
+                 ):
         self.min_sigma = min_sigma
         self.map_fn = map_fn
 
@@ -37,7 +43,10 @@ class GaussianNLL(BaseLoss):
     def name(self) -> str:
         return "gaussian_nll"
 
-    def __call__(self, preds, y_true):
+    def __call__(self,
+                 preds: ArrayLike,
+                 y_true: ArrayLike
+                 ):
         mu = preds[..., 0:1]
         sigma = self.map_fn(preds[..., 1:2]) + self.min_sigma
         resid = (y_true - mu) / sigma
@@ -46,7 +55,10 @@ class GaussianNLL(BaseLoss):
 
 
 class BinaryCrossEntropy(BaseLoss):
-    def __init__(self, min_sigma=1e-6, map_fn=jax.nn.softplus):
+    def __init__(self,
+                 min_sigma=1e-6,
+                 map_fn=jax.nn.softplus
+                 ):
         self.min_sigma = min_sigma
         self.map_fn = map_fn
 
@@ -68,7 +80,10 @@ class CategoricalCrossEntropy(BaseLoss):
     def name(self) -> str:
         return "categorical_cross_entropy"
 
-    def __call__(self, preds, y_true):
+    def __call__(self,
+                 preds: ArrayLike,
+                 y_true: ArrayLike
+                 ):
         cross_entropy = optax.softmax_cross_entropy(
             logits=preds,
             labels=jax.nn.one_hot(y_true, preds.shape[-1])

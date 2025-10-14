@@ -22,7 +22,7 @@ class BaseModel(ABC):
 class Fnn(BaseModel):
     """Single FNN that can optionally train itself on init."""
 
-    def __init__(self, sizes, init_seed: int =0, *, act_fn: str):
+    def __init__(self, sizes, init_seed: int = 0, *, act_fn: str):
         """
         #TODO: documentation
 
