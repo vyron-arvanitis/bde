@@ -282,7 +282,7 @@ def make_L_step_size_adaptation(
         L_step_size_adaptation_keys = jax.random.split(
             rng_key, tune1_steps + tune2_steps + 1
         )
-        L_step_size_adaptation_keys, final_key = (
+        L_step_size_adaptation_keys, _final_key = (
             L_step_size_adaptation_keys[:-1],
             L_step_size_adaptation_keys[-1],
         )

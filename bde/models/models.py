@@ -38,7 +38,6 @@ class Fnn(BaseModel):
         self.sizes = sizes
         self.params = self._init_mlp(seed=init_seed)
         self.activation_name = act_fn
-        # self.act_fn = self._get_activation(act_fn) TODO: [@delete] because it is non pickable and raises errors in test
 
     @property
     def name(self) -> str:

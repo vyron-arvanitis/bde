@@ -428,11 +428,9 @@ class BdeBuilder(FnnTrainer):
             y_val,
             epochs,
         )
-        stop_epoch_e = callback.stop_epochs(
+        callback.stop_epochs(
             loop_result.callback_state, ensemble_size=state.ensemble_size
         )
-        # for m_id, ep in enumerate(list(map(int, jax.device_get(stop_epoch_e)))):
-        #     print(f"member {m_id}: {'stopped at epoch ' + str(ep) if ep >= 0 else 'ran full training'}")
 
         params_e_final = callback.best_params(
             loop_result.callback_state, ensemble_size=state.ensemble_size
