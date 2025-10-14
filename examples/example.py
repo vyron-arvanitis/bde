@@ -61,7 +61,7 @@ def regression_example():
         patience=10,
     )
 
-    print(f"the params are {regressor.get_params()}")  # get_params is from sk learn!!
+    print(f"the params are {regressor.get_params()}")  # get_params is from sk learn!
     regressor.fit(x=Xtr, y=ytr)
 
     means, sigmas = regressor.predict(Xte, mean_and_std=True)
