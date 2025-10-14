@@ -122,36 +122,6 @@ def classification_example():
     print("Predicted class probabilities:\n", probs)
     print("Predicted class labels:\n", preds)
     print("True labels:\n", yte)
-
-    savepath = "plots_classification"
-    classes = list(range(3))  # [0,1,2]
-
-    # # 1. Confusion matrix
-    # plot_confusion_matrix(
-    #     y_true=jnp.array(yte),
-    #     y_pred=jnp.array(preds),
-    #     classes=classes,
-    #     title="Iris Confusion Matrix",
-    #     savepath=savepath,
-    # )
-    #
-    # # 2. Reliability curve (per class, e.g. class 0)
-    # plot_reliability_curve(
-    #     y_true=(jnp.array(yte) == 0).astype(int),
-    #     y_proba=jnp.array(probs)[:, 0],  # probability of class 0
-    #     n_bins=10,
-    #     title="Iris Calibration Curve (class 0)",
-    #     savepath=savepath,
-    # )
-    #
-    # # 3. ROC curve (per class, e.g. class 0)
-    # plot_roc_curve(
-    #     y_true=(jnp.array(yte) == 0).astype(int),
-    #     y_proba=jnp.array(probs)[:, 0],
-    #     title="Iris ROC Curve (class 0 vs rest)",
-    #     savepath=savepath,
-    # )
-
     score = classifier.score(Xtr, ytr)
     print(f"the sklearn score is {score}")
     raw = classifier.predict(Xte, raw=True)

@@ -317,7 +317,7 @@ class Bde:
 
         return y_checked
 
-    def fit(self, x: ArrayLike, y: ArrayLike):
+    def _fit(self, x: ArrayLike, y: ArrayLike):
         """Fit the Bayesian Deep Ensemble on the provided dataset.
 
         Parameters
@@ -423,7 +423,7 @@ class Bde:
 
         raise ValueError(f"Unsupported task type {self.task}")
 
-    def evaluate(
+    def _evaluate(
             self,
             xte: ArrayLike,
             mean_and_std: bool = False,
@@ -509,12 +509,15 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
             step_size_init=step_size_init,
         )
 
+    def fit(self, x: ArrayLike, y: ArrayLike):
+        return super()._fit(x, y)
+
     def predict(self,
                 x: ArrayLike,
                 mean_and_std: bool = False,
                 credible_intervals: list[float] | None = None,
                 raw: bool = False):
-        out = self.evaluate(
+        out = self._evaluate(
             x,
             mean_and_std=mean_and_std,
             credible_intervals=credible_intervals,
@@ -579,14 +582,17 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
         self.classes_ = np.asarray(encoder.classes_)
         return encoded.astype(np.int32)
 
+    def fit(self, x: ArrayLike, y: ArrayLike):
+        return super()._fit(x, y)
+
     def predict(self, x: ArrayLike, raw: bool = False):
         if raw:
-            return self.evaluate(x, raw=True)["raw"]
-        labels = np.asarray(self.evaluate(x)["labels"])
+            return self._evaluate(x, raw=True)["raw"]
+        labels = np.asarray(self._evaluate(x)["labels"])
         if not hasattr(self, "label_encoder_"):
             return labels
         return self.label_encoder_.inverse_transform(labels.astype(int))
 
     def predict_proba(self, x: ArrayLike):
-        probs = np.asarray(self.evaluate(x, probabilities=True)["probs"])
+        probs = np.asarray(self._evaluate(x, probabilities=True)["probs"])
         return probs

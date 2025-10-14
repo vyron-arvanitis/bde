@@ -64,7 +64,7 @@ class TestBdeRegressor(unittest.TestCase):
         self.assertEqual(raw_preds.shape[-2], self.x.shape[0])
 
     def test_evaluate_raw_returns_expected_shape(self):
-        raw_out = self.reg.evaluate(self.x, raw=True)
+        raw_out = self.reg._evaluate(self.x, raw=True)
         self.assertIn("raw", raw_out)
         raw = raw_out["raw"]
         # Expect shape (E, T, N, 2) with E=ensemble members, T=samples
@@ -124,7 +124,7 @@ class TestBdeClassifier(unittest.TestCase):
 
 
     def test_evaluate_raw_returns_expected_shape(self):
-        raw_out = self.clf.evaluate(self.x, raw=True)
+        raw_out = self.clf._evaluate(self.x, raw=True)
         self.assertIn("raw", raw_out)
         raw = raw_out["raw"]
         # Expect shape (E, T, N, 2) with E=ensemble members, T=samples
