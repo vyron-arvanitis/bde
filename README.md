@@ -54,57 +54,60 @@ Adjust the value to match the number of CPU (or GPU) devices you plan to use.
 
 ```python
 import os
+
 os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
+
 import jax.numpy as jnp
-from sklearn.datasets import make_regression
+from sklearn.datasets import fetch_openml
+from sklearn.metrics import root_mean_squared_error
 from sklearn.model_selection import train_test_split
 
 from bde import BdeRegressor
 from bde.loss import GaussianNLL
 
 
-# Generate and split a toy regression problem
-X, y = make_regression(
-    n_samples=500,
-    n_features=8,
-    noise=0.3,
-    random_state=42,
-)
-X = X.astype("float32")
-y = y.astype("float32")
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=0,
-)
+data = fetch_openml(name="airfoil_self_noise", as_frame=True)
+X = data.data.values  # shape (1503, 5)
+y = data.target.values.reshape(-1, 1)  # shape (1503, 1)
 
-# Convert to JAX arrays expected by the estimators
-X_train = jnp.array(X_train)
-y_train = jnp.array(y_train)
-X_test = jnp.array(X_test)
-y_test = jnp.array(y_test)
+X_train, X_test, y_train, y_test = train_test_split(
+   X,
+   y,
+   test_size=0.2,
+   random_state=0,
+)
+# Normalize data
+Xmu, Xstd = jnp.mean(X_train, 0), jnp.std(X_train, 0) + 1e-8
+Ymu, Ystd = jnp.mean(y_train, 0), jnp.std(y_train, 0) + 1e-8
+
+Xtr = (X_train - Xmu) / Xstd
+Xte = (X_test - Xmu) / Xstd
+ytr = (y_train - Ymu) / Ystd
+yte = (y_test - Ymu) / Ystd
 
 regressor = BdeRegressor(
-    n_members=4,
-    hidden_layers=[64, 64],
-    seed=123,
+    hidden_layers=[16, 16],
+    n_members=20,
+    seed=0,
     loss=GaussianNLL(),
-    activation="relu",
-    epochs=100,
+    epochs=200,
+    lr=1e-3,
+    warmup_steps=500,
+    n_samples=100,
+    n_thinning=1,
     patience=10,
-    n_samples=20,
-    warmup_steps=100,
-    lr=5e-4,
-    n_thinning=2,
-    desired_energy_var_start=0.5,
-    desired_energy_var_end=0.1,
-    step_size_init=0.01,
 )
 
-regressor.fit(x=X_train, y=y_train)
-mean, std = regressor.predict(X_test, mean_and_std=True)
-print("RMSE:", jnp.sqrt(jnp.mean((mean - y_test) ** 2)))
+regressor.fit(x=Xtr, y=ytr)
+
+mean, std = regressor.predict(jnp.array(X_test), mean_and_std=True)
+mu, intervals = regressor.predict(Xte, credible_intervals=[0.9, 0.95])
+raw = regressor.predict(Xte, raw=True)
+print("RSME: ", root_mean_squared_error(y_true=yte, y_pred=mean))
+score = regressor.score(Xtr, ytr)
+print(f"the sklearn score is {score}")
+
+
 ```
 
 ### Classification Example
@@ -113,54 +116,41 @@ print("RMSE:", jnp.sqrt(jnp.mean((mean - y_test) ** 2)))
 import os
 
 os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
-import jax.numpy as jnp
+
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 
 from bde import BdeClassifier
 from bde.loss import CategoricalCrossEntropy
 
-# Prepare the Iris dataset
-X, y = load_iris(return_X_y=True)
-X = X.astype("float32")
-y = y.astype("int32")
+iris = load_iris()
+X = iris.data.astype("float32")
+y = iris.target.astype("int32").ravel()
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=0,
-    stratify=y,
-)
-
-# Convert to JAX arrays expected by the estimators
-X_train = jnp.array(X_train)
-y_train = jnp.array(y_train)
-X_test = jnp.array(X_test)
-y_test = jnp.array(y_test)
-
+    X, y, test_size=0.2, random_state=42)
 classifier = BdeClassifier(
-    n_members=3,
-    hidden_layers=[32, 32],
-    seed=456,
+    n_members=2,
+    hidden_layers=[16, 16],
+    seed=0,
     loss=CategoricalCrossEntropy(),
     activation="relu",
-    epochs=50,
-    patience=8,
-    n_samples=15,
-    warmup_steps=80,
+    epochs=4,
     lr=1e-3,
-    n_thinning=2,
-    desired_energy_var_start=0.5,
-    desired_energy_var_end=0.1,
-    step_size_init=0.01,
-)
-
+    warmup_steps=50,
+    n_samples=2,
+    n_thinning=1,
+    patience=2
+    )
 classifier.fit(x=X_train, y=y_train)
 preds = classifier.predict(X_test)
 probs = classifier.predict_proba(X_test)
-print("Predicted probabilities shape:", probs.shape)
-accuracy = jnp.mean((jnp.array(preds) == y_test).astype(jnp.float32))
-print("Accuracy:", float(accuracy))
+score = classifier.score(X_train, y_train)
+raw = classifier.predict(X_test, raw=True)
+print("Predicted class probabilities:\n", probs)
+print("Predicted class labels:\n", preds)
+print("True labels:\n", y_test)
+print(f"the sklearn score is {score}")
+print(f"The shape of the raw predictions are {raw.shape}")
 ```
 
 Workflow

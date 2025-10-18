@@ -108,10 +108,6 @@ def classification_example():
         X, y, test_size=0.2, random_state=42
     )
 
-    # Convert to JAX
-    Xtr, Xte = jnp.array(X_train), jnp.array(X_test)
-    ytr, yte = jnp.array(y_train), jnp.array(y_test)
-
     classifier = BdeClassifier(
         n_members=2,
         hidden_layers=[16, 16],
@@ -126,16 +122,16 @@ def classification_example():
         patience=2,
     )
 
-    classifier.fit(x=Xtr, y=ytr)
+    classifier.fit(x=X_train, y=y_train)
 
-    preds = classifier.predict(Xte)
-    probs = classifier.predict_proba(Xte)
+    preds = classifier.predict(X_test)
+    probs = classifier.predict_proba(X_test)
     print("Predicted class probabilities:\n", probs)
     print("Predicted class labels:\n", preds)
-    print("True labels:\n", yte)
-    score = classifier.score(Xtr, ytr)
+    print("True labels:\n", y_test)
+    score = classifier.score(X_train, y_train)
     print(f"the sklearn score is {score}")
-    raw = classifier.predict(Xte, raw=True)
+    raw = classifier.predict(X_test, raw=True)
     print(
         f"The shape of the raw predictions are {raw.shape}"
     )  # (ensemble members, n_samples, n_data, n_classes))
