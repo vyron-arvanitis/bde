@@ -9,8 +9,6 @@ import logging
 import os
 import sys
 
-from sklearn.pipeline import Pipeline
-
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
 
@@ -23,13 +21,10 @@ logging.getLogger("bde").setLevel(logging.INFO)
 import jax.numpy as jnp
 from sklearn.datasets import fetch_openml, load_iris
 from sklearn.metrics import root_mean_squared_error
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 
 from bde import BdeClassifier, BdeRegressor
 from bde.loss.loss import CategoricalCrossEntropy, GaussianNLL
-from bde.viz.plotting import (
-    plot_pred_vs_true,
-)
 
 
 def regression_example():
@@ -69,14 +64,6 @@ def regression_example():
     means, sigmas = regressor.predict(Xte, mean_and_std=True)
 
     print("RSME: ", root_mean_squared_error(y_true=yte, y_pred=means))
-    plot_pred_vs_true(
-        y_pred=means,
-        y_true=yte,
-        y_pred_err=sigmas,
-        title="trial",
-        savepath="plots_regression",
-    )
-
     mean, intervals = regressor.predict(Xte, credible_intervals=[0.9, 0.95])
     raw = regressor.predict(Xte, raw=True)
     print(
@@ -84,18 +71,6 @@ def regression_example():
     )  # (ensemble members, n_samples, n_data, (mu,sigma))
 
     print("Credible intervals shape:", intervals.shape)  # (len(q), N)
-
-    # for plotting, pick the 95% interval
-    lower = intervals[0]  # q=0.9 or 0.95 depending on order
-    upper = intervals[1]  # if you asked for 2 quantiles
-
-    plot_pred_vs_true(
-        y_pred=means,
-        y_true=yte,
-        y_pred_err=(upper - lower) / 2,  # approx half-width as "sigma"
-        title="trial_with_intervals",
-        savepath="plots_regression",
-    )
 
     score = regressor.score(Xtr, ytr)
     print(f"the sklearn score is {score}")

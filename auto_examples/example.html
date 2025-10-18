@@ -414,8 +414,6 @@ to download the full example code.</p>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
-
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/os.path.html#os.path.abspath" title="os.path.abspath" class="sphx-glr-backref-module-os-path sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/os.path.html#os.path.join" title="os.path.join" class="sphx-glr-backref-module-os-path sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/os.path.html#os.path.dirname" title="os.path.dirname" class="sphx-glr-backref-module-os-path sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span></a><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;../&quot;</span><span class="p">)))</span>
 <a href="https://docs.python.org/3/library/os.html#os.environ" title="os.environ" class="sphx-glr-backref-module-os sphx-glr-backref-type-py-data"><span class="n">os</span><span class="o">.</span><span class="n">environ</span></a><span class="p">[</span><span class="s2">&quot;XLA_FLAGS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--xla_force_host_platform_device_count=8&quot;</span>
 
@@ -428,13 +426,10 @@ to download the full example code.</p>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_openml</span><span class="p">,</span> <span class="n">load_iris</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">root_mean_squared_error</span>
-<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span><span class="p">,</span> <span class="n">GridSearchCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
 
 <span class="kn">from</span> <span class="nn">bde</span> <span class="kn">import</span> <a href="../generated/bde.BdeClassifier.html#bde.BdeClassifier" title="bde.BdeClassifier" class="sphx-glr-backref-module-bde sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BdeClassifier</span></a><span class="p">,</span> <a href="../generated/bde.BdeRegressor.html#bde.BdeRegressor" title="bde.BdeRegressor" class="sphx-glr-backref-module-bde sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BdeRegressor</span></a>
 <span class="kn">from</span> <span class="nn">bde.loss.loss</span> <span class="kn">import</span> <span class="n">CategoricalCrossEntropy</span><span class="p">,</span> <span class="n">GaussianNLL</span>
-<span class="kn">from</span> <span class="nn">bde.viz.plotting</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">plot_pred_vs_true</span><span class="p">,</span>
-<span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">regression_example</span><span class="p">():</span>
@@ -474,14 +469,6 @@ to download the full example code.</p>
     <span class="n">means</span><span class="p">,</span> <span class="n">sigmas</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">mean_and_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RSME: &quot;</span><span class="p">,</span> <span class="n">root_mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">yte</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">means</span><span class="p">))</span>
-    <span class="n">plot_pred_vs_true</span><span class="p">(</span>
-        <span class="n">y_pred</span><span class="o">=</span><span class="n">means</span><span class="p">,</span>
-        <span class="n">y_true</span><span class="o">=</span><span class="n">yte</span><span class="p">,</span>
-        <span class="n">y_pred_err</span><span class="o">=</span><span class="n">sigmas</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;trial&quot;</span><span class="p">,</span>
-        <span class="n">savepath</span><span class="o">=</span><span class="s2">&quot;plots_regression&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-
     <span class="n">mean</span><span class="p">,</span> <span class="n">intervals</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">credible_intervals</span><span class="o">=</span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">])</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span>
@@ -489,18 +476,6 @@ to download the full example code.</p>
     <span class="p">)</span>  <span class="c1"># (ensemble members, n_samples, n_data, (mu,sigma))</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Credible intervals shape:&quot;</span><span class="p">,</span> <span class="n">intervals</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (len(q), N)</span>
-
-    <span class="c1"># for plotting, pick the 95% interval</span>
-    <span class="n">lower</span> <span class="o">=</span> <span class="n">intervals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># q=0.9 or 0.95 depending on order</span>
-    <span class="n">upper</span> <span class="o">=</span> <span class="n">intervals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># if you asked for 2 quantiles</span>
-
-    <span class="n">plot_pred_vs_true</span><span class="p">(</span>
-        <span class="n">y_pred</span><span class="o">=</span><span class="n">means</span><span class="p">,</span>
-        <span class="n">y_true</span><span class="o">=</span><span class="n">yte</span><span class="p">,</span>
-        <span class="n">y_pred_err</span><span class="o">=</span><span class="p">(</span><span class="n">upper</span> <span class="o">-</span> <span class="n">lower</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1"># approx half-width as &quot;sigma&quot;</span>
-        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;trial_with_intervals&quot;</span><span class="p">,</span>
-        <span class="n">savepath</span><span class="o">=</span><span class="s2">&quot;plots_regression&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
 
     <span class="n">score</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtr</span><span class="p">,</span> <span class="n">ytr</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the sklearn score is </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
