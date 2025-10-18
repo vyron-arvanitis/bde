@@ -1,181 +1,186 @@
 .. _quick_start:
 
 ###############
-Getting started
+Quick start
 ###############
 
-This package serves as a skeleton package aiding at developing compatible
-scikit-learn contribution.
+`bde` implements Bayesian Deep Ensembles that plug directly into scikit-learn
+pipelines while running training and sampling in JAX. This page walks through
+setting up the environment, running your first estimators, and validating the
+installation.
 
-Creating your own scikit-learn contribution package
-===================================================
+Installation
+============
 
-Download and setup your repository
-----------------------------------
-
-To create your package, you need to clone the ``bde`` repository:
-
-.. prompt:: bash $
-
-  git clone https://github.com/scikit-learn-contrib/bde.git
-
-Before to reinitialize your git repository, you need to make the following
-changes. Replace all occurrences of ``bde``, ``bde``, or
-``bde`` with the name of you own project. You can find all the
-occurrences using the following command:
+The package will be published on PyPI soon. Until then you can install the
+current source build:
 
 .. prompt:: bash $
 
-  git grep bde
-  git grep bde
-  git grep bde
+  pip install git+https://github.com/scikit-learn-contrib/bde.git
 
-To remove the history of the template package, you need to remove the `.git`
-directory:
+If you prefer reproducible environments with GPU or multi-device CPU support,
+consider using `pixi <https://prefix.dev/docs/pixi/overview>`__ as described in
+:ref:`user_guide`. The repo already ships with a ``pixi.toml`` that pins the
+required versions of JAX, scikit-learn, and the CUDA toolchain when available.
 
-.. prompt:: bash $
+Set the JAX device count
+========================
 
-  rm -rf .git
-
-Then, you need to initialize your new git repository:
-
-.. prompt:: bash $
-
-  git init
-  git add .
-  git commit -m 'Initial commit'
-
-Finally, you create an online repository on GitHub and push your code online:
+When you run the estimators outside of the examples shipped in ``examples/``,
+ensure JAX can see enough host devices. The environment variable below makes
+CPU-only runs allocate eight virtual devices; tweak the value to match your
+hardware:
 
 .. prompt:: bash $
 
-  git remote add origin https://github.com/your_remote/your_contribution.git
-  git push origin main
+  export XLA_FLAGS="--xla_force_host_platform_device_count=8"
 
-Develop your own scikit-learn estimators
-----------------------------------------
+You can set it once per shell session or inject it programmatically before
+importing JAX in your Python scripts.
 
-.. _check_estimator: http://scikit-learn.org/stable/modules/generated/sklearn.utils.estimator_checks.check_estimator.html#sklearn.utils.estimator_checks.check_estimator
-.. _`Contributor's Guide`: http://scikit-learn.org/stable/developers/
-.. _PEP8: https://www.python.org/dev/peps/pep-0008/
-.. _PEP257: https://www.python.org/dev/peps/pep-0257/
-.. _NumPyDoc: https://github.com/numpy/numpydoc
-.. _doctests: https://docs.python.org/3/library/doctest.html
+Run a regression model
+======================
 
-You can modify the source files as you want. However, your custom estimators
-need to pass the check_estimator_ test to be scikit-learn compatible. We provide a
-file called `test_common.py` where we run the checks on our custom estimators.
+The snippet below creates a toy regression dataset and fits a
+:class:`bde.BdeRegressor` instance. It mirrors the script in
+``examples/plot_regression.py``.
 
-You can refer to the :ref:`User Guide <user_guide>` to help you create a compatible
-scikit-learn estimator.
+.. code-block:: python
 
-In any case, developers should endeavor to adhere to scikit-learn's
-`Contributor's Guide`_ which promotes the use of:
+   import os
 
-* algorithm-specific unit tests, in addition to ``check_estimator``'s common
-  tests;
-* PEP8_-compliant code;
-* a clearly documented API using NumpyDoc_ and PEP257_-compliant docstrings;
-* references to relevant scientific literature in standard citation formats;
-* doctests_ to provide succinct usage examples;
-* standalone examples to illustrate the usage, model visualisation, and
-  benefits/benchmarks of particular algorithms;
-* efficient code when the need for optimization is supported by benchmarks.
+   os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
 
-Managing your local and continuous integration environment
-----------------------------------------------------------
+   import jax.numpy as jnp
+   from sklearn.datasets import fetch_openml
+   from sklearn.metrics import root_mean_squared_error
+   from bde import BdeRegressor
+   from bde.loss import GaussianNLL
 
-Here, we set up for you an repository that uses `pixi`. The `pixi.toml` file defines
-the packages and tasks to be run that we will present below. You can refer to the
-following documentation link to install `pixi`: https://pixi.sh/latest/#installation
 
-Once done, you can refer to the documentation to get started but we provide the
-command below to interact with the main task requested to develop your package.
+   data = fetch_openml(name="airfoil_self_noise", as_frame=True)
 
-Edit the documentation
-----------------------
+    X = data.data.values  # shape (1503, 5)
+    y = data.target.values.reshape(-1, 1)  # shape (1503, 1)
 
-.. _Sphinx: http://www.sphinx-doc.org/en/stable/
+   X_train, X_test, y_train, y_test = train_test_split(
+       X,
+       y,
+       test_size=0.2,
+       random_state=0,
+   )
+   # Normalize data
 
-The documentation is created using Sphinx_. In addition, the examples are
-created using ``sphinx-gallery``. Therefore, to generate locally the
-documentation, you can leverage the following `pixi` task:
+    Xmu, Xstd = jnp.mean(X_train, 0), jnp.std(X_train, 0) + 1e-8
+    Ymu, Ystd = jnp.mean(y_train, 0), jnp.std(y_train, 0) + 1e-8
+
+    Xtr = (X_train - Xmu) / Xstd
+    Xte = (X_test - Xmu) / Xstd
+    ytr = (y_train - Ymu) / Ystd
+    yte = (y_test - Ymu) / Ystd
+
+    regressor = BdeRegressor(
+        hidden_layers=[16, 16],
+        n_members=20,
+        seed=0,
+        loss=GaussianNLL(),
+        epochs=200,
+        lr=1e-3,
+        warmup_steps=500,
+        n_samples=100,
+        n_thinning=1,
+        patience=10,
+    )
+
+    regressor.fit(x=Xtr, y=ytr)
+
+   mean, std = reg.predict(jnp.array(X_test), mean_and_std=True)
+   mu, intervals = regressor.predict(Xte, credible_intervals=[0.9, 0.95])
+   raw = regressor.predict(Xte, raw=True)
+   print("RSME: ", root_mean_squared_error(y_true=yte, y_pred=means))
+   score = regressor.score(Xtr, ytr)
+   print(f"the sklearn score is {score}")
+
+
+Run a classification model
+==========================
+
+:class:`bde.BdeClassifier` follows the same API and works with standard
+datasets such as Iris:
+
+.. code-block:: python
+
+   import os
+
+   os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
+
+   from sklearn.datasets import load_iris
+   from sklearn.model_selection import train_test_split
+
+   from bde import BdeClassifier
+   from bde.loss import CategoricalCrossEntropy
+
+   iris = load_iris()
+   X = iris.data.astype("float32")
+   y = iris.target.astype("int32").ravel()
+   X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42)
+   classifier = BdeClassifier(
+        n_members=2,
+        hidden_layers=[16, 16],
+        seed=0,
+        loss=CategoricalCrossEntropy(),
+        activation="relu",
+        epochs=4,
+        lr=1e-3,
+        warmup_steps=50,
+        n_samples=2,
+        n_thinning=1,
+        patience=2
+        )
+   classifier.fit(x=X_train, y=y_train)
+   preds = classifier.predict(X_test)
+   probs = classifier.predict_proba(X_test)
+   score = classifier.score(X_train, y_train)
+   raw = classifier.predict(X_test, raw=True)
+   print("Predicted class probabilities:\n", probs)
+   print("Predicted class labels:\n", preds)
+   print("True labels:\n", y_test)
+   print(f"the sklearn score is {score}")
+   print(f"The shape of the raw predictions are {raw.shape}")
+
+Work with the development environment
+=====================================
+
+Once you clone the repository, bootstrap the dev dependencies and tooling with:
 
 .. prompt:: bash $
 
-  pixi run build-doc
+  pixi install
 
-The documentation is made of:
+You can then run the standard tasks:
 
-* a home page, ``doc/index.rst``;
-* an API documentation, ``doc/api.rst`` in which you should add all public
-  objects for which the docstring should be exposed publicly.
-* a User Guide documentation, ``doc/user_guide.rst``, containing the narrative
-  documentation of your package, to give as much intuition as possible to your
-  users.
-* examples which are created in the `examples/` folder. Each example
-  illustrates some usage of the package. the example file name should start by
-  `plot_*.py`.
+* ``pixi run lint`` for style checks (``ruff`` and ``black``)
+* ``pixi run test`` for the pytest suite, including scikit-learn compatibility
+  checks in ``tests/test_common.py``
+* ``pixi run build-doc`` to render this documentation locally with Sphinx and
+  sphinx-gallery examples
 
-Local testing
--------------
-
-To run the tests locally, you can use the following command:
-
-.. prompt:: bash $
-
-  pixi run test
-
-It will use `pytest` under the hood to run the package tests.
-
-In addition, you have a linter task to check the code consistency in terms of style:
-
-.. prompt:: bash $
-
-  pixi run lint
-
-Activating the development environment
---------------------------------------
-
-In the case that you don't want to use the `pixi run` commands and directly interact
-with the usual python tools, you can activate the development environment:
+If you prefer calling Python tooling directly, enter the environment shell:
 
 .. prompt:: bash $
 
   pixi shell -e dev
 
-This will activate an environment containing the dependencies needed to run the linters,
-tests, and build the documentation. So for instance, you can run the tests with:
+From there ``pytest``, ``ruff`` and ``sphinx-build`` are available on ``PATH``.
 
-.. prompt:: bash $
+Next steps
+==========
 
-  pytest -vsl bde
-
-In this case, you can even use pre-commit before using git. You will need to initialize
-it with:
-
-.. prompt:: bash $
-
-  pre-commit install
-
-Setup the continuous integration
---------------------------------
-
-The project template already contains configuration files of the continuous
-integration system. It leverage the above pixi commands and run on GitHub Actions.
-In short, it will:
-
-* run the tests on the different platforms (Linux, MacOS, Windows) and upload the
-  coverage report to codecov.io;
-* check the code style (linter);
-* build the documentation and deploy it automatically on GitHub Pages.
-
-Publish your package
-====================
-
-.. _PyPi: https://packaging.python.org/tutorials/packaging-projects/
-.. _conda-forge: https://conda-forge.org/
-
-You can make your package available through PyPi_ and conda-forge_. Refer to
-the associated documentation to be able to upload your packages such that
-it will be installable with ``pip`` and ``conda``.
+* Dive into :ref:`user_guide` for a walkthrough of the estimator internals and
+  configuration knobs.
+* Explore the auto-generated API reference in :ref:`api` to see every public
+  class, function, and dataclass.
+* Run the gallery in :ref:`general_examples` to compare regression and
+  classification behaviours on real-world datasets.

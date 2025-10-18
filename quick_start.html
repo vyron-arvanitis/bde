@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Getting started &#8212; Scikit-learn Project Template 0.1.dev225+g9de0d43ad documentation</title>
+    <title>Quick start &#8212; Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation</title>
   
   
   
@@ -42,7 +42,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="_static/documentation_options.js?v=47825a4b"></script>
+    <script src="_static/documentation_options.js?v=4ef11736"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
@@ -127,8 +127,8 @@
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="Scikit-learn Project Template 0.1.dev225+g9de0d43ad documentation - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Scikit-learn Project Template 0.1.dev225+g9de0d43ad documentation - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -145,7 +145,7 @@
     
                     <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="#">
-                        Getting started
+                        Quick start
                       </a>
                     </li>
                 
@@ -270,7 +270,7 @@ document.write(`
     
                     <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="#">
-                        Getting started
+                        Quick start
                       </a>
                     </li>
                 
@@ -368,7 +368,7 @@ document.write(`
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page">Getting started</li>
+    <li class="breadcrumb-item active" aria-current="page">Quick start</li>
   </ul>
 </nav>
 </div>
@@ -385,124 +385,168 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="getting-started">
-<span id="quick-start"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">#</a></h1>
-<p>This package serves as a skeleton package aiding at developing compatible
-scikit-learn contribution.</p>
-<section id="creating-your-own-scikit-learn-contribution-package">
-<h2>Creating your own scikit-learn contribution package<a class="headerlink" href="#creating-your-own-scikit-learn-contribution-package" title="Link to this heading">#</a></h2>
-<section id="download-and-setup-your-repository">
-<h3>Download and setup your repository<a class="headerlink" href="#download-and-setup-your-repository" title="Link to this heading">#</a></h3>
-<p>To create your package, you need to clone the <code class="docutils literal notranslate"><span class="pre">bde</span></code> repository:</p>
+  <section id="quick-start">
+<span id="id1"></span><h1>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">bde</span></code> implements Bayesian Deep Ensembles that plug directly into scikit-learn
+pipelines while running training and sampling in JAX. This page walks through
+setting up the environment, running your first estimators, and validating the
+installation.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">#</a></h2>
+<p>The package will be published on PyPI soon. Until then you can install the
+current source build:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><style type="text/css">
 span.prompt1:before {
   content: "$ ";
 }
-</style><span class="prompt1">git<span class="w"> </span>clone<span class="w"> </span>https://github.com/scikit-learn-contrib/bde.git</span>
-</pre></div></div><p>Before to reinitialize your git repository, you need to make the following
-changes. Replace all occurrences of <code class="docutils literal notranslate"><span class="pre">bde</span></code>, <code class="docutils literal notranslate"><span class="pre">bde</span></code>, or
-<code class="docutils literal notranslate"><span class="pre">bde</span></code> with the name of you own project. You can find all the
-occurrences using the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">git<span class="w"> </span>grep<span class="w"> </span>bde</span>
-<span class="prompt1">git<span class="w"> </span>grep<span class="w"> </span>bde</span>
-<span class="prompt1">git<span class="w"> </span>grep<span class="w"> </span>bde</span>
-</pre></div></div><p>To remove the history of the template package, you need to remove the <code class="docutils literal notranslate"><span class="pre">.git</span></code>
-directory:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">rm<span class="w"> </span>-rf<span class="w"> </span>.git</span>
-</pre></div></div><p>Then, you need to initialize your new git repository:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">git<span class="w"> </span>init</span>
-<span class="prompt1">git<span class="w"> </span>add<span class="w"> </span>.</span>
-<span class="prompt1">git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s1">&#39;Initial commit&#39;</span></span>
-</pre></div></div><p>Finally, you create an online repository on GitHub and push your code online:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">git<span class="w"> </span>remote<span class="w"> </span>add<span class="w"> </span>origin<span class="w"> </span>https://github.com/your_remote/your_contribution.git</span>
-<span class="prompt1">git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main</span>
-</pre></div></div></section>
-<section id="develop-your-own-scikit-learn-estimators">
-<h3>Develop your own scikit-learn estimators<a class="headerlink" href="#develop-your-own-scikit-learn-estimators" title="Link to this heading">#</a></h3>
-<p>You can modify the source files as you want. However, your custom estimators
-need to pass the <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.utils.estimator_checks.check_estimator.html#sklearn.utils.estimator_checks.check_estimator">check_estimator</a> test to be scikit-learn compatible. We provide a
-file called <code class="docutils literal notranslate"><span class="pre">test_common.py</span></code> where we run the checks on our custom estimators.</p>
-<p>You can refer to the <a class="reference internal" href="user_guide.html#user-guide"><span class="std std-ref">User Guide</span></a> to help you create a compatible
-scikit-learn estimator.</p>
-<p>In any case, developers should endeavor to adhere to scikit-learn’s
-<a class="reference external" href="http://scikit-learn.org/stable/developers/">Contributor’s Guide</a> which promotes the use of:</p>
+</style><span class="prompt1">pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/scikit-learn-contrib/bde.git</span>
+</pre></div></div><p>If you prefer reproducible environments with GPU or multi-device CPU support,
+consider using <a class="reference external" href="https://prefix.dev/docs/pixi/overview">pixi</a> as described in
+<a class="reference internal" href="user_guide.html#user-guide"><span class="std std-ref">User Guide</span></a>. The repo already ships with a <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code> that pins the
+required versions of JAX, scikit-learn, and the CUDA toolchain when available.</p>
+</section>
+<section id="set-the-jax-device-count">
+<h2>Set the JAX device count<a class="headerlink" href="#set-the-jax-device-count" title="Link to this heading">#</a></h2>
+<p>When you run the estimators outside of the examples shipped in <code class="docutils literal notranslate"><span class="pre">examples/</span></code>,
+ensure JAX can see enough host devices. The environment variable below makes
+CPU-only runs allocate eight virtual devices; tweak the value to match your
+hardware:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1"><span class="nb">export</span><span class="w"> </span><span class="nv">XLA_FLAGS</span><span class="o">=</span><span class="s2">&quot;--xla_force_host_platform_device_count=8&quot;</span></span>
+</pre></div></div><p>You can set it once per shell session or inject it programmatically before
+importing JAX in your Python scripts.</p>
+</section>
+<section id="run-a-regression-model">
+<h2>Run a regression model<a class="headerlink" href="#run-a-regression-model" title="Link to this heading">#</a></h2>
+<p>The snippet below creates a toy regression dataset and fits a
+<a class="reference internal" href="generated/bde.BdeRegressor.html#bde.BdeRegressor" title="bde.BdeRegressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bde.BdeRegressor</span></code></a> instance. It mirrors the script in
+<code class="docutils literal notranslate"><span class="pre">examples/plot_regression.py</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;XLA_FLAGS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--xla_force_host_platform_device_count=8&quot;</span>
+
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_openml</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">root_mean_squared_error</span>
+<span class="kn">from</span> <span class="nn">bde</span> <span class="kn">import</span> <span class="n">BdeRegressor</span>
+<span class="kn">from</span> <span class="nn">bde.loss</span> <span class="kn">import</span> <span class="n">GaussianNLL</span>
+
+
+<span class="n">data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;airfoil_self_noise&quot;</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+ <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># shape (1503, 5)</span>
+ <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (1503, 1)</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># Normalize data</span>
+
+ <span class="n">Xmu</span><span class="p">,</span> <span class="n">Xstd</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+ <span class="n">Ymu</span><span class="p">,</span> <span class="n">Ystd</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-8</span>
+
+ <span class="n">Xtr</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_train</span> <span class="o">-</span> <span class="n">Xmu</span><span class="p">)</span> <span class="o">/</span> <span class="n">Xstd</span>
+ <span class="n">Xte</span> <span class="o">=</span> <span class="p">(</span><span class="n">X_test</span> <span class="o">-</span> <span class="n">Xmu</span><span class="p">)</span> <span class="o">/</span> <span class="n">Xstd</span>
+ <span class="n">ytr</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_train</span> <span class="o">-</span> <span class="n">Ymu</span><span class="p">)</span> <span class="o">/</span> <span class="n">Ystd</span>
+ <span class="n">yte</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_test</span> <span class="o">-</span> <span class="n">Ymu</span><span class="p">)</span> <span class="o">/</span> <span class="n">Ystd</span>
+
+ <span class="n">regressor</span> <span class="o">=</span> <span class="n">BdeRegressor</span><span class="p">(</span>
+     <span class="n">hidden_layers</span><span class="o">=</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>
+     <span class="n">n_members</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+     <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+     <span class="n">loss</span><span class="o">=</span><span class="n">GaussianNLL</span><span class="p">(),</span>
+     <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+     <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+     <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+     <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+     <span class="n">n_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+     <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+ <span class="p">)</span>
+
+ <span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Xtr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">ytr</span><span class="p">)</span>
+
+<span class="n">mean</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="n">reg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X_test</span><span class="p">),</span> <span class="n">mean_and_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">mu</span><span class="p">,</span> <span class="n">intervals</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">credible_intervals</span><span class="o">=</span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">])</span>
+<span class="n">raw</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RSME: &quot;</span><span class="p">,</span> <span class="n">root_mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">yte</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">means</span><span class="p">))</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtr</span><span class="p">,</span> <span class="n">ytr</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the sklearn score is </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="run-a-classification-model">
+<h2>Run a classification model<a class="headerlink" href="#run-a-classification-model" title="Link to this heading">#</a></h2>
+<p><a class="reference internal" href="generated/bde.BdeClassifier.html#bde.BdeClassifier" title="bde.BdeClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bde.BdeClassifier</span></code></a> follows the same API and works with standard
+datasets such as Iris:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;XLA_FLAGS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;--xla_force_host_platform_device_count=8&quot;</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_iris</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="kn">from</span> <span class="nn">bde</span> <span class="kn">import</span> <span class="n">BdeClassifier</span>
+<span class="kn">from</span> <span class="nn">bde.loss</span> <span class="kn">import</span> <span class="n">CategoricalCrossEntropy</span>
+
+<span class="n">iris</span> <span class="o">=</span> <span class="n">load_iris</span><span class="p">()</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+     <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">classifier</span> <span class="o">=</span> <span class="n">BdeClassifier</span><span class="p">(</span>
+     <span class="n">n_members</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+     <span class="n">hidden_layers</span><span class="o">=</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>
+     <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+     <span class="n">loss</span><span class="o">=</span><span class="n">CategoricalCrossEntropy</span><span class="p">(),</span>
+     <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+     <span class="n">epochs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+     <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+     <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+     <span class="n">n_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+     <span class="n">n_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+     <span class="n">patience</span><span class="o">=</span><span class="mi">2</span>
+     <span class="p">)</span>
+<span class="n">classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<span class="n">score</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">raw</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted class probabilities:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted class labels:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">preds</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;True labels:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the sklearn score is </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The shape of the raw predictions are </span><span class="si">{</span><span class="n">raw</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="work-with-the-development-environment">
+<h2>Work with the development environment<a class="headerlink" href="#work-with-the-development-environment" title="Link to this heading">#</a></h2>
+<p>Once you clone the repository, bootstrap the dev dependencies and tooling with:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">pixi<span class="w"> </span>install</span>
+</pre></div></div><p>You can then run the standard tasks:</p>
 <ul class="simple">
-<li><p>algorithm-specific unit tests, in addition to <code class="docutils literal notranslate"><span class="pre">check_estimator</span></code>’s common
-tests;</p></li>
-<li><p><a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a>-compliant code;</p></li>
-<li><p>a clearly documented API using <a class="reference external" href="https://github.com/numpy/numpydoc">NumpyDoc</a> and <a class="reference external" href="https://www.python.org/dev/peps/pep-0257/">PEP257</a>-compliant docstrings;</p></li>
-<li><p>references to relevant scientific literature in standard citation formats;</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/doctest.html">doctests</a> to provide succinct usage examples;</p></li>
-<li><p>standalone examples to illustrate the usage, model visualisation, and
-benefits/benchmarks of particular algorithms;</p></li>
-<li><p>efficient code when the need for optimization is supported by benchmarks.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">lint</span></code> for style checks (<code class="docutils literal notranslate"><span class="pre">ruff</span></code> and <code class="docutils literal notranslate"><span class="pre">black</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">test</span></code> for the pytest suite, including scikit-learn compatibility
+checks in <code class="docutils literal notranslate"><span class="pre">tests/test_common.py</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build-doc</span></code> to render this documentation locally with Sphinx and
+sphinx-gallery examples</p></li>
 </ul>
-</section>
-<section id="managing-your-local-and-continuous-integration-environment">
-<h3>Managing your local and continuous integration environment<a class="headerlink" href="#managing-your-local-and-continuous-integration-environment" title="Link to this heading">#</a></h3>
-<p>Here, we set up for you an repository that uses <code class="docutils literal notranslate"><span class="pre">pixi</span></code>. The <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code> file defines
-the packages and tasks to be run that we will present below. You can refer to the
-following documentation link to install <code class="docutils literal notranslate"><span class="pre">pixi</span></code>: <a class="reference external" href="https://pixi.sh/latest/#installation">https://pixi.sh/latest/#installation</a></p>
-<p>Once done, you can refer to the documentation to get started but we provide the
-command below to interact with the main task requested to develop your package.</p>
-</section>
-<section id="edit-the-documentation">
-<h3>Edit the documentation<a class="headerlink" href="#edit-the-documentation" title="Link to this heading">#</a></h3>
-<p>The documentation is created using <a class="reference external" href="http://www.sphinx-doc.org/en/stable/">Sphinx</a>. In addition, the examples are
-created using <code class="docutils literal notranslate"><span class="pre">sphinx-gallery</span></code>. Therefore, to generate locally the
-documentation, you can leverage the following <code class="docutils literal notranslate"><span class="pre">pixi</span></code> task:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">pixi<span class="w"> </span>run<span class="w"> </span>build-doc</span>
-</pre></div></div><p>The documentation is made of:</p>
-<ul class="simple">
-<li><p>a home page, <code class="docutils literal notranslate"><span class="pre">doc/index.rst</span></code>;</p></li>
-<li><p>an API documentation, <code class="docutils literal notranslate"><span class="pre">doc/api.rst</span></code> in which you should add all public
-objects for which the docstring should be exposed publicly.</p></li>
-<li><p>a User Guide documentation, <code class="docutils literal notranslate"><span class="pre">doc/user_guide.rst</span></code>, containing the narrative
-documentation of your package, to give as much intuition as possible to your
-users.</p></li>
-<li><p>examples which are created in the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder. Each example
-illustrates some usage of the package. the example file name should start by
-<code class="docutils literal notranslate"><span class="pre">plot_*.py</span></code>.</p></li>
-</ul>
-</section>
-<section id="local-testing">
-<h3>Local testing<a class="headerlink" href="#local-testing" title="Link to this heading">#</a></h3>
-<p>To run the tests locally, you can use the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">pixi<span class="w"> </span>run<span class="w"> </span><span class="nb">test</span></span>
-</pre></div></div><p>It will use <code class="docutils literal notranslate"><span class="pre">pytest</span></code> under the hood to run the package tests.</p>
-<p>In addition, you have a linter task to check the code consistency in terms of style:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">pixi<span class="w"> </span>run<span class="w"> </span>lint</span>
-</pre></div></div></section>
-<section id="activating-the-development-environment">
-<h3>Activating the development environment<a class="headerlink" href="#activating-the-development-environment" title="Link to this heading">#</a></h3>
-<p>In the case that you don’t want to use the <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span></code> commands and directly interact
-with the usual python tools, you can activate the development environment:</p>
+<p>If you prefer calling Python tooling directly, enter the environment shell:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">pixi<span class="w"> </span>shell<span class="w"> </span>-e<span class="w"> </span>dev</span>
-</pre></div></div><p>This will activate an environment containing the dependencies needed to run the linters,
-tests, and build the documentation. So for instance, you can run the tests with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">pytest<span class="w"> </span>-vsl<span class="w"> </span>bde</span>
-</pre></div></div><p>In this case, you can even use pre-commit before using git. You will need to initialize
-it with:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1">pre-commit<span class="w"> </span>install</span>
-</pre></div></div></section>
-<section id="setup-the-continuous-integration">
-<h3>Setup the continuous integration<a class="headerlink" href="#setup-the-continuous-integration" title="Link to this heading">#</a></h3>
-<p>The project template already contains configuration files of the continuous
-integration system. It leverage the above pixi commands and run on GitHub Actions.
-In short, it will:</p>
+</pre></div></div><p>From there <code class="docutils literal notranslate"><span class="pre">pytest</span></code>, <code class="docutils literal notranslate"><span class="pre">ruff</span></code> and <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> are available on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
+</section>
+<section id="next-steps">
+<h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">#</a></h2>
 <ul class="simple">
-<li><p>run the tests on the different platforms (Linux, MacOS, Windows) and upload the
-coverage report to codecov.io;</p></li>
-<li><p>check the code style (linter);</p></li>
-<li><p>build the documentation and deploy it automatically on GitHub Pages.</p></li>
+<li><p>Dive into <a class="reference internal" href="user_guide.html#user-guide"><span class="std std-ref">User Guide</span></a> for a walkthrough of the estimator internals and
+configuration knobs.</p></li>
+<li><p>Explore the auto-generated API reference in <a class="reference internal" href="api.html#api"><span class="std std-ref">API Reference</span></a> to see every public
+class, function, and dataclass.</p></li>
+<li><p>Run the gallery in <a class="reference internal" href="auto_examples/index.html#general-examples"><span class="std std-ref">Example Gallery</span></a> to compare regression and
+classification behaviours on real-world datasets.</p></li>
 </ul>
-</section>
-</section>
-<section id="publish-your-package">
-<h2>Publish your package<a class="headerlink" href="#publish-your-package" title="Link to this heading">#</a></h2>
-<p>You can make your package available through <a class="reference external" href="https://packaging.python.org/tutorials/packaging-projects/">PyPi</a> and <a class="reference external" href="https://conda-forge.org/">conda-forge</a>. Refer to
-the associated documentation to be able to upload your packages such that
-it will be installable with <code class="docutils literal notranslate"><span class="pre">pip</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>.</p>
 </section>
 </section>
 
@@ -552,17 +596,12 @@ it will be installable with <code class="docutils literal notranslate"><span cla
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-your-own-scikit-learn-contribution-package">Creating your own scikit-learn contribution package</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#download-and-setup-your-repository">Download and setup your repository</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#develop-your-own-scikit-learn-estimators">Develop your own scikit-learn estimators</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#managing-your-local-and-continuous-integration-environment">Managing your local and continuous integration environment</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#edit-the-documentation">Edit the documentation</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#local-testing">Local testing</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#activating-the-development-environment">Activating the development environment</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#setup-the-continuous-integration">Setup the continuous integration</a></li>
-</ul>
-</li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#publish-your-package">Publish your package</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#installation">Installation</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#set-the-jax-device-count">Set the JAX device count</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-regression-model">Run a regression model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#run-a-classification-model">Run a classification model</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#work-with-the-development-environment">Work with the development environment</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#next-steps">Next steps</a></li>
 </ul>
   </nav></div>
 
