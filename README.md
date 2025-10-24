@@ -13,6 +13,11 @@ both scikit-learn and JAX. It exposes estimators that plug into scikit-learn
 pipelines while leveraging JAX for accelerator-backed training, sampling, and
 uncertainty estimation.
 
+In particular, **bde** implements **Microcanonical Langevin Ensembles (MILE)** as
+introduced in [*Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks* (ICLR 2025)](https://arxiv.org/abs/2502.06335).
+
+![MILE Overview](doc/_static/img/flowchart.png)
+
 Installation
 ------------
 
@@ -210,7 +215,3 @@ flowchart TD
     Cache --> EvalCall --> MakePred --> Predictor --> Outputs
     Posterior --> Predictor
 ```
-
-
-Mathematical Background
------------------------
