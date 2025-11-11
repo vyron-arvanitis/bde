@@ -587,7 +587,9 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
         self,
         x: ArrayLike,
         mean_and_std: bool = False,
-        credible_intervals: list[float] | None = None, # Docstring necessary to explain this parameter which actually lists quantiles not the intervals
+        credible_intervals: list[float] | None = None,
+        # Docstring necessary to explain this parameter which
+        # actually lists quantiles not the intervals
         raw: bool = False,
     ):
         out = self._evaluate(

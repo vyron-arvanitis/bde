@@ -51,7 +51,7 @@ scripts, remember to set the XLA device count so JAX allocates enough host devic
 this needs to be done before importing JAX):
 
 ```
-export XLA_FLAGS="--xla_force_host_platform_device_count=8" 
+export XLA_FLAGS="--xla_force_host_platform_device_count=8"
 ```
 
 Adjust the value to match the number of CPU (or GPU) devices you plan to use.
@@ -74,7 +74,7 @@ from bde.loss import GaussianNLL
 
 data = fetch_openml(name="airfoil_self_noise", as_frame=True)
 
-X = data.data.values  
+X = data.data.values
 y = data.target.values.reshape(-1, 1)
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42

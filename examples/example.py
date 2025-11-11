@@ -2,7 +2,8 @@
 Usage Examples
 ===============
 
-These examples demonstrate a simple usage of the BDE package both for regression and classification tasks.
+These examples demonstrate a simple usage of the BDE package both for
+regression and classification tasks.
 """
 
 import logging
@@ -18,8 +19,8 @@ logging.basicConfig(
 )
 logging.getLogger("bde").setLevel(logging.INFO)
 
-import jax.numpy as jnp
 import jax
+import jax.numpy as jnp
 from sklearn.datasets import fetch_openml, load_iris
 from sklearn.metrics import root_mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -29,9 +30,9 @@ from bde.loss.loss import CategoricalCrossEntropy, GaussianNLL
 
 
 def regression_example():
-    print("-"*20)
+    print("-" * 20)
     print("Regression example")
-    print("-"*20)
+    print("-" * 20)
     data = fetch_openml(name="airfoil_self_noise", as_frame=True)
 
     X = data.data.values  # shape (1503, 5)
@@ -56,8 +57,8 @@ def regression_example():
         loss=GaussianNLL(),
         epochs=200,
         lr=1e-3,
-        warmup_steps=5000, # 50k in the original paper
-        n_samples=2000, # 10k in the original paper
+        warmup_steps=5000,  # 50k in the original paper
+        n_samples=2000,  # 10k in the original paper
         n_thinning=2,
         patience=10,
     )
@@ -76,11 +77,12 @@ def regression_example():
 
     # use the raw predictions to compute log pointwise predictive density (lppd)
     from jax.scipy.stats import norm
+
     n_data = yte.shape[0]
     log_likelihoods = norm.logpdf(
         yte.reshape(1, 1, n_data),
         loc=raw[:, :, :, 0],
-        scale=jnp.exp(raw[..., 1]).clip(min=1e-6, max=1e6), # note we model log sigma
+        scale=jnp.exp(raw[..., 1]).clip(min=1e-6, max=1e6),  # note we model log sigma
     )
     b = 1 / jnp.prod(jnp.array(log_likelihoods.shape[:-1]))
     axis = tuple(range(len(log_likelihoods.shape) - 1))
@@ -98,10 +100,11 @@ def regression_example():
     score = regressor.score(Xtr, ytr)
     print(f"The sklearn score is {score}")
 
+
 def classification_example():
-    print("-"*20)
+    print("-" * 20)
     print("Classification example")
-    print("-"*20)
+    print("-" * 20)
     iris = load_iris()
     X = iris.data.astype("float32")
     y = iris.target.astype("int32").ravel()  # 0, 1, 2
@@ -118,7 +121,7 @@ def classification_example():
         activation="relu",
         epochs=100,
         lr=1e-3,
-        warmup_steps=400, # very few steps required for this simple dataset
+        warmup_steps=400,  # very few steps required for this simple dataset
         n_samples=100,
         n_thinning=1,
         patience=10,
