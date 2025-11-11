@@ -35,7 +35,7 @@ Issues = "https://github.com/scikit-learn-contrib/bde/issues"
 [tool.setuptools_scm]
 version_file = "bde/_version.py"
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 
