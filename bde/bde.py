@@ -581,6 +581,21 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
         )
 
     def fit(self, x: ArrayLike, y: ArrayLike):
+        """Fit the regression ensemble on the provided dataset.
+
+        Parameters
+        ----------
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features).
+        y : ArrayLike
+            Continuous targets shaped (n_samples,) or (n_samples, 1).
+
+        Returns
+        -------
+        BdeRegressor
+            The fitted estimator instance.
+        """
+
         return super()._fit(x, y)
 
     def predict(
@@ -592,6 +607,40 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
         # actually lists quantiles not the intervals
         raw: bool = False,
     ):
+        """Predict regression targets with optional uncertainty summaries.
+
+        Parameters
+        ----------
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features).
+        mean_and_std : bool, default=False
+            When ``True``, return a tuple ``(mean, std)`` where both arrays
+            have shape ``(n_samples,)`` and ``std`` combines aleatoric and
+            epistemic uncertainty.
+        credible_intervals : list[float] | None, default=None
+            Quantile levels in (0, 1) used to summarise the predictive
+            distribution. When not ``None`` and ``mean_and_std`` is ``False``, the
+            method returns ``(mean, quantiles)`` where ``mean`` has shape
+            ``(n_samples,)`` and ``quantiles`` has shape ``(Q, n_samples)`` with
+            one row per requested level. Note that the values are quantiles,
+            not closed intervals; for an 80% interval you would typically pass
+            ``[0.1, 0.9]`` and interpret the two returned quantile curves as
+            lower and upper bounds.
+        raw : bool, default=False
+            When ``True``, ignore other flags and return the raw ensemble
+            outputs with shape ``(n_members, n_samples_draws, n_samples, 2)``,
+            corresponding to per-member, per-draw mean and scale parameters.
+
+        Returns
+        -------
+        ArrayLike | tuple[jax.Array, jax.Array]
+            - If ``raw`` is ``True``, the raw tensor described above.
+            - If ``mean_and_std`` is ``True``, a tuple ``(mean, std)``.
+            - If ``credible_intervals`` is provided, a tuple
+              ``(mean, quantiles)``.
+            - Otherwise, the predictive mean ``(n_samples,)``.
+        """
+
         out = self._evaluate(
             x,
             mean_and_std=mean_and_std,
@@ -683,6 +732,21 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
         )
 
     def _prepare_targets(self, y_checked):
+        """Encode class labels and cache the label encoder.
+
+        Parameters
+        ----------
+        y_checked : ArrayLike
+            Target labels validated by ``validate_fit_data``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Integer-encoded labels suitable for training, with the fitted
+            encoder stored on the estimator as ``label_encoder_`` and the
+            decoded class labels exposed via ``classes_``.
+        """
+
         from sklearn.preprocessing import LabelEncoder
 
         encoder = LabelEncoder()
@@ -692,9 +756,42 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
         return encoded.astype(np.int32)
 
     def fit(self, x: ArrayLike, y: ArrayLike):
+        """Fit the classification ensemble on the provided dataset.
+
+        Parameters
+        ----------
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features).
+        y : ArrayLike
+            Class labels as a one-dimensional array.
+
+        Returns
+        -------
+        BdeClassifier
+            The fitted estimator instance.
+        """
+
         return super()._fit(x, y)
 
     def predict(self, x: ArrayLike, raw: bool = False):
+        """Predict class labels or return raw logits.
+
+        Parameters
+        ----------
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features).
+        raw : bool, default=False
+            When ``True``, return the raw ensemble logits with shape
+            ``(n_members, n_samples_draws, n_samples, n_classes)``. When
+            ``False``, return hard labels shaped ``(n_samples,)`` in the
+            original label encoding (if available).
+
+        Returns
+        -------
+        numpy.ndarray | ArrayLike
+            Hard labels when ``raw=False``, or raw logits when ``raw=True``.
+        """
+
         if raw:
             return self._evaluate(x, raw=True)["raw"]
         labels = np.asarray(self._evaluate(x)["labels"])
@@ -703,5 +800,19 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
         return self.label_encoder_.inverse_transform(labels.astype(int))
 
     def predict_proba(self, x: ArrayLike):
+        """Predict class probabilities for each sample.
+
+        Parameters
+        ----------
+        x : ArrayLike
+            Feature matrix of shape (n_samples, n_features).
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape ``(n_samples, n_classes)`` with mean class
+            probabilities across ensemble members and posterior samples.
+        """
+
         probs = np.asarray(self._evaluate(x, probabilities=True)["probs"])
         return probs

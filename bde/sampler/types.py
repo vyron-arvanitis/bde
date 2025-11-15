@@ -12,6 +12,8 @@ from pathlib import Path
 
 import jax
 
+LayerParams: typing.TypeAlias = typing.Tuple[jax.Array, jax.Array]
+ParamList: typing.TypeAlias = typing.List[LayerParams]
 ParamTree: typing.TypeAlias = dict[str, typing.Union[jax.Array, "ParamTree"]]
 # `FileTree` mirrors the on-disk nesting when persisting checkpoints;
 # retained for API stability.

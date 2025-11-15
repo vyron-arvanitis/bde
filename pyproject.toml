@@ -6,14 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "bde"
 dynamic = ["version"]
 authors = [
-  { name="Vighnesh Birodkar", email="vighneshbirodkar@nyu.edu" },
-  { name="Guillaume Lemaitre", email="g.lemaitre58@gmail.com" },
+    { name = "Arvanitis Vyron", email = "vyronas.arvanitis@gmail.com" },
+    { name = "Angelos Aslanidis", email = "..." },
+    { name = "Emanuel Sommer", email = "..." }
 ]
 description = "Bayesian Deep Ensembles with MILE (JAX), scikit-learn style."
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-  "scikit-learn>=1.4.2",
+    "scikit-learn>=1.4.2",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -53,7 +54,7 @@ jax = ">=0.4.28"
 flax = ">=0.8.2"
 optax = ">=0.2.1"
 blackjax = "==1.2.2"
-bde = { path=".", editable=true }
+bde = { path = ".", editable = true }
 
 [tool.pixi.feature.lint.dependencies]
 # The version below should be aligned with the one of `.pre-commit-config.yaml`
@@ -64,11 +65,11 @@ ruff = "==0.14.4"
 [tool.pixi.feature.lint.tasks]
 black = { cmd = "black --check --diff bde && black --check --diff examples" }
 ruff = { cmd = "ruff check --output-format=full bde && ruff check --output-format=full examples" }
-lint = { depends-on = ["black", "ruff"]}
+lint = { depends-on = ["black", "ruff"] }
 
 black-fix = { cmd = "black bde examples" }
-ruff-fix  = { cmd = "ruff check --fix bde examples" }
-fix       = { depends-on = ["black-fix", "ruff-fix"] }
+ruff-fix = { cmd = "ruff check --fix bde examples" }
+fix = { depends-on = ["black-fix", "ruff-fix"] }
 
 [tool.pixi.feature.test.dependencies]
 pytest = "*"
@@ -115,21 +116,21 @@ force-exclude = "bde/_version.py"
 line-length = 88
 target-version = "py38"
 exclude = [
-  ".git",
-  "__pycache__",
-  "dist",
-  "doc/_build",
-  "doc/auto_examples",
-  "build",
-  "bde/_version.py",
+    ".git",
+    "__pycache__",
+    "dist",
+    "doc/_build",
+    "doc/auto_examples",
+    "build",
+    "bde/_version.py",
 ]
 
 # Linting configuration
 select = ["E", "F", "W", "I"]
 ignore = [
-  "E203",
-  "E731",
-  "E741",
+    "E203",
+    "E731",
+    "E741",
 ]
 
 [tool.ruff.per-file-ignores]

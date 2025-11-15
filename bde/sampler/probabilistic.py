@@ -82,7 +82,7 @@ class ProbabilisticModel:
         jnp.ndarray
             Scalar log-likelihood of the batch under the current task and parameters.
         """
-        lvals = self.model.apply({"params": params}, x, **kwargs)
+        lvals = self.model.apply({"params": params}, x)
 
         if self.task == TaskType.REGRESSION:
             return jnp.nansum(
