@@ -73,7 +73,7 @@ def regression_example():
     raw = regressor.predict(Xte, raw=True)
     print(
         f"The shape of the raw predictions are {raw.shape}"
-    )  # (ensemble members, n_samples, n_data, (mu,sigma))
+    )  # (ensemble members, n_samples/n_thinning, n_data, (mu,sigma))
 
     # use the raw predictions to compute log pointwise predictive density (lppd)
     from jax.scipy.stats import norm
@@ -82,9 +82,9 @@ def regression_example():
     log_likelihoods = norm.logpdf(
         yte.reshape(1, 1, n_data),
         loc=raw[:, :, :, 0],
-        scale=jnp.exp(raw[..., 1]).clip(min=1e-6, max=1e6),  # note we model log sigma
-    )
-    b = 1 / jnp.prod(jnp.array(log_likelihoods.shape[:-1]))
+        scale=jax.nn.softplus(raw[..., 1]) + 1e-6,  # map raw scale via softplus
+    ) # (E,T,N)
+    b = 1 / jnp.prod(jnp.array(log_likelihoods.shape[:-1])) # 1/ET
     axis = tuple(range(len(log_likelihoods.shape) - 1))
     log_likelihoods = jax.scipy.special.logsumexp(log_likelihoods, b=b, axis=axis)
     lppd = jnp.mean(log_likelihoods)
@@ -143,5 +143,5 @@ def classification_example():
 
 
 if __name__ == "__main__":
-    classification_example()
+    # classification_example()
     regression_example()

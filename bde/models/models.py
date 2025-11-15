@@ -18,7 +18,7 @@ class BaseModel(ABC):
         ...
 
     @abstractmethod
-    def apply(self, params, x, **kwargs):
+    def apply(self, params, x):
         ...
 
 
@@ -86,10 +86,10 @@ class Fnn(BaseModel):
         W, b = params[-1]
         return jnp.dot(x, W) + b
 
-    def apply(self, variables, x, **kwargs):
+    def apply(self, variables, x):
         """Mimic Flax API: variables['params'] contains weights."""
         params = variables["params"]
-        return self.forward(params, x, **kwargs)
+        return self.forward(params, x)
 
     @staticmethod
     def _get_activation(activation):

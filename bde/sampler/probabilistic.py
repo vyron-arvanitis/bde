@@ -82,7 +82,6 @@ class ProbabilisticModel:
         jnp.ndarray
             Scalar log-likelihood of the batch under the current task and parameters.
         """
-
         lvals = self.model.apply({"params": params}, x, **kwargs)
 
         if self.task == TaskType.REGRESSION:
@@ -90,7 +89,9 @@ class ProbabilisticModel:
                 stats.norm.logpdf(
                     x=y,
                     loc=lvals[..., 0:1],
-                    scale=jnp.exp(lvals[..., 1:2]).clip(min=1e-6, max=1e6),
+                    scale=(
+                        jax.nn.softplus(lvals[..., 1:2]) + 1e-6
+                    ).clip(min=1e-6, max=1e6),
                 )
             )
         elif self.task == TaskType.CLASSIFICATION:

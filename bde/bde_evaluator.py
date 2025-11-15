@@ -66,6 +66,10 @@ class BdePredictor:
         -------
         tuple[jax.Array, jax.Array]
             Predictive means and softplus-transformed scales with shape (E, T, N).
+            The second regression head is treated as an unconstrained scale
+            parameter and is transformed with ``jax.nn.softplus`` here and in
+            the sampler log-likelihood so that training and sampling share the
+            same parameterisation.
         """
 
         preds = self.get_raw_preds()  # (E, T, N, 2)
