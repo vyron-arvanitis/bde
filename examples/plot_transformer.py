@@ -5,6 +5,7 @@ Plotting Template Transformer
 
 An example plot of :class:`bde.template.TemplateTransformer`
 """
+
 import numpy as np
 from matplotlib import pyplot as plt
 

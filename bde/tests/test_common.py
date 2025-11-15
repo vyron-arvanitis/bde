@@ -1,4 +1,5 @@
 """This file shows how to write test based on the scikit-learn common tests."""
+
 # TODO: [@angelos, @vyron] need to pass these tests to be scikit-learn compatible
 # Authors: scikit-learn-contrib developers
 # License: BSD 3 clause

@@ -4,29 +4,28 @@ import jax
 import jax.nn as nn
 import jax.numpy as jnp
 from jax.typing import ArrayLike
-from bde.sampler.types import LayerParams, ParamList
+
+from bde.sampler.types import ParamList
+
 
 class BaseModel(ABC):
     name: str
 
     @property
     @abstractmethod
-    def name(self) -> str:
-        ...
+    def name(self) -> str: ...
 
     @abstractmethod
-    def forward(self, params, x):
-        ...
+    def forward(self, params, x): ...
 
     @abstractmethod
-    def apply(self, params, x):
-        ...
+    def apply(self, params, x): ...
 
 
 class Fnn(BaseModel):
     """Single FNN that can optionally train itself on init."""
 
-    def __init__(self, sizes : list[int], init_seed: int = 0, *, act_fn: str):
+    def __init__(self, sizes: list[int], init_seed: int = 0, *, act_fn: str):
         """Initialize a fully-connected feed-forward neural network.
 
         Parameters
@@ -76,7 +75,7 @@ class Fnn(BaseModel):
             params.append((W, b))
         return params
 
-    def forward(self, params: ParamList, x: ArrayLike) ->ArrayLike:
+    def forward(self, params: ParamList, x: ArrayLike) -> ArrayLike:
         """Run a forward pass of the network.
 
         Parameters

@@ -69,7 +69,7 @@ lint = { depends-on = ["black", "ruff"] }
 
 black-fix = { cmd = "black bde examples" }
 ruff-fix = { cmd = "ruff check --fix bde examples" }
-fix = { depends-on = ["black-fix", "ruff-fix"] }
+lint-fix = { depends-on = ["black-fix", "ruff-fix"] }
 
 [tool.pixi.feature.test.dependencies]
 pytest = "*"

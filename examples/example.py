@@ -83,8 +83,8 @@ def regression_example():
         yte.reshape(1, 1, n_data),
         loc=raw[:, :, :, 0],
         scale=jax.nn.softplus(raw[..., 1]) + 1e-6,  # map raw scale via softplus
-    ) # (E,T,N)
-    b = 1 / jnp.prod(jnp.array(log_likelihoods.shape[:-1])) # 1/ET
+    )  # (E,T,N)
+    b = 1 / jnp.prod(jnp.array(log_likelihoods.shape[:-1]))  # 1/ET
     axis = tuple(range(len(log_likelihoods.shape) - 1))
     log_likelihoods = jax.scipy.special.logsumexp(log_likelihoods, b=b, axis=axis)
     lppd = jnp.mean(log_likelihoods)

@@ -1,4 +1,5 @@
 """Utilities for constructing and training Bayesian deep ensembles."""
+
 import logging
 from dataclasses import dataclass
 from typing import Any, Callable

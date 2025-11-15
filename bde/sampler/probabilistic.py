@@ -1,4 +1,5 @@
 """Convert frequentist Flax modules to Bayesian NNs. This is used from @MILE."""
+
 import logging
 
 import jax
@@ -89,9 +90,9 @@ class ProbabilisticModel:
                 stats.norm.logpdf(
                     x=y,
                     loc=lvals[..., 0:1],
-                    scale=(
-                        jax.nn.softplus(lvals[..., 1:2]) + 1e-6
-                    ).clip(min=1e-6, max=1e6),
+                    scale=(jax.nn.softplus(lvals[..., 1:2]) + 1e-6).clip(
+                        min=1e-6, max=1e6
+                    ),
                 )
             )
         elif self.task == TaskType.CLASSIFICATION:

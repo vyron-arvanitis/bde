@@ -1,4 +1,5 @@
 """This file will just show how to write tests for the template classes."""
+
 import numpy as np
 import pytest
 from sklearn.datasets import load_iris
