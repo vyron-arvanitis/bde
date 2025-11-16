@@ -35,7 +35,7 @@ Issues = "https://github.com/scikit-learn-contrib/bde/issues"
 [tool.setuptools_scm]
 version_file = "bde/_version.py"
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["conda-forge"]
 platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 
@@ -59,7 +59,7 @@ bde = { path=".", editable=true }
 # The version below should be aligned with the one of `.pre-commit-config.yaml`
 black = "==23.3.0"
 pre-commit = "==3.7.1"
-ruff = "==0.4.2"
+ruff = "==0.14.4"
 
 [tool.pixi.feature.lint.tasks]
 black = { cmd = "black --check --diff bde && black --check --diff examples" }
@@ -111,38 +111,28 @@ exclude = '''
 force-exclude = "bde/_version.py"
 
 [tool.ruff]
-# max line length for black
+# General options
 line-length = 88
 target-version = "py38"
-exclude=[
-    ".git",
-    "__pycache__",
-    "dist",
-    "doc/_build",
-    "doc/auto_examples",
-    "build",
-    "bde/_version.py",
+exclude = [
+  ".git",
+  "__pycache__",
+  "dist",
+  "doc/_build",
+  "doc/auto_examples",
+  "build",
+  "bde/_version.py",
 ]
 
-[tool.ruff.lint]
-# all rules can be found here: https://beta.ruff.rs/docs/rules/
+# Linting configuration
 select = ["E", "F", "W", "I"]
-ignore=[
-    # space before : (needed for how black formats slicing)
-    "E203",
-    # do not assign a lambda expression, use a def
-    "E731",
-    # do not use variables named 'l', 'O', or 'I'
-    "E741",
+ignore = [
+  "E203",
+  "E731",
+  "E741",
 ]
 
-[tool.ruff.lint.per-file-ignores]
-# It's fine not to put the import at the top of the file in the examples
-# folder.
-"examples/*"=["E402"]
-"doc/conf.py"=["E402"]
-"doc/_templates/numpydoc_docstring.py"=["F821", "W292"]
-
-[tool.pytest.ini_options]
-addopts = "--doctest-modules --color=yes"
-doctest_optionflags = "NORMALIZE_WHITESPACE"
+[tool.ruff.per-file-ignores]
+"examples/*" = ["E402"]
+"doc/conf.py" = ["E402"]
+"doc/_templates/numpydoc_docstring.py" = ["F821", "W292"]

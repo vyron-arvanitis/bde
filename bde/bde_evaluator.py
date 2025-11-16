@@ -118,6 +118,13 @@ class BdePredictor:
         if mean_and_std:
             out["std"] = std_total
         if credible_intervals:
+            # this diregards the sigmas and uses only the mus which is an ok strategy
+            # (the cheapest one, could be a default)
+            # if you want to incorporate the sigmas you could sample for example n
+            # (n=1 for more than 1000 samples and n=10 for less than 1000 samples)
+            # predictions from each mu,sigma (gaussian) pair and then compute the
+            # quantiles over all these sampled predictions - likely a better
+            # strategy but more expensive.
             qs = jnp.quantile(mu, q=jnp.array(credible_intervals), axis=(0, 1))
             out["credible_intervals"] = qs
         if raw:

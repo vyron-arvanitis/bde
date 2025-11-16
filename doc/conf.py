@@ -13,7 +13,7 @@ from importlib.metadata import version as get_version
 project = "Scikit-learn Project Template"
 copyright = "2016, V. Birodkar"
 author = "V. Birodkar"
-release = get_version('bde')
+release = get_version("bde")
 version = ".".join(release.split(".")[:3])
 
 # -- General configuration ---------------------------------------------------

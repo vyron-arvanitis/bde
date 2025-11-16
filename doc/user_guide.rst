@@ -48,9 +48,9 @@ The estimators expose several prediction modes:
 ``predict(X, mean_and_std=True)``
     Regression only; returns a tuple ``(mean, std)`` where ``std`` combines
     aleatoric and epistemic components.
-``predict(X, credible_intervals=[0.9, 0.95])``
-    Regression only; returns ``(mean, intervals)`` with quantiles over posterior
-    samples.
+``predict(X, credible_intervals=[0.05, 0.95])``
+    Regression only; returns ``(mean, quantiles)`` with quantiles over posterior
+    samples that can be used to construct credible intervals.
 ``predict(X, raw=True)``
     Returns the raw tensor with leading axes ``(ensemble_members, samples, n,
     output_dims)``. Useful for custom diagnostics.
@@ -61,23 +61,46 @@ The estimators expose several prediction modes:
 Key hyperparameters
 -------------------
 
-``n_members``
+**Model architecture**
+
+- ``n_members``
     Number of deterministic networks in the ensemble. Increasing members improves
-    epistemic uncertainty estimation but raises computational cost.
-``hidden_layers``
+    epistemic uncertainty estimation but raises computational cost (if enough
+    parallel devices are available training time is not affected).
+- ``hidden_layers``
     Widths of hidden layers. Defaults internally to ``[4, 4]`` if ``None``.
-``epochs`` / ``patience``
-    Control training duration. ``epochs`` sets the maximum number of epochs,
+
+**Pre-sampling optimization**
+
+- ``epochs`` / ``patience``
+    Control optimization duration (the to start the sampler at a high likelihood region.
+    ``epochs`` sets the maximum number of epochs,
     while ``patience`` enables early stopping. When ``patience`` is ``None``,
     training always runs for all epochs.
-``lr``
+- ``lr``
     Learning rate for the Adam optimiser during pre-sampling training.
-``warmup_steps`` / ``n_samples`` / ``n_thinning``
+
+**Sampling**
+
+- ``warmup_steps`` / ``n_samples`` / ``n_thinning``
     Control the MCMC sampling stage. ``warmup_steps`` adjusts the step size,
     ``n_samples`` defines the number of retained posterior draws, and
     ``n_thinning`` specifies the interval between saved samples.
 
-
+- ``desired_energy_var_start`` / ``desired_energy_var_end`` / ``step_size_init``
+    Configure the samplers behaviour. The ``desired_energy_var_*`` parameters
+    set the target variance of the energy during sampling which is linearly
+    annealed from start to end over the course of the warmup phase. The
+    ``step_size_init`` parameter sets the initial step size for the dynamics
+    integrator; this is adapted during warmup to reach the desired energy
+    variance. For medium sized BNNs a good default is to set
+    ``desired_energy_var_start=0.5``, ``desired_energy_var_end=0.1``, and
+    pick the learning rate as the ``step_size_init`` (or slightly larger). For simpler
+    models or highly overparameterized settings (for example a 2x16 network provides
+    good results on a small dataset, then using a 3x32 network would be considered
+    highly overparameterized) decreasing the desired energy variance targets might
+    be necessary to reach good performance. **The desired energy variance is the most
+    important hyperparameter** to tune for sampler performance.
 
 Sampler and builder internals
 -----------------------------
