@@ -68,7 +68,7 @@ Introductory examples.
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example demonstrates a simple usage of the BDE package.">
+    <div class="sphx-glr-thumbcontainer" tooltip="These examples demonstrate a simple usage of the BDE package both for regression and classifica...">
 
 .. only:: html
 
@@ -79,7 +79,7 @@ Introductory examples.
 
 .. raw:: html
 
-      <div class="sphx-glr-thumbnail-title">Minimal Example</div>
+      <div class="sphx-glr-thumbnail-title">Usage Examples</div>
     </div>
 
 

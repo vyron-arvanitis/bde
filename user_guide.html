@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>User guide : contents &#8212; Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation</title>
+    <title>User guide : contents &#8212; Scikit-learn Project Template 0.1.dev241+gfc5b2bccb documentation</title>
   
   
   
@@ -42,7 +42,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="_static/documentation_options.js?v=4ef11736"></script>
+    <script src="_static/documentation_options.js?v=ba110d9e"></script>
     <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/design-tabs.js?v=36754332"></script>
@@ -127,8 +127,8 @@
       
     
     
-    <img src="_static/logo.png" class="logo__image only-light" alt="Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation - Home"/>
-    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation - Home"/>`);</script>
+    <img src="_static/logo.png" class="logo__image only-light" alt="Scikit-learn Project Template 0.1.dev241+gfc5b2bccb documentation - Home"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Scikit-learn Project Template 0.1.dev241+gfc5b2bccb documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -424,8 +424,8 @@ unscaled. Always apply basic preprocessing before calling <code class="docutils 
 <dt><code class="docutils literal notranslate"><span class="pre">predict(X,</span> <span class="pre">mean_and_std=True)</span></code></dt><dd><p>Regression only; returns a tuple <code class="docutils literal notranslate"><span class="pre">(mean,</span> <span class="pre">std)</span></code> where <code class="docutils literal notranslate"><span class="pre">std</span></code> combines
 aleatoric and epistemic components.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">predict(X,</span> <span class="pre">credible_intervals=[0.9,</span> <span class="pre">0.95])</span></code></dt><dd><p>Regression only; returns <code class="docutils literal notranslate"><span class="pre">(mean,</span> <span class="pre">intervals)</span></code> with quantiles over posterior
-samples.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">predict(X,</span> <span class="pre">credible_intervals=[0.05,</span> <span class="pre">0.95])</span></code></dt><dd><p>Regression only; returns <code class="docutils literal notranslate"><span class="pre">(mean,</span> <span class="pre">quantiles)</span></code> with quantiles over posterior
+samples that can be used to construct credible intervals.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">predict(X,</span> <span class="pre">raw=True)</span></code></dt><dd><p>Returns the raw tensor with leading axes <code class="docutils literal notranslate"><span class="pre">(ensemble_members,</span> <span class="pre">samples,</span> <span class="pre">n,</span>
 <span class="pre">output_dims)</span></code>. Useful for custom diagnostics.</p>
@@ -436,23 +436,64 @@ samples.</p>
 </section>
 <section id="key-hyperparameters">
 <h2>Key hyperparameters<a class="headerlink" href="#key-hyperparameters" title="Link to this heading">#</a></h2>
-<dl class="simple">
+<p><strong>Model architecture</strong></p>
+<ul class="simple">
+<li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">n_members</span></code></dt><dd><p>Number of deterministic networks in the ensemble. Increasing members improves
-epistemic uncertainty estimation but raises computational cost.</p>
+epistemic uncertainty estimation but raises computational cost (if enough
+parallel devices are available training time is not affected).</p>
 </dd>
+</dl>
+</li>
+<li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">hidden_layers</span></code></dt><dd><p>Widths of hidden layers. Defaults internally to <code class="docutils literal notranslate"><span class="pre">[4,</span> <span class="pre">4]</span></code> if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">epochs</span></code> / <code class="docutils literal notranslate"><span class="pre">patience</span></code></dt><dd><p>Control training duration. <code class="docutils literal notranslate"><span class="pre">epochs</span></code> sets the maximum number of epochs,
+</dl>
+</li>
+</ul>
+<p><strong>Pre-sampling optimization</strong></p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">epochs</span></code> / <code class="docutils literal notranslate"><span class="pre">patience</span></code></dt><dd><p>Control optimization duration (the to start the sampler at a high likelihood region.
+<code class="docutils literal notranslate"><span class="pre">epochs</span></code> sets the maximum number of epochs,
 while <code class="docutils literal notranslate"><span class="pre">patience</span></code> enables early stopping. When <code class="docutils literal notranslate"><span class="pre">patience</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>,
 training always runs for all epochs.</p>
 </dd>
+</dl>
+</li>
+<li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">lr</span></code></dt><dd><p>Learning rate for the Adam optimiser during pre-sampling training.</p>
 </dd>
+</dl>
+</li>
+</ul>
+<p><strong>Sampling</strong></p>
+<ul class="simple">
+<li><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">warmup_steps</span></code> / <code class="docutils literal notranslate"><span class="pre">n_samples</span></code> / <code class="docutils literal notranslate"><span class="pre">n_thinning</span></code></dt><dd><p>Control the MCMC sampling stage. <code class="docutils literal notranslate"><span class="pre">warmup_steps</span></code> adjusts the step size,
 <code class="docutils literal notranslate"><span class="pre">n_samples</span></code> defines the number of retained posterior draws, and
 <code class="docutils literal notranslate"><span class="pre">n_thinning</span></code> specifies the interval between saved samples.</p>
 </dd>
 </dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">desired_energy_var_start</span></code> / <code class="docutils literal notranslate"><span class="pre">desired_energy_var_end</span></code> / <code class="docutils literal notranslate"><span class="pre">step_size_init</span></code></dt><dd><p>Configure the samplers behaviour. The <code class="docutils literal notranslate"><span class="pre">desired_energy_var_*</span></code> parameters
+set the target variance of the energy during sampling which is linearly
+annealed from start to end over the course of the warmup phase. The
+<code class="docutils literal notranslate"><span class="pre">step_size_init</span></code> parameter sets the initial step size for the dynamics
+integrator; this is adapted during warmup to reach the desired energy
+variance. For medium sized BNNs a good default is to set
+<code class="docutils literal notranslate"><span class="pre">desired_energy_var_start=0.5</span></code>, <code class="docutils literal notranslate"><span class="pre">desired_energy_var_end=0.1</span></code>, and
+pick the learning rate as the <code class="docutils literal notranslate"><span class="pre">step_size_init</span></code> (or slightly larger). For simpler
+models or highly overparameterized settings (for example a 2x16 network provides
+good results on a small dataset, then using a 3x32 network would be considered
+highly overparameterized) decreasing the desired energy variance targets might
+be necessary to reach good performance. <strong>The desired energy variance is the most
+important hyperparameter</strong> to tune for sampler performance.</p>
+</dd>
+</dl>
+</li>
+</ul>
 </section>
 <section id="sampler-and-builder-internals">
 <h2>Sampler and builder internals<a class="headerlink" href="#sampler-and-builder-internals" title="Link to this heading">#</a></h2>

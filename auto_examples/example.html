@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Minimal Example &#8212; Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation</title>
+    <title>Usage Examples &#8212; Scikit-learn Project Template 0.1.dev241+gfc5b2bccb documentation</title>
   
   
   
@@ -42,7 +42,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=4ef11736"></script>
+    <script src="../_static/documentation_options.js?v=ba110d9e"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../_static/logo.png" class="logo__image only-light" alt="Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Scikit-learn Project Template 0.1.dev227+g6cec0e980 documentation - Home"/>`);</script>
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Scikit-learn Project Template 0.1.dev241+gfc5b2bccb documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Scikit-learn Project Template 0.1.dev241+gfc5b2bccb documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -344,7 +344,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="plot_template.html">Plotting Template Estimator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_transformer.html">Plotting Template Transformer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_classifier.html">Plotting Template Classifier</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Minimal Example</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Usage Examples</a></li>
 </ul>
 </div>
 </nav></div>
@@ -385,7 +385,7 @@ document.write(`
     
     <li class="breadcrumb-item"><a href="index.html" class="nav-link">Example Gallery</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page">Minimal Example</li>
+    <li class="breadcrumb-item active" aria-current="page">Usage Examples</li>
   </ul>
 </nav>
 </div>
@@ -407,9 +407,10 @@ document.write(`
 <p><a class="reference internal" href="#sphx-glr-download-auto-examples-example-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code.</p>
 </div>
-<section class="sphx-glr-example-title" id="minimal-example">
-<span id="sphx-glr-auto-examples-example-py"></span><h1>Minimal Example<a class="headerlink" href="#minimal-example" title="Link to this heading">#</a></h1>
-<p>This example demonstrates a simple usage of the BDE package.</p>
+<section class="sphx-glr-example-title" id="usage-examples">
+<span id="sphx-glr-auto-examples-example-py"></span><h1>Usage Examples<a class="headerlink" href="#usage-examples" title="Link to this heading">#</a></h1>
+<p>These examples demonstrate a simple usage of the BDE package both for
+regression and classification tasks.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -423,6 +424,7 @@ to download the full example code.</p>
 <span class="p">)</span>
 <a href="https://docs.python.org/3/library/logging.html#logging.getLogger" title="logging.getLogger" class="sphx-glr-backref-module-logging sphx-glr-backref-type-py-function"><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span></a><span class="p">(</span><span class="s2">&quot;bde&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><a href="https://docs.python.org/3/library/logging.html#logging.INFO" title="logging.INFO" class="sphx-glr-backref-module-logging sphx-glr-backref-type-py-data"><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span></a><span class="p">)</span>
 
+<span class="kn">import</span> <span class="nn">jax</span>
 <span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_openml</span><span class="p">,</span> <span class="n">load_iris</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">root_mean_squared_error</span>
@@ -433,6 +435,9 @@ to download the full example code.</p>
 
 
 <span class="k">def</span> <span class="nf">regression_example</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Regression example&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">fetch_openml</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;airfoil_self_noise&quot;</span><span class="p">,</span> <span class="n">as_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span>  <span class="c1"># shape (1503, 5)</span>
@@ -452,36 +457,59 @@ to download the full example code.</p>
 
     <span class="n">regressor</span> <span class="o">=</span> <a href="../generated/bde.BdeRegressor.html#bde.BdeRegressor" title="bde.BdeRegressor" class="sphx-glr-backref-module-bde sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BdeRegressor</span></a><span class="p">(</span>
         <span class="n">hidden_layers</span><span class="o">=</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>
-        <span class="n">n_members</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">n_members</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">loss</span><span class="o">=</span><span class="n">GaussianNLL</span><span class="p">(),</span>
         <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
         <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
-        <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-        <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-        <span class="n">n_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>  <span class="c1"># 50k in the original paper</span>
+        <span class="n">n_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>  <span class="c1"># 10k in the original paper</span>
+        <span class="n">n_thinning</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the params are </span><span class="si">{</span><span class="n">regressor</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># get_params is from sk learn!</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the params are </span><span class="si">{</span><span class="n">regressor</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># get_params is from sklearn!</span>
     <span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Xtr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">ytr</span><span class="p">)</span>
 
     <span class="n">means</span><span class="p">,</span> <span class="n">sigmas</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">mean_and_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;RSME: &quot;</span><span class="p">,</span> <span class="n">root_mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">yte</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">means</span><span class="p">))</span>
-    <span class="n">mean</span><span class="p">,</span> <span class="n">intervals</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">credible_intervals</span><span class="o">=</span><span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">])</span>
+    <span class="n">mean</span><span class="p">,</span> <span class="n">intervals</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">credible_intervals</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">])</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;The shape of the raw predictions are </span><span class="si">{</span><span class="n">raw</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>  <span class="c1"># (ensemble members, n_samples, n_data, (mu,sigma))</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Credible intervals shape:&quot;</span><span class="p">,</span> <span class="n">intervals</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (len(q), N)</span>
+    <span class="c1"># use the raw predictions to compute log pointwise predictive density (lppd)</span>
+    <span class="kn">from</span> <span class="nn">jax.scipy.stats</span> <span class="kn">import</span> <span class="n">norm</span>
+
+    <span class="n">n_data</span> <span class="o">=</span> <span class="n">yte</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">log_likelihoods</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span>
+        <span class="n">yte</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_data</span><span class="p">),</span>
+        <span class="n">loc</span><span class="o">=</span><span class="n">raw</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="n">scale</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">raw</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">1e6</span><span class="p">),</span>  <span class="c1"># note we model log sigma</span>
+    <span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">jnp</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">log_likelihoods</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">log_likelihoods</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">log_likelihoods</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">scipy</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">log_likelihoods</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+    <span class="n">lppd</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">log_likelihoods</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The log pointwise predictive density (lppd) is </span><span class="si">{</span><span class="n">lppd</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Quantiles shape:&quot;</span><span class="p">,</span> <span class="n">intervals</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (len(q), N)</span>
+    <span class="c1"># calculate the coverage of the 80% credible interval</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="n">intervals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="n">intervals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">coverage</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">yte</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">lower</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">yte</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">upper</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Coverage of the 80% credible interval: </span><span class="si">{</span><span class="n">coverage</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
 
     <span class="n">score</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">Xtr</span><span class="p">,</span> <span class="n">ytr</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the sklearn score is </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The sklearn score is </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">classification_example</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Classification example&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
     <span class="n">iris</span> <span class="o">=</span> <span class="n">load_iris</span><span class="p">()</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">iris</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;int32&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>  <span class="c1"># 0, 1, 2</span>
@@ -491,32 +519,32 @@ to download the full example code.</p>
     <span class="p">)</span>
 
     <span class="n">classifier</span> <span class="o">=</span> <a href="../generated/bde.BdeClassifier.html#bde.BdeClassifier" title="bde.BdeClassifier" class="sphx-glr-backref-module-bde sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">BdeClassifier</span></a><span class="p">(</span>
-        <span class="n">n_members</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">n_members</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="n">hidden_layers</span><span class="o">=</span><span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">],</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">loss</span><span class="o">=</span><span class="n">CategoricalCrossEntropy</span><span class="p">(),</span>
         <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
-        <span class="n">epochs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
-        <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
-        <span class="n">n_samples</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>  <span class="c1"># very few steps required for this simple dataset</span>
+        <span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">n_thinning</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">patience</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">classifier</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y_train</span><span class="p">)</span>
 
     <span class="n">preds</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
     <span class="n">probs</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted class probabilities:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">probs</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted class labels:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">preds</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;True labels:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Predicted class probabilities shape:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">y_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test accuracy: </span><span class="si">{</span><span class="n">accuracy</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
     <span class="n">score</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the sklearn score is </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The sklearn score is </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;The shape of the raw predictions are </span><span class="si">{</span><span class="n">raw</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="p">)</span>  <span class="c1"># (ensemble members, n_samples, n_data, n_classes))</span>
+    <span class="p">)</span>  <span class="c1"># (ensemble members, n_samples, n_test_data, n_classes))</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
