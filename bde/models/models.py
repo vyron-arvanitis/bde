@@ -18,9 +18,6 @@ class BaseModel(ABC):
     @abstractmethod
     def forward(self, params, x): ...
 
-    @abstractmethod
-    def apply(self, params, x): ...
-
 
 class Fnn(BaseModel):
     """Single FNN that can optionally train itself on init."""
@@ -98,24 +95,6 @@ class Fnn(BaseModel):
         W, b = params[-1]
         return jnp.dot(x, W) + b
 
-    def apply(self, variables: dict[str, ParamList], x: ArrayLike) -> ArrayLike:
-        """Mimic Flax API: variables['params'] contains weights.
-
-        Parameters
-        ----------
-        variables : dict[str, ParamList]
-            Must contain a `"params"` entry with the model parameters.
-        x : ArrayLike
-            Input batch.
-
-        Returns
-        -------
-        ArrayLike
-            Model outputs.
-        """
-
-        params = variables["params"]
-        return self.forward(params, x)
 
     @staticmethod
     def _get_activation(activation: str):

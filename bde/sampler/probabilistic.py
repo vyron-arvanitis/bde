@@ -83,7 +83,7 @@ class ProbabilisticModel:
         jnp.ndarray
             Scalar log-likelihood of the batch under the current task and parameters.
         """
-        lvals = self.model.apply({"params": params}, x)
+        lvals = self.model.forward(params, x)
 
         if self.task == TaskType.REGRESSION:
             return jnp.nansum(
@@ -108,7 +108,7 @@ class ProbabilisticModel:
 
     def log_unnormalized_posterior(
         self,
-        position: ParamTree,
+        positions: ParamTree,
         x: jnp.ndarray,
         y: jnp.ndarray,
         **kwargs,
@@ -117,7 +117,7 @@ class ProbabilisticModel:
 
         Parameters:
         -----------
-        params: ParamTree
+        positions: ParamTree
             Parameters of the model.
         x: jnp.ndarray
             Input data of shape (batch_size, ...).
@@ -127,4 +127,4 @@ class ProbabilisticModel:
             Additional keyword arguments to pass to the model forward pass.
         """
 
-        return self.log_prior(position) + self.log_likelihood(position, x, y, **kwargs)
+        return self.log_prior(positions) + self.log_likelihood(positions, x, y, **kwargs)
