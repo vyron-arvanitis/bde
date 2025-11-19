@@ -39,7 +39,7 @@ class BdePredictor:
         self._raw_preds: ArrayLike | None = None
 
     def get_raw_preds(self) -> ArrayLike:
-        """Materialise ensemble predictions with leading axes (E, T, N, *).
+        """Materialise ensemble predictions with leading axes ``(E, T, N, ...)``.
 
         Returns
         -------
@@ -83,7 +83,7 @@ class BdePredictor:
         Returns
         -------
         tuple[jax.Array, jax.Array]
-            Tuple of mean predictions and standard deviations shaped (E, N).
+            Tuple of mean predictions and standard deviations shaped ``(E, N)``.
         """
 
         mu, sigma = self._regression_mu_sigma()
