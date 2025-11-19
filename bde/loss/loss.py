@@ -11,10 +11,12 @@ class BaseLoss(ABC):
 
     @property
     @abstractmethod
-    def name(self) -> str: ...
+    def name(self) -> str:
+        ...
 
     @abstractmethod
-    def __call__(self, preds, y_true): ...
+    def __call__(self, preds, y_true):
+        ...
 
 
 class Rmse(BaseLoss):

@@ -13,10 +13,12 @@ class BaseModel(ABC):
 
     @property
     @abstractmethod
-    def name(self) -> str: ...
+    def name(self) -> str:
+        ...
 
     @abstractmethod
-    def forward(self, params, x): ...
+    def forward(self, params, x):
+        ...
 
 
 class Fnn(BaseModel):
@@ -94,7 +96,6 @@ class Fnn(BaseModel):
             x = act_fn(jnp.dot(x, W) + b)
         W, b = params[-1]
         return jnp.dot(x, W) + b
-
 
     @staticmethod
     def _get_activation(activation: str):

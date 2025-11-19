@@ -9,9 +9,9 @@ regression and classification tasks.
 import logging
 import os
 import sys
+
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
@@ -144,24 +144,24 @@ def classification_example():
         f"The shape of the raw predictions are {raw.shape}"
     )  # (ensemble members, n_samples, n_test_data, n_classes))
 
+
 def concrete_data_example():
     print("-" * 20)
     print("Regression example for concrete data")
     print("-" * 20)
     scaler = StandardScaler()
-    data=pd.read_csv("bde/data/concrete.data", sep=" ", header=None)
+    data = pd.read_csv("bde/data/concrete.data", sep=" ", header=None)
     data_norm = pd.DataFrame(scaler.fit_transform(data), columns=data.columns)
-    
-    X = data_norm.iloc[:, :-1]   # shape (1038, 8)
-    y = data_norm.iloc[:, -1]    # shape (1038, )
-    X= jnp.array(X)
-    y= jnp.array(y)
-    
+
+    X = data_norm.iloc[:, :-1]  # shape (1038, 8)
+    y = data_norm.iloc[:, -1]  # shape (1038, )
+    X = jnp.array(X)
+    y = jnp.array(y)
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
-    )    
-    
-    
+    )
+
     regressor = BdeRegressor(
         hidden_layers=[16, 16],
         n_members=8,
@@ -174,7 +174,7 @@ def concrete_data_example():
         n_thinning=10,
         patience=10,
     )
-    
+
     print(f"the params are {regressor.get_params()}")  # get_params is from sklearn!
     regressor.fit(x=X_train, y=y_train)
 

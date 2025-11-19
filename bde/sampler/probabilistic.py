@@ -127,4 +127,6 @@ class ProbabilisticModel:
             Additional keyword arguments to pass to the model forward pass.
         """
 
-        return self.log_prior(positions) + self.log_likelihood(positions, x, y, **kwargs)
+        return self.log_prior(positions) + self.log_likelihood(
+            positions, x, y, **kwargs
+        )
