@@ -12,11 +12,8 @@ from importlib.metadata import version as get_version
 
 project = "Scikit-learn Project Template"
 copyright = "2016, V. Birodkar"
-author = authors = [
-    { name = "Arvanitis Vyron", email = "vyronas.arvanitis@gmail.com" },
-    { name = "Angelos Aslanidis", email = "..." },
-    { name = "Emanuel Sommer", email = "..." }
-]
+author = "Arvanitis Vyron, Aslanidis Angelos, Sommer Emanuel"
+
 release = get_version("bde")
 version = ".".join(release.split(".")[:3])
 

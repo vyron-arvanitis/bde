@@ -7,8 +7,8 @@ name = "bde"
 dynamic = ["version"]
 authors = [
     { name = "Arvanitis Vyron", email = "vyronas.arvanitis@gmail.com" },
-    { name = "Angelos Aslanidis", email = "..." },
-    { name = "Emanuel Sommer", email = "..." }
+    { name = "Aslanidis Angelos", email = "..." },
+    { name = "Sommer Emanuel", email = "..." }
 ]
 description = "Bayesian Deep Ensembles with MILE (JAX), scikit-learn style."
 readme = "README.md"
