@@ -7,7 +7,7 @@ name = "bde"
 dynamic = ["version"]
 authors = [
     { name = "Arvanitis Vyron", email = "vyronas.arvanitis@gmail.com" },
-    { name = "Aslanidis Angelos", email = "A.Aslanidis@campus.lmu.de" },
+    { name = "Aslanidis Angelos", email = "angelo.aslanidis@gmail.com" },
     { name = "Sommer Emanuel", email = "emanuel.sommer@stat.uni-muenchen.de" }
 ]
 description = "Bayesian Deep Ensembles with MILE (JAX), scikit-learn style."
@@ -28,6 +28,7 @@ classifiers = [
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
 ]
+
 
 [project.urls]
 Homepage = "https://github.com/scikit-learn-contrib/bde"
