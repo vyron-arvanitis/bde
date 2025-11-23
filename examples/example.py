@@ -142,25 +142,31 @@ def classification_example():
     raw = classifier.predict(X_test, raw=True)
     print(
         f"The shape of the raw predictions are {raw.shape}"
-    )  # (ensemble members, n_samples, n_test_data, n_classes))
+    )  # (ensemble members, n_samples/n_thinning, n_test_data, n_classes)
 
 
 def concrete_data_example():
     print("-" * 20)
     print("Regression example for concrete data")
     print("-" * 20)
-    scaler = StandardScaler()
-    data = pd.read_csv("bde/data/concrete.data", sep=" ", header=None)
-    data_norm = pd.DataFrame(scaler.fit_transform(data), columns=data.columns)
 
-    X = data_norm.iloc[:, :-1]  # shape (1038, 8)
-    y = data_norm.iloc[:, -1]  # shape (1038, )
-    X = jnp.array(X)
-    y = jnp.array(y)
+    data = pd.read_csv("bde/data/concrete.data", sep=" ", header=None)
+
+    X = data.iloc[:, :-1].values  # (1030, 8)
+    y = data.iloc[:, -1].values  # (1030,)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
+
+    x_scaler = StandardScaler()
+    y_scaler = StandardScaler()
+
+    X_train = x_scaler.fit_transform(X_train)
+    X_test = x_scaler.transform(X_test)
+
+    y_train = y_scaler.fit_transform(y_train.reshape(-1, 1)).ravel()
+    y_test = y_scaler.transform(y_test.reshape(-1, 1)).ravel()
 
     regressor = BdeRegressor(
         hidden_layers=[16, 16],
@@ -169,18 +175,18 @@ def concrete_data_example():
         loss=GaussianNLL(),
         epochs=200,
         lr=1e-3,
-        warmup_steps=50000,  # 50k in the original paper
-        n_samples=10000,  # 10k in the original paper
+        warmup_steps=50000,
+        n_samples=10000,
         n_thinning=10,
         patience=10,
     )
 
-    print(f"the params are {regressor.get_params()}")  # get_params is from sklearn!
-    regressor.fit(x=X_train, y=y_train)
+    print(f"the params are {regressor.get_params()}")
+    regressor.fit(x=jnp.array(X_train), y=jnp.array(y_train))
 
-    means, sigmas = regressor.predict(X_test, mean_and_std=True)
-
-    print("RSME: ", root_mean_squared_error(y_true=y_test, y_pred=means))
+    means, sigmas = regressor.predict(jnp.array(X_test), mean_and_std=True)
+    rmse = root_mean_squared_error(y_true=y_test, y_pred=means)
+    print("RMSE:", rmse)
     mean, intervals = regressor.predict(X_test, credible_intervals=[0.1, 0.9])
     raw = regressor.predict(X_test, raw=True)
     print(
