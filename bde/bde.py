@@ -151,7 +151,9 @@ class Bde:
 
         self.members_ = self._bde.members
 
-    def _build_log_post(self, x, y, prior_family: PriorDist, prior_kwargs=None):
+    def _build_log_post(
+        self, x: ArrayLike, y: ArrayLike, prior_family: PriorDist, prior_kwargs=None
+    ) -> Callable[[ParamTree], ArrayLike]:
         """Construct the log-posterior callable for the ensemble.
 
         Parameters
@@ -163,9 +165,10 @@ class Bde:
 
         Returns
         -------
-        Callable
+        Callable[[ParamTree], ArrayLike]
             Function mapping parameter states to their unnormalized log posterior.
         """
+
         prior_obj = (
             prior_family
             if isinstance(prior_family, Prior)
@@ -178,12 +181,12 @@ class Bde:
         )
         return partial(pm.log_unnormalized_posterior, x=x, y=y)
 
-    def _warmup_sampler(self, logpost):
+    def _warmup_sampler(self, logpost: Callable[[ParamTree], ArrayLike]):
         """Run the adaptive warmup phase for the MCMC sampler.
 
         Parameters
         ----------
-        logpost : Callable
+        logpost : Callable[[ParamTree], ArrayLike]
             Unnormalised log posterior accepting parameter trees.
 
         Returns
@@ -252,7 +255,7 @@ class Bde:
 
     def _draw_samples(
         self,
-        logpost: Callable,
+        logpost: Callable[[ParamTree], ArrayLike],
         rng_keys_e: ArrayLike,
         init_positions_e: ArrayLike,
         L_e: ArrayLike,
@@ -263,7 +266,7 @@ class Bde:
 
         Parameters
         ----------
-        logpost : Callable
+        logpost : Callable[[ParamTree], ArrayLike]
             Log posterior callable produced by `_build_log_post`.
         rng_keys_e : jax.Array
             PRNG keys for each chain.
