@@ -10,6 +10,14 @@ import optax
 from jax.tree_util import tree_leaves, tree_map
 from jax.typing import ArrayLike
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
+from sklearn.utils._tags import (
+    ClassifierTags,
+    InputTags,
+    RegressorTags,
+    Tags,
+    TargetTags,
+    default_tags,
+)
 from sklearn.utils.validation import check_is_fitted
 
 from .bde_builder import BdeBuilder
@@ -64,7 +72,7 @@ class Bde:
         desired_energy_var_start: float = 0.5,
         desired_energy_var_end: float = 0.1,
         step_size_init: float = None,
-        prior_family: PriorDist = PriorDist.STANDARDNORMAL,
+        prior_family: str | PriorDist = "standardnormal",
         prior_kwargs: dict[str, Any] | None = None,
     ):
         """Initialise the estimator with architectural and sampling settings.
@@ -101,9 +109,9 @@ class Bde:
             Final target energy variance for warmup.
         step_size_init : float | None
             Optional initial step size for the sampler.
-        prior_family : PriorDist
-            Prior distribution for network weights; defaults to the standard
-            normal (loc=0, scale=1).
+        prior_family : str or PriorDist
+            Prior distribution for network weights; accepts a ``PriorDist`` enum
+            or a string key (case-insensitive). Defaults to ``\"standardnormal\"``.
         prior_kwargs : dict[str, Any] | None
             Optional keyword arguments forwarded to the chosen `prior_family`
             (e.g. ``{"scale": 0.1}`` for a wider or narrower Normal or Laplace).
@@ -114,8 +122,6 @@ class Bde:
         self.seed = seed
         self.task = task
         self.loss = loss
-        if self.task is not None and self.loss is not None:
-            self.task.validate_loss(self.loss)
         self.activation = activation
         self.epochs = epochs
         self.patience = patience
@@ -151,8 +157,33 @@ class Bde:
 
         self.members_ = self._bde.members
 
+    def _resolve_prior_family(self) -> Prior | PriorDist:
+        """Normalise the prior specification to a PriorDist or Prior instance."""
+
+        pf = self.prior_family
+        if isinstance(pf, Prior):
+            return pf
+        if isinstance(pf, PriorDist):
+            return pf
+        if isinstance(pf, str):
+            try:
+                return PriorDist[pf.upper()]
+            except KeyError as exc:
+                valid = ", ".join([p.name.lower() for p in PriorDist])
+                raise ValueError(
+                    f"Unknown prior_family '{pf}'. Valid options: {valid}."
+                ) from exc
+        raise ValueError(
+            f"Unsupported prior_family type {type(pf).__name__}; expected str,"
+            " PriorDist or Prior."
+        )
+
     def _build_log_post(
-        self, x: ArrayLike, y: ArrayLike, prior_family: PriorDist, prior_kwargs=None
+        self,
+        x: ArrayLike,
+        y: ArrayLike,
+        prior_family: Prior | PriorDist,
+        prior_kwargs=None,
     ) -> Callable[[ParamTree], ArrayLike]:
         """Construct the log-posterior callable for the ensemble.
 
@@ -370,9 +401,14 @@ class Bde:
         x_np, y_np = validate_fit_data(
             self, x, y
         )  # x_np: (N, D), y_np: (N, 1) for regression
+        self.n_features_in_ = x_np.shape[1]
         y_prepared = self._prepare_targets(
             y_np
         )  # preserve (N, 1) for regression targets
+        loss_obj = self.loss if isinstance(self.loss, BaseLoss) else None
+        if self.task is not None and loss_obj is not None:
+            self.task.validate_loss(loss_obj)
+        resolved_prior_family = self._resolve_prior_family()
 
         x_checked = jnp.asarray(x_np)  # (N, D)
         y_checked = jnp.asarray(y_prepared)  # regression: (N, 1); classification: (N,)
@@ -387,11 +423,11 @@ class Bde:
             y=y_checked,
             optimizer=optax.adam(self.lr),
             epochs=self.epochs,
-            loss=self.loss,
+            loss=loss_obj,
         )
 
         logpost_one = self._build_log_post(
-            x_checked, y_checked, self.prior_family, self.prior_kwargs
+            x_checked, y_checked, resolved_prior_family, self.prior_kwargs
         )
         init_positions_e, tuned = self._warmup_sampler(logpost_one)
 
@@ -414,11 +450,32 @@ class Bde:
         return self
 
     # scikit-learn compatibility tags
-    def _more_tags(self):
-        return {
-            "poor_score": True,  # training can be stochastic and heavy
-            "multioutput": False,
-        }
+    def __sklearn_tags__(self) -> Tags:
+        tags = default_tags(self)
+        tags._skip_test = False
+        tags.no_validation = False
+        tags.requires_fit = True
+        tags.input_tags = InputTags(
+            one_d_array=False,
+            two_d_array=True,
+            three_d_array=False,
+            sparse=False,
+            categorical=False,
+            string=False,
+            dict=False,
+            positive_only=False,
+            allow_nan=False,
+            pairwise=False,
+        )
+        tags.target_tags = TargetTags(
+            required=getattr(tags.target_tags, "required", False),
+            one_d_labels=False,
+            two_d_labels=False,
+            positive_only=False,
+            multi_output=False,
+            single_output=True,
+        )
+        return tags
 
     def _validate_evaluate_tags(
         self,
@@ -527,7 +584,7 @@ class Bde:
         )
 
 
-class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
+class BdeRegressor(Bde, RegressorMixin, BaseEstimator):
     """Regression-friendly wrapper exposing scikit-learn style API."""
 
     def __init__(
@@ -546,7 +603,7 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
         desired_energy_var_start: float = 0.5,
         desired_energy_var_end: float = 0.1,
         step_size_init: float | None = None,
-        prior_family: PriorDist = PriorDist.STANDARDNORMAL,
+        prior_family: str | PriorDist = "standardnormal",
         prior_kwargs: dict[str, Any] | None = None,
     ):
         """Initialise the regressor with architecture,
@@ -582,9 +639,9 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
             Target energy variance at the end of warm-up.
         step_size_init : float | None, optional
             Override for the sampler's initial step size; falls back to ``lr``.
-        prior_family : PriorDist
-            Prior distribution for network weights; defaults to the standard
-            normal (loc=0, scale=1).
+        prior_family : str or PriorDist
+            Prior distribution for network weights; accepts a ``PriorDist`` enum
+            or string key. Defaults to ``\"standardnormal\"``.
         prior_kwargs : dict[str, Any] | None
             Optional keyword arguments forwarded to the chosen `prior_family`
             (e.g. ``{"scale": 0.1}`` for a wider or narrower Normal or Laplace).
@@ -609,6 +666,21 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
             prior_family=prior_family,
             prior_kwargs=prior_kwargs,
         )
+        self._estimator_type = "regressor"
+
+    def __sklearn_tags__(self) -> Tags:
+        base = super().__sklearn_tags__()
+        base.estimator_type = "regressor"
+        base.target_tags = TargetTags(
+            required=True,
+            one_d_labels=False,
+            two_d_labels=False,
+            positive_only=False,
+            multi_output=False,
+            single_output=True,
+        )
+        base.regressor_tags = RegressorTags(poor_score=True)
+        return base
 
     def fit(self, x: ArrayLike, y: ArrayLike):
         """Fit the regression ensemble on the provided dataset.
@@ -686,7 +758,7 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
         return out["mean"]  # (N,) regression predictive mean
 
 
-class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
+class BdeClassifier(Bde, ClassifierMixin, BaseEstimator):
     """Classification wrapper with label encoding helpers."""
 
     label_encoder_: "LabelEncoder"
@@ -707,7 +779,7 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
         desired_energy_var_start: float = 0.5,
         desired_energy_var_end: float = 0.1,
         step_size_init: float | None = None,
-        prior_family: PriorDist = PriorDist.STANDARDNORMAL,
+        prior_family: str | PriorDist = "standardnormal",
         prior_kwargs: dict[str, Any] | None = None,
     ):
         """Initialise the classifier with architecture,
@@ -743,9 +815,9 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
             Target energy variance at the end of warm-up.
         step_size_init : float | None, optional
             Override for the sampler's initial step size; falls back to ``lr``.
-        prior_family : PriorDist
-            Prior distribution for network weights; defaults to the standard
-            normal (loc=0, scale=1).
+        prior_family : str or PriorDist
+            Prior distribution for network weights; accepts a ``PriorDist`` enum
+            or string key. Defaults to ``\"standardnormal\"``.
         prior_kwargs : dict[str, Any] | None
             Optional keyword arguments forwarded to the chosen `prior_family`
             (e.g. ``{"scale": 0.1}`` for a wider or narrower Normal or Laplace).
@@ -770,6 +842,7 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
             prior_family=prior_family,
             prior_kwargs=prior_kwargs,
         )
+        self._estimator_type = "classifier"
 
     def _prepare_targets(self, y_checked):
         """Encode class labels and cache the label encoder.
@@ -856,3 +929,21 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
 
         probs = np.asarray(self._evaluate(x, probabilities=True)["probs"])
         return probs
+
+    def __sklearn_tags__(self) -> Tags:
+        base = super().__sklearn_tags__()
+        base.estimator_type = "classifier"
+        base.target_tags = TargetTags(
+            required=True,
+            one_d_labels=False,
+            two_d_labels=False,
+            positive_only=False,
+            multi_output=False,
+            single_output=True,
+        )
+        base.classifier_tags = ClassifierTags(
+            poor_score=True,
+            multi_class=True,
+            multi_label=False,
+        )
+        return base

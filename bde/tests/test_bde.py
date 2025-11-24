@@ -341,7 +341,7 @@ def test_sanity_airfoil():
 
     # ---- Linear baseline ----
     lr = MLPRegressor(hidden_layer_sizes=(2, 12))  # very simple MLP
-    lr.fit(X_train, y_train)
+    lr.fit(X_train, y_train.ravel())
     lr_pred = lr.predict(X_test)
     lr_rmse = root_mean_squared_error(y_test, lr_pred)
 
