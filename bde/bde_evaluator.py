@@ -83,7 +83,7 @@ class BdePredictor:
         sigma: ArrayLike,
         credible_intervals: list[float],
     ) -> ArrayLike:
-        """Compute predictive credible intervals for a scalar regression model using
+        r"""Compute predictive credible intervals for a scalar regression model using
         Monte Carlo sampling from each Gaussian posterior component.
 
         This method implements the *expensive* but statistically correct approach:

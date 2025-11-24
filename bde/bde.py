@@ -18,7 +18,7 @@ from .data.utils import validate_fit_data, validate_predict_data
 from .loss import BaseLoss
 from .models import BaseModel
 from .sampler.mile_wrapper import MileWrapper
-from .sampler.prior import PriorDist
+from .sampler.prior import Prior, PriorDist
 from .sampler.probabilistic import ProbabilisticModel
 from .sampler.types import ParamTree
 from .sampler.warmup import warmup_bde
@@ -64,6 +64,8 @@ class Bde:
         desired_energy_var_start: float = 0.5,
         desired_energy_var_end: float = 0.1,
         step_size_init: float = None,
+        prior_family: PriorDist = PriorDist.STANDARDNORMAL,
+        prior_kwargs: dict[str, Any] | None = None,
     ):
         """Initialise the estimator with architectural and sampling settings.
 
@@ -99,6 +101,12 @@ class Bde:
             Final target energy variance for warmup.
         step_size_init : float | None
             Optional initial step size for the sampler.
+        prior_family : PriorDist
+            Prior distribution for network weights; defaults to the standard
+            normal (loc=0, scale=1).
+        prior_kwargs : dict[str, Any] | None
+            Optional keyword arguments forwarded to the chosen `prior_family`
+            (e.g. ``{"scale": 0.1}`` for a wider or narrower Normal or Laplace).
         """
 
         self.n_members = n_members
@@ -118,6 +126,8 @@ class Bde:
         self.desired_energy_var_start = desired_energy_var_start
         self.desired_energy_var_end = desired_energy_var_end
         self.step_size_init = step_size_init
+        self.prior_family = prior_family
+        self.prior_kwargs = prior_kwargs
 
         # Internal caches resolved during fit
         self._resolved_hidden_layers = None
@@ -141,7 +151,7 @@ class Bde:
 
         self.members_ = self._bde.members
 
-    def _build_log_post(self, x: ArrayLike, y: ArrayLike):
+    def _build_log_post(self, x, y, prior_family: PriorDist, prior_kwargs=None):
         """Construct the log-posterior callable for the ensemble.
 
         Parameters
@@ -156,10 +166,15 @@ class Bde:
         Callable
             Function mapping parameter states to their unnormalized log posterior.
         """
-        prior = PriorDist.STANDARDNORMAL.get_prior()
+        prior_obj = (
+            prior_family
+            if isinstance(prior_family, Prior)
+            else prior_family.get_prior(**(prior_kwargs or {}))
+        )
+
         proto = self._bde.members[0]
         pm = ProbabilisticModel(
-            model=proto, params=proto.params, prior=prior, task=self.task
+            model=proto, params=proto.params, prior=prior_obj, task=self.task
         )
         return partial(pm.log_unnormalized_posterior, x=x, y=y)
 
@@ -372,7 +387,9 @@ class Bde:
             loss=self.loss,
         )
 
-        logpost_one = self._build_log_post(x_checked, y_checked)
+        logpost_one = self._build_log_post(
+            x_checked, y_checked, self.prior_family, self.prior_kwargs
+        )
         init_positions_e, tuned = self._warmup_sampler(logpost_one)
 
         num_chains = tree_leaves(init_positions_e)[0].shape[0]
@@ -526,6 +543,8 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
         desired_energy_var_start: float = 0.5,
         desired_energy_var_end: float = 0.1,
         step_size_init: float | None = None,
+        prior_family: PriorDist = PriorDist.STANDARDNORMAL,
+        prior_kwargs: dict[str, Any] | None = None,
     ):
         """Initialise the regressor with architecture,
         optimisation, and sampling settings.
@@ -560,6 +579,12 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
             Target energy variance at the end of warm-up.
         step_size_init : float | None, optional
             Override for the sampler's initial step size; falls back to ``lr``.
+        prior_family : PriorDist
+            Prior distribution for network weights; defaults to the standard
+            normal (loc=0, scale=1).
+        prior_kwargs : dict[str, Any] | None
+            Optional keyword arguments forwarded to the chosen `prior_family`
+            (e.g. ``{"scale": 0.1}`` for a wider or narrower Normal or Laplace).
         """
 
         super().__init__(
@@ -578,6 +603,8 @@ class BdeRegressor(Bde, BaseEstimator, RegressorMixin):
             desired_energy_var_start=desired_energy_var_start,
             desired_energy_var_end=desired_energy_var_end,
             step_size_init=step_size_init,
+            prior_family=prior_family,
+            prior_kwargs=prior_kwargs,
         )
 
     def fit(self, x: ArrayLike, y: ArrayLike):
@@ -677,6 +704,8 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
         desired_energy_var_start: float = 0.5,
         desired_energy_var_end: float = 0.1,
         step_size_init: float | None = None,
+        prior_family: PriorDist = PriorDist.STANDARDNORMAL,
+        prior_kwargs: dict[str, Any] | None = None,
     ):
         """Initialise the classifier with architecture,
         optimisation, and sampling settings.
@@ -711,6 +740,12 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
             Target energy variance at the end of warm-up.
         step_size_init : float | None, optional
             Override for the sampler's initial step size; falls back to ``lr``.
+        prior_family : PriorDist
+            Prior distribution for network weights; defaults to the standard
+            normal (loc=0, scale=1).
+        prior_kwargs : dict[str, Any] | None
+            Optional keyword arguments forwarded to the chosen `prior_family`
+            (e.g. ``{"scale": 0.1}`` for a wider or narrower Normal or Laplace).
         """
 
         super().__init__(
@@ -729,6 +764,8 @@ class BdeClassifier(Bde, BaseEstimator, ClassifierMixin):
             desired_energy_var_start=desired_energy_var_start,
             desired_energy_var_end=desired_energy_var_end,
             step_size_init=step_size_init,
+            prior_family=prior_family,
+            prior_kwargs=prior_kwargs,
         )
 
     def _prepare_targets(self, y_checked):

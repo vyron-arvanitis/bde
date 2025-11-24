@@ -12,8 +12,8 @@ from bde.sampler.types import BaseStrEnum, ParamTree
 
 
 class PriorDist(BaseStrEnum):
-    NORMAL = "Normal"  # allow changing the normal for the user
-    STANDARDNORMAL = "StandardNormal"  # maybe remove
+    NORMAL = "Normal"
+    STANDARDNORMAL = "StandardNormal"
     LAPLACE = "Laplace"
 
     def get_prior(self, **parameters):

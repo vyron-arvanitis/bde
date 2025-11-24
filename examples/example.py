@@ -31,6 +31,7 @@ from sklearn.model_selection import train_test_split
 
 from bde import BdeClassifier, BdeRegressor
 from bde.loss.loss import CategoricalCrossEntropy, GaussianNLL
+from bde.sampler.prior import PriorDist
 
 
 def regression_example():
@@ -175,10 +176,12 @@ def concrete_data_example():
         loss=GaussianNLL(),
         epochs=200,
         lr=1e-3,
-        warmup_steps=50000,
-        n_samples=10000,
+        warmup_steps=500,
+        n_samples=100,
         n_thinning=10,
         patience=10,
+        prior_family=PriorDist.NORMAL,
+        prior_kwargs={"loc": 0, "scale": 1.5},
     )
 
     print(f"the params are {regressor.get_params()}")
