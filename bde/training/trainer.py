@@ -14,21 +14,8 @@ class FnnTrainer:
     def __init__(self):
         """
         #TODO: documentation
-
+        
         """
-        self.history = {}
-        self.log_every = 100
-        self.keep_best = False
-
-    def _reset_history(self):
-        """
-        #TODO: documentation
-
-        Returns
-        -------
-
-        """
-        self.history = {"train_loss": []}
 
     @staticmethod
     def make_loss_fn(model, loss_obj: BaseLoss):

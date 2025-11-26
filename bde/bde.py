@@ -3,6 +3,8 @@
 from functools import partial
 from typing import TYPE_CHECKING, Any, Callable, Protocol, cast
 
+import json
+
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -425,6 +427,16 @@ class Bde:
             epochs=self.epochs,
             loss=loss_obj,
         )
+
+        #TODO: Delete this 
+        import json
+        import numpy as np
+        serializable_tree = {
+            "train": np.asarray(self._bde.history["train"]).tolist(),
+            "val":   np.asarray(self._bde.history["val"]).tolist(),
+        }
+        with open("loss_tree.json", "w") as f:
+            json.dump(serializable_tree, f, indent=2)
 
         logpost_one = self._build_log_post(
             x_checked, y_checked, resolved_prior_family, self.prior_kwargs

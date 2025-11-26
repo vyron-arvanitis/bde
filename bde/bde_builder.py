@@ -99,7 +99,7 @@ class BdeBuilder(FnnTrainer):
         self.eval_every = 1  # Check epochs for early stopping
         self.keep_best = True
         self.min_delta = 1e-9
-
+        self.history = {"epoch": [], "train_loss": [], "val_loss": []}
         self.results: dict[str, Any] = {}
 
     @staticmethod
@@ -230,6 +230,10 @@ class BdeBuilder(FnnTrainer):
                 min_delta=self.min_delta,
                 eval_every=self.eval_every,
             )
+    
+    def _reset_history(self):
+        """Reset the training history dictionary."""
+        self.history = {"epoch": [], "train_loss": [], "val_loss": []}
 
     def _prepare_distributed_state(
         self, components: TrainingComponents
@@ -300,6 +304,7 @@ class BdeBuilder(FnnTrainer):
             params_de, opt_state_de, pstep, peval, ensemble_size
         )
 
+    #TODO: Look over history
     def _training_loop(
         self,
         state: DistributedTrainingState,
@@ -339,14 +344,20 @@ class BdeBuilder(FnnTrainer):
         """
         params_de = state.params_de
         opt_state_de = state.opt_state_de
+        
+        train_loss_e = jnp.full((epochs, state.ensemble_size), jnp.nan)
+        val_loss_e   = jnp.full((epochs, state.ensemble_size), jnp.nan)
 
         for epoch in range(epochs):
             stopped_de = callback.stopped_mask(callback_state)
             params_de, opt_state_de, lvals_de = state.pstep(
                 params_de, opt_state_de, x_train, y_train, stopped_de
             )
-            train_mean = float(jnp.mean(jax.device_get(lvals_de)))
-            self.history["train_loss"].append(train_mean)
+            
+            train_lvals_e = lvals_de.reshape(-1)[: state.ensemble_size]
+            self.history["epoch"].append(epoch)
+            train_loss_e = train_loss_e.at[epoch].set(train_lvals_e)
+
             # if epoch % self.log_every == 0:
             #     print(epoch, train_mean)
 
@@ -357,6 +368,7 @@ class BdeBuilder(FnnTrainer):
             )
             if should_eval:
                 val_lvals_de = state.peval(params_de, x_val, y_val)
+                val_loss_e = val_lvals_de.reshape(-1)[: state.ensemble_size]
                 callback_state = callback.update(
                     callback_state, epoch, params_de, val_lvals_de
                 )
@@ -370,6 +382,13 @@ class BdeBuilder(FnnTrainer):
                 if callback.all_stopped(callback_state):
                     logger.info("All members stopped by epoch %d.", epoch)
                     break
+
+        epochs_run = len(self.history["epoch"])
+        self.history = {
+            "train": train_loss_e[:epochs_run],  # (epochs_run, ensemble_size)
+            "val":   val_loss_e[:epochs_run],    # (epochs_run, ensemble_size)
+        }
+        
         return TrainingLoopResult(params_de, opt_state_de, callback_state)
 
     def fit_members(

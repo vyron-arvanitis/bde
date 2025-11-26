@@ -38,10 +38,14 @@ def regression_example():
     print("-" * 20)
     print("Regression example")
     print("-" * 20)
-    data = fetch_openml(name="airfoil_self_noise", as_frame=True)
+    #data = fetch_openml(name="airfoil_self_noise", as_frame=True)
+    data = pd.read_csv("bde/data/airfoil.csv", sep=",")
 
-    X = data.data.values  # shape (1503, 5)
-    y = data.target.values.reshape(-1, 1)  # shape (1503, 1)
+    feature_cols = ["frequency","angle","length","velocity","thickness"]   # adapt to your real column names
+    target_col = "target"
+
+    X = data[feature_cols].values                  # shape (n_samples, n_features)
+    y = data[target_col].values.reshape(-1, 1) 
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -57,14 +61,14 @@ def regression_example():
 
     regressor = BdeRegressor(
         hidden_layers=[16, 16],
-        n_members=8,
+        n_members=9,
         seed=0,
         loss=GaussianNLL(),
         epochs=200,
         lr=1e-3,
-        warmup_steps=5000,  # 50k in the original paper
-        n_samples=2000,  # 10k in the original paper
-        n_thinning=2,
+        warmup_steps=0,  # 50k in the original paper
+        n_samples=0,  # 10k in the original paper
+        n_thinning=0,
         patience=10,
     )
 
@@ -222,5 +226,5 @@ def concrete_data_example():
 
 if __name__ == "__main__":
     # classification_example()
-    # regression_example()
-    concrete_data_example()
+    regression_example()
+    #concrete_data_example()
