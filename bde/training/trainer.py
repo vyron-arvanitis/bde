@@ -12,10 +12,7 @@ class BaseTrainer:  # TODO: maybe later?
 
 class FnnTrainer:
     def __init__(self):
-        """
-        #TODO: documentation
-        
-        """
+        """Class responsible for training FNNs."""
 
     @staticmethod
     def make_loss_fn(model, loss_obj: BaseLoss):

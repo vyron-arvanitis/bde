@@ -591,7 +591,7 @@ class Bde:
             raw=raw,
             probabilities=probabilities,
         )
-    
+
     def history(self):
         """Return training history from the builder.
 
@@ -608,6 +608,7 @@ class Bde:
                 " successfully."
             )
         return self._bde.history
+
 
 class BdeRegressor(Bde, RegressorMixin, BaseEstimator):
     """Regression-friendly wrapper exposing scikit-learn style API."""

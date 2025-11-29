@@ -71,7 +71,7 @@ class BdeBuilder(FnnTrainer):
         patience: int,
         validation_split: float,
         lr: float,
-        weight_decay: float
+        weight_decay: float,
     ):
         """Configure the builder with architectural and training defaults.
 
@@ -238,7 +238,7 @@ class BdeBuilder(FnnTrainer):
                 min_delta=self.min_delta,
                 eval_every=self.eval_every,
             )
-    
+
     def _reset_history(self):
         """Reset the training history dictionary."""
         self.history = {"epoch": [], "train_loss": [], "val_loss": []}
@@ -351,16 +351,16 @@ class BdeBuilder(FnnTrainer):
         """
         params_de = state.params_de
         opt_state_de = state.opt_state_de
-        
+
         train_loss_e = jnp.full((epochs, state.ensemble_size), jnp.nan)
-        val_loss_e   = jnp.full((epochs, state.ensemble_size), jnp.nan)
+        val_loss_e = jnp.full((epochs, state.ensemble_size), jnp.nan)
 
         for epoch in range(epochs):
             stopped_de = callback.stopped_mask(callback_state)
             params_de, opt_state_de, lvals_de = state.pstep(
                 params_de, opt_state_de, x_train, y_train, stopped_de
             )
-            
+
             train_lvals_e = lvals_de.reshape(-1)[: state.ensemble_size]
             self.history["epoch"].append(epoch)
             train_loss_e = train_loss_e.at[epoch].set(train_lvals_e)
@@ -390,8 +390,8 @@ class BdeBuilder(FnnTrainer):
 
         epochs_run = len(self.history["epoch"])
 
-        train_hist = train_loss_e[:epochs_run]  
-        val_hist   = val_loss_e[:epochs_run]  
+        train_hist = train_loss_e[:epochs_run]
+        val_hist = val_loss_e[:epochs_run]
 
         stop_epochs = np.asarray(
             callback.stop_epoch_de(callback_state, ensemble_size=state.ensemble_size)
@@ -401,18 +401,19 @@ class BdeBuilder(FnnTrainer):
             f"Model{i}": {
                 "epoch": jnp.arange(epochs_run),
                 "trainloss": train_hist[:, i],
-                "valloss":   val_hist[:, i],
+                "valloss": val_hist[:, i],
                 "stop_epoch": int(stop_epochs[i]),
             }
             for i in range(state.ensemble_size)
         }
 
         for _, model_hist in self.history.items():
-            s = model_hist["stop_epoch"] 
-            if s < 0: continue
+            s = model_hist["stop_epoch"]
+            if s < 0:
+                continue
             model_hist["trainloss"] = model_hist["trainloss"][: s + 1]
-            model_hist["valloss"]   = model_hist["valloss"][: s + 1]
-            model_hist["epoch"]     = model_hist["epoch"][: s + 1]
+            model_hist["valloss"] = model_hist["valloss"][: s + 1]
+            model_hist["epoch"] = model_hist["epoch"][: s + 1]
 
         return TrainingLoopResult(params_de, opt_state_de, callback_state)
 
@@ -454,7 +455,9 @@ class BdeBuilder(FnnTrainer):
             y_val = None
         else:
             x_train, x_val, y_train, y_val = super().split_train_val(
-                x, y, val_size=self.validation_split, 
+                x,
+                y,
+                val_size=self.validation_split,
             )  # for early stopping
 
         components = self._create_training_components(optimizer, loss)

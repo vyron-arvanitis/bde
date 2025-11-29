@@ -38,14 +38,20 @@ def regression_example():
     print("-" * 20)
     print("Regression example")
     print("-" * 20)
-    #data = fetch_openml(name="airfoil_self_noise", as_frame=True)
+    # data = fetch_openml(name="airfoil_self_noise", as_frame=True)
     data = pd.read_csv("bde/data/airfoil.csv", sep=",")
 
-    feature_cols = ["frequency","angle","length","velocity","thickness"]   # adapt to your real column names
+    feature_cols = [
+        "frequency",
+        "angle",
+        "length",
+        "velocity",
+        "thickness",
+    ]  # adapt to your real column names
     target_col = "target"
 
-    X = data[feature_cols].values                  # shape (n_samples, n_features)
-    y = data[target_col].values.reshape(-1, 1) 
+    X = data[feature_cols].values  # shape (n_samples, n_features)
+    y = data[target_col].values.reshape(-1, 1)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
@@ -109,6 +115,8 @@ def regression_example():
 
     score = regressor.score(Xte, yte)
     print(f"The sklearn test score is {score}")
+
+    print(f"This is the history of the regressor\n {regressor.history()}")
 
 
 def classification_example():
@@ -231,6 +239,6 @@ def concrete_data_example():
 
 
 if __name__ == "__main__":
-    classification_example()
-    # regression_example()
-    #concrete_data_example()
+    # classification_example()
+    regression_example()
+    # concrete_data_example()

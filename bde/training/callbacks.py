@@ -122,7 +122,7 @@ class EarlyStoppingCallback:
     def should_evaluate(self, epoch: int) -> bool:
         """Return whether evaluation should run on this epoch."""
         return (epoch % self.eval_every) == 0
-    
+
     def stop_epoch_de(self, state: EarlyStoppingState, *, ensemble_size: int):
         """Return the epoch at which each real member stopped."""
         return state.stop_epoch_de.reshape(-1)[:ensemble_size]

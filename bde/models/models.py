@@ -90,7 +90,13 @@ class Fnn(BaseModel):
             Model outputs with shape '(n_samples, output_dim)'.
         """
 
-        # TODO: [@later] have a validation of input layer and number of features
+        n_features = x.shape[-1]
+        expected_features = self.sizes[0]
+        if n_features != expected_features:
+            raise ValueError(
+                f"Input feature dimension mismatch: expected {expected_features}, got"
+                f" {n_features}"
+            )
         act_fn = self._get_activation(self.activation_name)
         for W, b in params[:-1]:
             x = act_fn(jnp.dot(x, W) + b)
