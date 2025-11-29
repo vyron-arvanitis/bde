@@ -428,16 +428,6 @@ class Bde:
             loss=loss_obj,
         )
 
-        #TODO: Delete this 
-        import json
-        import numpy as np
-        serializable_tree = {
-            "train": np.asarray(self._bde.history["train"]).tolist(),
-            "val":   np.asarray(self._bde.history["val"]).tolist(),
-        }
-        with open("loss_tree.json", "w") as f:
-            json.dump(serializable_tree, f, indent=2)
-
         logpost_one = self._build_log_post(
             x_checked, y_checked, resolved_prior_family, self.prior_kwargs
         )
@@ -594,7 +584,23 @@ class Bde:
             raw=raw,
             probabilities=probabilities,
         )
+    
+    def history(self):
+        """Return training history from the builder.
 
+        Returns
+        -------
+        dict[str, dict[str, list[float]]]
+            Dictionary mapping member names to their training and validation loss
+            histories.
+        """
+
+        if self._bde is None:
+            raise RuntimeError(
+                "The BDE builder is not initialized; ensure 'fit' has been executed"
+                " successfully."
+            )
+        return self._bde.history
 
 class BdeRegressor(Bde, RegressorMixin, BaseEstimator):
     """Regression-friendly wrapper exposing scikit-learn style API."""

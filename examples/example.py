@@ -64,12 +64,12 @@ def regression_example():
         n_members=9,
         seed=0,
         loss=GaussianNLL(),
-        epochs=200,
+        epochs=1000,
         lr=1e-3,
-        warmup_steps=0,  # 50k in the original paper
-        n_samples=0,  # 10k in the original paper
+        warmup_steps=2,  # 50k in the original paper
+        n_samples=2,  # 10k in the original paper
         n_thinning=0,
-        patience=10,
+        patience=1,
     )
 
     print(f"the params are {regressor.get_params()}")  # get_params is from sklearn!

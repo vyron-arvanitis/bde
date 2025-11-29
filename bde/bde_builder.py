@@ -4,6 +4,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Callable
 
+import numpy as np
+
 import jax
 import jax.numpy as jnp
 import optax
@@ -304,7 +306,6 @@ class BdeBuilder(FnnTrainer):
             params_de, opt_state_de, pstep, peval, ensemble_size
         )
 
-    #TODO: Look over history
     def _training_loop(
         self,
         state: DistributedTrainingState,
@@ -358,9 +359,6 @@ class BdeBuilder(FnnTrainer):
             self.history["epoch"].append(epoch)
             train_loss_e = train_loss_e.at[epoch].set(train_lvals_e)
 
-            # if epoch % self.log_every == 0:
-            #     print(epoch, train_mean)
-
             should_eval = (
                 (x_val is not None)
                 and (y_val is not None)
@@ -368,7 +366,8 @@ class BdeBuilder(FnnTrainer):
             )
             if should_eval:
                 val_lvals_de = state.peval(params_de, x_val, y_val)
-                val_loss_e = val_lvals_de.reshape(-1)[: state.ensemble_size]
+                val_lvals_e = val_lvals_de.reshape(-1)[: state.ensemble_size]
+                val_loss_e = val_loss_e.at[epoch].set(val_lvals_e)
                 callback_state = callback.update(
                     callback_state, epoch, params_de, val_lvals_de
                 )
@@ -384,11 +383,31 @@ class BdeBuilder(FnnTrainer):
                     break
 
         epochs_run = len(self.history["epoch"])
+
+        train_hist = train_loss_e[:epochs_run]  
+        val_hist   = val_loss_e[:epochs_run]  
+
+        stop_epochs = np.asarray(
+            callback.stop_epoch_de(callback_state, ensemble_size=state.ensemble_size)
+        )
+
         self.history = {
-            "train": train_loss_e[:epochs_run],  # (epochs_run, ensemble_size)
-            "val":   val_loss_e[:epochs_run],    # (epochs_run, ensemble_size)
+            f"Model{i}": {
+                "epoch": jnp.arange(epochs_run),
+                "trainloss": train_hist[:, i],
+                "valloss":   val_hist[:, i],
+                "stop_epoch": int(stop_epochs[i]),
+            }
+            for i in range(state.ensemble_size)
         }
-        
+
+        for _, model_hist in self.history.items():
+            s = model_hist["stop_epoch"] 
+            if s < 0: continue
+            model_hist["trainloss"] = model_hist["trainloss"][: s + 1]
+            model_hist["valloss"]   = model_hist["valloss"][: s + 1]
+            model_hist["epoch"]     = model_hist["epoch"][: s + 1]
+
         return TrainingLoopResult(params_de, opt_state_de, callback_state)
 
     def fit_members(
@@ -448,7 +467,7 @@ class BdeBuilder(FnnTrainer):
             y_val,
             epochs,
         )
-        callback.stop_epochs(
+        callback.stop_epoch_de(
             loop_result.callback_state, ensemble_size=state.ensemble_size
         )
 
