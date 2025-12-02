@@ -31,7 +31,6 @@ def validate_fit_data(estimator, X, y):
             else:
                 multi_output = True
         else:
-            # Estimator does not support multi-output: warn and fall back to first column
             warnings.warn(
                 (
                     "A column-vector y was passed when a 1d array was expected. Please"

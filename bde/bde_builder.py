@@ -4,10 +4,9 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Callable
 
-import numpy as np
-
 import jax
 import jax.numpy as jnp
+import numpy as np
 import optax
 from jax.tree_util import tree_map
 from jax.typing import ArrayLike

@@ -3,8 +3,6 @@
 from functools import partial
 from typing import TYPE_CHECKING, Any, Callable, Protocol, cast
 
-import json
-
 import jax
 import jax.numpy as jnp
 import numpy as np
