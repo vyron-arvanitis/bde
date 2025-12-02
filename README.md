@@ -65,22 +65,31 @@ Adjust the value to match the number of CPU (or GPU) devices you plan to use.
 #### Airfoil
 
 **Airfoil Self-Noise Dataset**
+
 **Source:** UCI Machine Learning Repository (Dua & Graff, 2017)
+
 **Task:** Regression (predicting scaled sound pressure level)
+
 **Notes:** This is the standard `airfoil_self_noise` dataset used in many regression benchmarks.
 
 #### Concrete
 
 **Concrete Compressive Strength Dataset**
+
 **Source:** UCI Machine Learning Repository (Yeh, 2006)
+
 **Task:** Regression (predicting concrete compressive strength based on mixture components)
+
 **Notes:** Widely used as a tabular regression benchmark. Your file `concrete.data` matches the UCI format.
 
 ##### Iris
 
 **Iris Dataset**
+
 **Source:** Fisher (1936); canonical modern version distributed via scikit-learn
+
 **Task:** Multiclass classification (setosa, versicolor, virginica)
+
 **Notes:** Standard toy dataset for testing classification models.
 
 
