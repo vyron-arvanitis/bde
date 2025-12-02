@@ -63,7 +63,7 @@ Adjust the value to match the number of CPU (or GPU) devices you plan to use.
 ###  Datasets included in the package for testing purposes
 
 
-**Airfoil Self-Noise Dataset**
+#### Airfoil Self-Noise Dataset
 
 **Source:** UCI Machine Learning Repository (Dua & Graff, 2017)
 
@@ -72,7 +72,7 @@ Adjust the value to match the number of CPU (or GPU) devices you plan to use.
 **Notes:** This is the standard `airfoil_self_noise` dataset used in many regression benchmarks.
 
 
-**Concrete Compressive Strength Dataset**
+#### Concrete Compressive Strength Dataset
 
 **Source:** UCI Machine Learning Repository (Yeh, 2006)
 
@@ -81,7 +81,7 @@ Adjust the value to match the number of CPU (or GPU) devices you plan to use.
 **Notes:** Widely used as a tabular regression benchmark. Your file `concrete.data` matches the UCI format.
 
 
-**Iris Dataset**
+#### Iris Dataset
 
 **Source:** Fisher (1936); canonical modern version distributed via scikit-learn
 
