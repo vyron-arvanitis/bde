@@ -118,17 +118,17 @@ yte = (y_test - Ymu) / Ystd
 
 regressor = BdeRegressor(
     hidden_layers=[16, 16],
-    n_members=9,
+    n_members=8,
     seed=0,
     loss=GaussianNLL(),
-    epochs=1000,
+    epochs=200,
     validation_split=0.15,
     lr=1e-3,
     weight_decay=1e-4,
-    warmup_steps=2000,  # 50k in the original paper
-    n_samples=100,  # 10k in the original paper
-    n_thinning=0,
-    patience=1,
+    warmup_steps=5000,  # 50k in the original paper
+    n_samples=2000,  # 10k in the original paper
+    n_thinning=2,
+    patience=10,
 )
 
 print(f"the params are {regressor.get_params()}")  # get_params is from sklearn!
@@ -168,8 +168,17 @@ score = regressor.score(Xte, yte)
 print(f"The sklearn test score is {score}")
 
 print(f"This is the history of the regressor\n {regressor.history()}")
-
 ```
+
+Gaussian likelihood parameterization
+------------------------------------
+
+For regression, the network outputs two values per datapoint: a mean (`mu`) and an
+unconstrained scale. The scale is always transformed with `softplus` (plus a small
+epsilon) inside the loss, warmup, sampling, and prediction utilities to ensure it
+remains positive. When you request `raw=True`, you receive the unconstrained scale
+head and should apply the same `softplus` transform yourself, as shown in the example
+above.
 
 ### Classification Example
 
@@ -201,10 +210,9 @@ classifier = BdeClassifier(
     epochs=1000,
     validation_split=0.15,
     lr=1e-3,
-    weight_decay=1e-4,
-    warmup_steps=2,  # very few steps required for this simple dataset
-    n_samples=2,
-    n_thinning=0,
+    warmup_steps=400,  # very few steps required for this simple dataset
+    n_samples=100,
+    n_thinning=1,
     patience=10,
 )
 

@@ -62,6 +62,20 @@ The estimators expose several prediction modes:
 ``predict_proba(X)``
     Classification only; returns class probability vectors.
 
+Gaussian likelihood (regression)
+--------------------------------
+
+Regression heads emit a mean and an unconstrained scale. The scale is mapped to a
+positive standard deviation with ``softplus`` (plus a small epsilon) in all stages:
+the training loss :class:`bde.loss.GaussianNLL <bde.loss.loss.GaussianNLL>`, the
+posterior log-likelihood in :func:`bde.sampler.probabilistic.ProbabilisticModel.log_likelihood`,
+and the prediction helpers in :func:`bde.bde_evaluator.BdePredictor._regression_mu_sigma`.
+.. note::
+
+   If you request ``raw=True`` from the regressor you receive the unconstrained scale
+   head and should apply the same ``softplus`` transform before treating it as a
+   standard deviation.
+
 How to read uncertainties
 -------------------------
 
