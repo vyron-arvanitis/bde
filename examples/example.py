@@ -27,7 +27,9 @@ import jax.numpy as jnp
 from jax.scipy.stats import norm
 from sklearn.datasets import fetch_openml, load_iris
 from sklearn.metrics import root_mean_squared_error
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 from bde import BdeClassifier, BdeRegressor
 from bde.loss.loss import CategoricalCrossEntropy, GaussianNLL
@@ -228,7 +230,66 @@ def regression_concrete_example():
     print(f"The sklearn score is {score}")
 
 
+def sklearn_pipeline():
+    print("-" * 20)
+    print("Sklearn Pipeline with GridSearchCV example")
+    print("-" * 20)
+
+    base_estimator = BdeClassifier(
+        n_members=4,
+        hidden_layers=[16, 16],
+        seed=0,
+        loss=CategoricalCrossEntropy(),
+        activation="relu",
+        epochs=100,
+        lr=1e-3,
+        warmup_steps=400,  # very few steps required for this simple dataset
+        n_samples=100,
+        n_thinning=1,
+        patience=10,
+    )
+
+    pipe = Pipeline(
+        [
+            ("scaler", StandardScaler(with_mean=True, with_std=True)),
+            ("clf", base_estimator),
+        ]
+    )
+
+    # Explore relevant BDE hyperparameters while keeping the search lightweight.
+    param_grid = {
+        "clf__n_members": [4],
+        "clf__hidden_layers": [[8, 8], [16, 16]],
+        "clf__epochs": [20],
+        "clf__lr": [1e-3],
+        "clf__warmup_steps": [400],
+        "clf__n_samples": [100],
+        "scaler__with_std": [True],
+    }
+
+    grid = GridSearchCV(
+        estimator=pipe,
+        param_grid=param_grid,
+        scoring={"accuracy": "accuracy", "f1_macro": "f1_macro"},
+        refit="f1_macro",
+        n_jobs=None,  # single-threaded for clarity; set to -1 if you want parallel
+        cv=3,
+        verbose=1,
+        return_train_score=True,
+    )
+    iris = load_iris()
+    X = iris.data.astype("float32")
+    y = iris.target.astype("int32").ravel()  # 0, 1, 2
+
+    X_train, _, y_train, _ = train_test_split(X, y, test_size=0.2, random_state=42)
+    grid.fit(X_train, y_train)
+
+    print("Best params:", grid.best_params_)
+    print("Best CV f1_macro: {:.4f}".format(grid.best_score_))
+
+
 if __name__ == "__main__":
     regression_airfoil_example()
     classification_example()
     regression_concrete_example()
+    sklearn_pipeline()
