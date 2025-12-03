@@ -15,7 +15,7 @@ uncertainty estimation.
 
 In particular, **bde** implements **Microcanonical Langevin Ensembles (MILE)** as
 introduced in [*Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks* (ICLR 2025)](https://arxiv.org/abs/2502.06335).
-A conceptual overview of MILE is shown below (in general implementation details of this package are not exactly matching this diagram):
+A conceptual overview of MILE is shown below:
 
 <div style="width: 60%; margin: auto;">
     <img src="doc/_static/img/flowchart.png" alt="MILE Overview" style="width: 100%;">
