@@ -775,12 +775,13 @@ class BdeRegressor(Bde, RegressorMixin, BaseEstimator):
             When ``True``, ignore other flags and return the raw ensemble
             outputs with shape ``(n_members, n_samples_draws, n_samples, 2)``,
             corresponding to per-member, per-draw mean and scale parameters.
+
+        Note
+        ----
             The regression likelihood is Gaussian with mean given by the first
             head and scale given by the second head passed through ``softplus``
             (plus a small epsilon) during training, sampling, and evaluation;
-            consumers requesting ``raw=True`` receive the unconstrained scale
-            head and should apply the same transformation if a positive scale
-            is needed.
+
 
         Returns
         -------

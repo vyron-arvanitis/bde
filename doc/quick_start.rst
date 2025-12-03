@@ -6,8 +6,7 @@ Quick start
 
 `bde` implements Bayesian Deep Ensembles that plug directly into scikit-learn
 pipelines while running training and sampling in JAX. This page walks through
-setting up the environment, running your first estimators, and validating the
-installation.
+installing the package, setting up the environment and information regarding JAX device count.
 
 Installation
 ============
@@ -67,9 +66,9 @@ From there ``pytest``, ``ruff`` and ``sphinx-build`` are available on ``PATH``.
 Next steps
 ==========
 
-* Dive into :ref:`user_guide` for a walkthrough of the estimator internals and
+* Dive into :ref:`user_guide` for a walkthrough of the package internals and
   configuration knobs.
 * Explore the auto-generated API reference in :ref:`api` to see every public
   class, function, and dataclass.
 * Run the gallery in :ref:`general_examples` to compare regression and
-  classification behaviours on real-world datasets.
+  classification behaviours on real-world datasets!
