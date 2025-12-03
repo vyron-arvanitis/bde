@@ -78,7 +78,9 @@ html_context = {
 autodoc_default_options = {
     "members": True,
     "inherited-members": True,
+    "special-members": "__init__",
 }
+
 
 # generate autosummary even if no references
 autosummary_generate = True

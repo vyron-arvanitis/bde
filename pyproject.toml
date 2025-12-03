@@ -46,7 +46,7 @@ platforms = ["win-64", "linux-64", "osx-64", "osx-arm64"]
 
 [tool.pixi.dependencies]
 python = ">=3.9"
-scikit-learn = ">=1.4.2"
+scikit-learn = ">=1.7.2"
 numpy = ">=1.26.4"
 scipy = ">=1.16.2"
 tqdm = ">=4.67.1"
