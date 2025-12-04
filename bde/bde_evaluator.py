@@ -39,7 +39,7 @@ class BdePredictor:
         self._raw_preds: ArrayLike | None = None
 
     def get_raw_preds(self) -> ArrayLike:
-        """Materialise ensemble predictions with leading axes (E, T, N, *).
+        """Materialise ensemble predictions with leading axes ``(E, T, N, ...)``.
 
         Returns
         -------
@@ -66,6 +66,10 @@ class BdePredictor:
         -------
         tuple[jax.Array, jax.Array]
             Predictive means and softplus-transformed scales with shape (E, T, N).
+            The second regression head is treated as an unconstrained scale
+            parameter and is transformed with ``jax.nn.softplus`` here and in
+            the sampler log-likelihood so that training and sampling share the
+            same parameterisation.
         """
 
         preds = self.get_raw_preds()  # (E, T, N, 2)
@@ -73,13 +77,71 @@ class BdePredictor:
         sigma = jax.nn.softplus(preds[..., 1]) + 1e-6
         return mu, sigma
 
+    def _credible_intervals(
+        self,
+        mu: ArrayLike,
+        sigma: ArrayLike,
+        credible_intervals: list[float],
+    ) -> ArrayLike:
+        r"""Compute predictive credible intervals for a scalar regression model using
+        Monte Carlo sampling from each Gaussian posterior component.
+
+        This method implements the *expensive* but statistically correct approach:
+        for every posterior parameter pair (mu, sigma), we draw ``n`` samples from
+        :math:`\mathcal{N}(\mu, \sigma)` and compute quantiles over the entire set
+        of synthetic predictions. This corresponds to estimating credible intervals
+        from the full mixture distribution produced by the ensemble and posterior
+        samples.
+
+        Parameters
+        ----------
+        mu : jax.Array
+            Predictive means with shape ``(E, T, N)`` where ``E`` is the number of
+            ensemble members, ``T`` the number of posterior samples per member, and
+            ``N`` the number of datapoints.
+
+        sigma : jax.Array
+            Predictive standard deviations with shape ``(E, T, N)``, obtained after
+            applying the softplus transformation to the second regression head.
+
+        credible_intervals : list[float]
+            A list of quantile levels in ``[0, 1]`` (e.g. ``[0.1, 0.9]``), defining
+            the desired credible interval bounds.
+
+        Returns
+        -------
+        jax.Array
+            Array of shape ``(Q, N)`` where ``Q = len(credible_intervals)``.
+            Each row corresponds to a quantile evaluated across all samples drawn
+            from the mixture of Gaussians defined by the ensemble and its posterior
+            samples.
+        """
+
+        E, T, N, _ = self.get_raw_preds().shape
+
+        n = 1 if T > 1000 else 10
+        key = jax.random.PRNGKey(0)
+
+        # Expand for broadcasting
+        mu_exp = mu[:, :, :, None]  # (E,T,N,1)
+        sigma_exp = sigma[:, :, :, None]  # (E,T,N,1)
+
+        noise = jax.random.normal(key, shape=(E, T, N, n))  # (E,T,N,n)
+
+        # Samples from the mixture of Gaussians
+        samples = mu_exp + sigma_exp * noise  # (E,T,N,n)
+
+        return jnp.quantile(
+            samples, q=jnp.array(credible_intervals), axis=(0, 1, 3)
+        )  # (Q,N)
+
     def get_preds_per_member(self) -> tuple[jax.Array, jax.Array]:
         """Summarise each ensemble member by mean prediction and total uncertainty.
 
         Returns
         -------
         tuple[jax.Array, jax.Array]
-            Tuple of mean predictions and standard deviations shaped (E, N).
+            Tuple of mean predictions and standard deviations shaped ``(E, N)``.
         """
 
         mu, sigma = self._regression_mu_sigma()
@@ -111,22 +173,16 @@ class BdePredictor:
 
         mu, sigma = self._regression_mu_sigma()
         mu_mean = jnp.mean(mu, axis=(0, 1))
-        var_ale = jnp.mean(sigma**2, axis=(0, 1))
-        var_epi = jnp.var(mu, axis=(0, 1))
+        var_ale = jnp.mean(sigma**2, axis=(0, 1))  # aleatoric variance
+        var_epi = jnp.var(mu, axis=(0, 1))  # epistemic variance
         std_total = jnp.sqrt(var_ale + var_epi)
         out = {"mean": mu_mean}
         if mean_and_std:
             out["std"] = std_total
         if credible_intervals:
-            # this diregards the sigmas and uses only the mus which is an ok strategy
-            # (the cheapest one, could be a default)
-            # if you want to incorporate the sigmas you could sample for example n
-            # (n=1 for more than 1000 samples and n=10 for less than 1000 samples)
-            # predictions from each mu,sigma (gaussian) pair and then compute the
-            # quantiles over all these sampled predictions - likely a better
-            # strategy but more expensive.
-            qs = jnp.quantile(mu, q=jnp.array(credible_intervals), axis=(0, 1))
-            out["credible_intervals"] = qs
+            out["credible_intervals"] = self._credible_intervals(
+                mu, sigma, credible_intervals
+            )
         if raw:
             out["raw"] = self.get_raw_preds()
         return out

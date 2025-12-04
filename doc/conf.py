@@ -10,9 +10,10 @@ import sys
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 from importlib.metadata import version as get_version
 
-project = "Scikit-learn Project Template"
-copyright = "2016, V. Birodkar"
-author = "V. Birodkar"
+project = "bde"
+copyright = "2025, Arvanitis Vyron, Aslanidis Angelos, Sommer Emanuel"
+author = "Arvanitis Vyron, Aslanidis Angelos, Sommer Emanuel"
+
 release = get_version("bde")
 version = ".".join(release.split(".")[:3])
 
@@ -77,7 +78,9 @@ html_context = {
 autodoc_default_options = {
     "members": True,
     "inherited-members": True,
+    "special-members": "__init__",
 }
+
 
 # generate autosummary even if no references
 autosummary_generate = True

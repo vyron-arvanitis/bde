@@ -9,7 +9,7 @@ These are the two Estimators that the bde package offers
 .. currentmodule:: bde
 
 Estimators
-=========
+==========
 
 .. autosummary::
    :toctree: generated/
@@ -17,3 +17,12 @@ Estimators
 
    BdeRegressor
    BdeClassifier
+
+Predictors
+==========
+
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   BdePredictor

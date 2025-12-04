@@ -4,7 +4,7 @@ objects (i.e. estimators, displays, functions) from the `bde` package.
 """
 
 # Adapted from scikit-learn
-# Authors: scikit-learn-contrib developers
+# Authors: Arvanitis V., Aslanidis A., Sommer E. and scikit-learn-contrib developers
 # License: BSD 3 clause
 
 import inspect
@@ -72,8 +72,6 @@ def all_estimators(type_filter=None):
             module_parts = module_name.split(".")
             if any(part in _MODULE_TO_IGNORE for part in module_parts):
                 continue
-            if module_name.startswith("bde.bde"):
-                continue
             module = import_module(module_name)
             classes = inspect.getmembers(module, inspect.isclass)
             classes = [
@@ -83,7 +81,6 @@ def all_estimators(type_filter=None):
             all_classes.extend(classes)
 
     all_classes = set(all_classes)
-
     estimators = [
         c
         for c in all_classes

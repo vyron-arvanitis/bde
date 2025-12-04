@@ -3,6 +3,9 @@ from abc import ABC, abstractmethod
 import jax
 import jax.nn as nn
 import jax.numpy as jnp
+from jax.typing import ArrayLike
+
+from bde.sampler.types import ParamList
 
 
 class BaseModel(ABC):
@@ -17,24 +20,27 @@ class BaseModel(ABC):
     def forward(self, params, x):
         ...
 
-    @abstractmethod
-    def apply(self, params, x, **kwargs):
-        ...
-
 
 class Fnn(BaseModel):
     """Single FNN that can optionally train itself on init."""
 
-    def __init__(self, sizes, init_seed: int = 0, *, act_fn: str):
-        """
-        #TODO: documentation
+    def __init__(self, sizes: list[int], init_seed: int = 0, *, act_fn: str):
+        """Initialize a fully-connected feed-forward neural network.
 
         Parameters
         ----------
-        sizes
-        init_seed
+        sizes : list[int]
+            List of layer sizes. `sizes[0]` is the input dimension, and
+            `sizes[-1]` is the output dimension. Each consecutive pair defines
+            one linear layer.
+        init_seed : int
+            Seed used to initialize the random number generator for parameter
+            initialization.
+        act_fn : str
+            Name of the activation function to use for all hidden layers.
+            Must be supported by `_get_activation`.
         """
-        super().__init__()  # init the trainer side (history, etc.)
+
         self.sizes = sizes
         self.params = self._init_mlp(seed=init_seed)
         self.activation_name = act_fn
@@ -43,17 +49,22 @@ class Fnn(BaseModel):
     def name(self) -> str:
         return "Fnn"
 
-    def _init_mlp(self, seed):
-        """
-        #TODO:documentation
+    def _init_mlp(self, seed: int) -> ParamList:
+        """Initialize weights and biases for each layer of the MLP.
+
         Parameters
         ----------
-        seed
+        seed : int
+            Seed used to initialize the random number generator for parameter
+            initialization.
 
         Returns
         -------
-
+        ParamList
+            A list of `(W, b)` pairs, one for each linear layer.
+            `W` has shape (in_dim, out_dim); `b` has shape (out_dim,).
         """
+
         key = jax.random.PRNGKey(seed)
         keys = jax.random.split(key, len(self.sizes) - 1)
         params = []
@@ -61,10 +72,9 @@ class Fnn(BaseModel):
             W = jax.random.normal(k, (m, n)) / jnp.sqrt(m)
             b = jnp.zeros((n,))
             params.append((W, b))
-        self.params = params
         return params
 
-    def forward(self, params, x):
+    def forward(self, params: ParamList, x: ArrayLike) -> ArrayLike:
         """Run a forward pass of the network.
 
         Parameters
@@ -72,27 +82,29 @@ class Fnn(BaseModel):
         params : list[tuple[jax.Array, jax.Array]]
             Sequence of `(weights, bias)` pairs produced by `_init_mlp`.
         x : ArrayLike
-            Input batch shaped (n_samples, n_features).
+            Input batch shaped '(n_samples, n_features)'.
 
         Returns
         -------
-        jax.Array
-            Model outputs with shape (n_samples, output_dim).
+        Arraylike
+            Model outputs with shape '(n_samples, output_dim)'.
         """
-        # TODO: [@later] have a validation of input layer and number of features
+
+        n_features = x.shape[-1]
+        expected_features = self.sizes[0]
+        if n_features != expected_features:
+            raise ValueError(
+                f"Input feature dimension mismatch: expected {expected_features}, got"
+                f" {n_features}"
+            )
         act_fn = self._get_activation(self.activation_name)
         for W, b in params[:-1]:
             x = act_fn(jnp.dot(x, W) + b)
         W, b = params[-1]
         return jnp.dot(x, W) + b
 
-    def apply(self, variables, x, **kwargs):
-        """Mimic Flax API: variables['params'] contains weights."""
-        params = variables["params"]
-        return self.forward(params, x, **kwargs)
-
     @staticmethod
-    def _get_activation(activation):
+    def _get_activation(activation: str):
         available_activation = {
             "relu": nn.relu,
             "relu6": nn.relu6,

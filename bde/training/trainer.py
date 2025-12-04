@@ -12,23 +12,7 @@ class BaseTrainer:  # TODO: maybe later?
 
 class FnnTrainer:
     def __init__(self):
-        """
-        #TODO: documentation
-
-        """
-        self.history = {}
-        self.log_every = 100
-        self.keep_best = False
-
-    def _reset_history(self):
-        """
-        #TODO: documentation
-
-        Returns
-        -------
-
-        """
-        self.history = {"train_loss": []}
+        """Class responsible for training FNNs."""
 
     @staticmethod
     def make_loss_fn(model, loss_obj: BaseLoss):
@@ -57,8 +41,7 @@ class FnnTrainer:
         X,
         y,
         *,
-        train_size=0.85,
-        val_size=0.15,
+        val_size,
         random_state=42,
         stratify=False,
         shuffle=True,
@@ -87,14 +70,8 @@ class FnnTrainer:
         tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]
             Training, validation features, training, validation targets.
         """
-        # prefer val_size; keep train_size for backward-compat
-        if val_size is None and train_size is not None:
-            val_size = 1.0 - train_size
-        elif val_size is None:
-            val_size = 0.15
-
         if not (0.0 < val_size < 1.0):
-            raise ValueError("val_size must be in (0, 1).")
+            raise ValueError("validation_split must be in (0, 1).")
 
         strat = y if stratify else None
 
@@ -109,8 +86,8 @@ class FnnTrainer:
         return X_train, X_val, y_train, y_val
 
     @staticmethod
-    def default_optimizer():
-        return optax.adam(learning_rate=0.01)
+    def default_optimizer(learning_rate: float, weight_decay: float):
+        return optax.adamw(learning_rate, weight_decay)
 
     @staticmethod
     def default_loss(task: TaskType):

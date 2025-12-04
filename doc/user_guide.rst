@@ -49,13 +49,39 @@ The estimators expose several prediction modes:
     Regression only; returns a tuple ``(mean, std)`` where ``std`` combines
     aleatoric and epistemic components.
 ``predict(X, credible_intervals=[0.05, 0.95])``
-    Regression only; returns ``(mean, quantiles)`` with quantiles over posterior
-    samples that can be used to construct credible intervals.
+    Regression only; returns ``(mean, quantiles)`` where each quantile is computed
+    from Monte Carlo samples drawn from every posterior component (i.e. the full
+    mixture across ensemble members and MCMC draws). This reflects the predictive
+    distribution of the entire ensemble rather than just parameter quantiles. For
+    small posterior sample counts (``n_samples < 10``) a small random draw is used;
+    for very large counts (``n_samples > 10_000``) a single sample is taken to keep
+    the computation cheap.
 ``predict(X, raw=True)``
     Returns the raw tensor with leading axes ``(ensemble_members, samples, n,
     output_dims)``. Useful for custom diagnostics.
 ``predict_proba(X)``
     Classification only; returns class probability vectors.
+
+Gaussian likelihood (regression)
+--------------------------------
+
+Regression heads emit a mean and an unconstrained scale. The scale is mapped to a
+positive standard deviation with ``softplus`` (plus a small epsilon) in all stages:
+the training loss :class:`bde.loss.GaussianNLL <bde.loss.loss.GaussianNLL>`, the
+posterior log-likelihood in :func:`bde.sampler.probabilistic.ProbabilisticModel.log_likelihood`,
+and the prediction helpers in :func:`bde.bde_evaluator.BdePredictor._regression_mu_sigma`.
+.. note::
+
+   If you request ``raw=True`` from the regressor you receive the unconstrained scale
+   head and should apply the same ``softplus`` transform before treating it as a
+   standard deviation.
+
+How to read uncertainties
+-------------------------
+
+- **Mean + std** (``mean_and_std=True``): ``std`` is the total predictive standard deviation. It sums aleatoric variance (averaged scale head) and epistemic variance (spread of ensemble means), so high values mean either noisy data or disagreement across members.
+- **Credible intervals** (``credible_intervals=[...])``): Quantiles are taken over *samples from the full mixture* of ensemble members and posterior draws. This captures both aleatoric and epistemic uncertainty. For example, requesting ``[0.05, 0.95]`` returns lower/upper curves you can treat as a 90% credible band.
+- **Raw outputs** (``raw=True``): Shape ``(E, T, N, D)`` for regression where ``D=2`` (mean, scale). You can manually compute aleatoric vs epistemic components, plot per-member predictions, or customise intervals if needed.
 
 
 Key hyperparameters

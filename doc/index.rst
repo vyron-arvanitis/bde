@@ -6,7 +6,7 @@
 :notoc:
 
 #############################################
-Project template for `scikit-learn` extension
+Bayesian Deep Ensembles via MILE: easy to use, scikit-learn compatible and fast (JAX powered)
 #############################################
 
 **Date**: |today| **Version**: |version|
@@ -15,9 +15,8 @@ Project template for `scikit-learn` extension
 `Source Repository <https://github.com/scikit-learn-contrib/bde>`__ |
 `Issues & Ideas <https://github.com/scikit-learn-contrib/bdek/issues>`__ |
 
-This is the documentation for the `bde` to help at extending
-`scikit-learn`. It provides some information on how to build your own custom
-`scikit-learn` compatible estimators as well as a template to package them.
+This is the documentation for the `bde`.
+
 
 
 .. grid:: 1 2 2 2
@@ -30,7 +29,7 @@ This is the documentation for the `bde` to help at extending
         :class-card: intro-card
         :shadow: md
 
-        Information regarding this template and how to modify it for your own project.
+        Information on how to install the package, manage dependencies and JAX device count
 
         +++
 
@@ -47,8 +46,7 @@ This is the documentation for the `bde` to help at extending
         :class-card: intro-card
         :shadow: md
 
-        An example of narrative documentation. Here, we will explain how to create your
-        own `scikit-learn` estimator.
+        Overview of the package, estimators and most important hyperparameters
 
         +++
 
@@ -65,8 +63,7 @@ This is the documentation for the `bde` to help at extending
         :class-card: intro-card
         :shadow: md
 
-        An example of API documentation. This is an example how to use `sphinx` to
-        automatically generate reference API page.
+        The API reference of the `bde` package.
 
         +++
 
@@ -83,8 +80,7 @@ This is the documentation for the `bde` to help at extending
         :class-card: intro-card
         :shadow: md
 
-        A set of examples. It complements the User Guide and it is the right place to
-        show how to use your compatible estimator.
+        A set of examples. It complements the User Guide and shows how to use the available `bde` estimators.
 
         +++
 

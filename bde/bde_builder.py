@@ -1,10 +1,12 @@
 """Utilities for constructing and training Bayesian deep ensembles."""
+
 import logging
 from dataclasses import dataclass
 from typing import Any, Callable
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 import optax
 from jax.tree_util import tree_map
 from jax.typing import ArrayLike
@@ -66,6 +68,9 @@ class BdeBuilder(FnnTrainer):
         seed: int,
         act_fn: str,
         patience: int,
+        val_split: float,
+        lr: float,
+        weight_decay: float,
     ):
         """Configure the builder with architectural and training defaults.
 
@@ -83,6 +88,14 @@ class BdeBuilder(FnnTrainer):
             Activation function name understood by `Fnn`.
         patience : int
             Early stopping patience measured in validation evaluations.
+        val_split: float | None, default=0.15
+            Proportion to split the data for validation when early stopping is enabled.
+            Must lie in (0, 1); when ``None``, all data is used for training and early
+            stopping is skipped.
+        lr : float
+            Learning rate of the optimizer used for member pretraining.
+        weight_decay: float | None
+            Weight decay parameter for the AdamW optimizer applied to member training.
         """
 
         FnnTrainer.__init__(self)
@@ -93,12 +106,15 @@ class BdeBuilder(FnnTrainer):
         self.params_e = None  # will be set after training
         self.members = None  #
         self.act_fn = act_fn
-
+        self.lr = lr
+        self.weight_decay = weight_decay
         self.patience = patience
+        self.val_split = val_split
+
         self.eval_every = 1  # Check epochs for early stopping
         self.keep_best = True
         self.min_delta = 1e-9
-
+        self.history = {"epoch": [], "train_loss": [], "val_loss": []}
         self.results: dict[str, Any] = {}
 
     @staticmethod
@@ -214,7 +230,7 @@ class BdeBuilder(FnnTrainer):
         """
 
         proto_model = self.members[0]
-        opt = optimizer or self.default_optimizer()
+        opt = optimizer or self.default_optimizer(self.lr, self.weight_decay)
         loss_obj = loss or self.default_loss(self.task)
         loss_fn = FnnTrainer.make_loss_fn(proto_model, loss_obj)
         step_one = FnnTrainer.make_step(loss_fn, opt)
@@ -229,6 +245,10 @@ class BdeBuilder(FnnTrainer):
                 min_delta=self.min_delta,
                 eval_every=self.eval_every,
             )
+
+    def _reset_history(self):
+        """Reset the training history dictionary."""
+        self.history = {"epoch": [], "train_loss": [], "val_loss": []}
 
     def _prepare_distributed_state(
         self, components: TrainingComponents
@@ -339,15 +359,18 @@ class BdeBuilder(FnnTrainer):
         params_de = state.params_de
         opt_state_de = state.opt_state_de
 
+        train_loss_e = jnp.full((epochs, state.ensemble_size), jnp.nan)
+        val_loss_e = jnp.full((epochs, state.ensemble_size), jnp.nan)
+
         for epoch in range(epochs):
             stopped_de = callback.stopped_mask(callback_state)
             params_de, opt_state_de, lvals_de = state.pstep(
                 params_de, opt_state_de, x_train, y_train, stopped_de
             )
-            train_mean = float(jnp.mean(jax.device_get(lvals_de)))
-            self.history["train_loss"].append(train_mean)
-            # if epoch % self.log_every == 0:
-            #     print(epoch, train_mean)
+
+            train_lvals_e = lvals_de.reshape(-1)[: state.ensemble_size]
+            self.history["epoch"].append(epoch)
+            train_loss_e = train_loss_e.at[epoch].set(train_lvals_e)
 
             should_eval = (
                 (x_val is not None)
@@ -356,6 +379,8 @@ class BdeBuilder(FnnTrainer):
             )
             if should_eval:
                 val_lvals_de = state.peval(params_de, x_val, y_val)
+                val_lvals_e = val_lvals_de.reshape(-1)[: state.ensemble_size]
+                val_loss_e = val_loss_e.at[epoch].set(val_lvals_e)
                 callback_state = callback.update(
                     callback_state, epoch, params_de, val_lvals_de
                 )
@@ -369,6 +394,34 @@ class BdeBuilder(FnnTrainer):
                 if callback.all_stopped(callback_state):
                     logger.info("All members stopped by epoch %d.", epoch)
                     break
+
+        epochs_run = len(self.history["epoch"])
+
+        train_hist = train_loss_e[:epochs_run]
+        val_hist = val_loss_e[:epochs_run]
+
+        stop_epochs = np.asarray(
+            callback.stop_epoch_de(callback_state, ensemble_size=state.ensemble_size)
+        )
+
+        self.history = {
+            f"Model{i}": {
+                "epoch": jnp.arange(epochs_run),
+                "trainloss": train_hist[:, i],
+                "valloss": val_hist[:, i],
+                "stop_epoch": int(stop_epochs[i]),
+            }
+            for i in range(state.ensemble_size)
+        }
+
+        for _, model_hist in self.history.items():
+            s = model_hist["stop_epoch"]
+            if s < 0:
+                continue
+            model_hist["trainloss"] = model_hist["trainloss"][: s + 1]
+            model_hist["valloss"] = model_hist["valloss"][: s + 1]
+            model_hist["epoch"] = model_hist["epoch"][: s + 1]
+
         return TrainingLoopResult(params_de, opt_state_de, callback_state)
 
     def fit_members(
@@ -409,7 +462,9 @@ class BdeBuilder(FnnTrainer):
             y_val = None
         else:
             x_train, x_val, y_train, y_val = super().split_train_val(
-                x, y
+                x,
+                y,
+                val_size=self.val_split,
             )  # for early stopping
 
         components = self._create_training_components(optimizer, loss)
@@ -428,7 +483,7 @@ class BdeBuilder(FnnTrainer):
             y_val,
             epochs,
         )
-        callback.stop_epochs(
+        callback.stop_epoch_de(
             loop_result.callback_state, ensemble_size=state.ensemble_size
         )
 
