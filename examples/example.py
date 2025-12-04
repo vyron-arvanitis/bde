@@ -11,7 +11,6 @@ import os
 import sys
 
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 os.environ["XLA_FLAGS"] = "--xla_force_host_platform_device_count=8"
@@ -25,7 +24,7 @@ logging.getLogger("bde").setLevel(logging.INFO)
 import jax
 import jax.numpy as jnp
 from jax.scipy.stats import norm
-from sklearn.datasets import fetch_openml, load_iris
+from sklearn.datasets import load_iris
 from sklearn.metrics import root_mean_squared_error
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
