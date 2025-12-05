@@ -65,6 +65,7 @@ seaborn = ">=0.13.2"
 jax = ">=0.4.28"
 optax = ">=0.2.1"
 blackjax = "==1.2.2"
+pandas = ">=2.3.3"
 bde = { path = ".", editable = true }
 
 [tool.pixi.feature.lint.dependencies]
