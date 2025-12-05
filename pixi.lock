@@ -2932,10 +2932,17 @@ packages:
   timestamp: 1702422720584
 - pypi: ./
   name: bde
-  version: 0.1.dev275+gc7c2b17ae.d20251203
-  sha256: 92278bf4ccafb24ac50385da2d60526e71bb1684c21df5f47be021c6051a3d64
+  version: 0.1.dev292+g817f88e7f
+  sha256: f23f547ea35555be9a9f7bf7df697be24d70c0e9fed94af20ed0413f5722d34a
   requires_dist:
-  - scikit-learn>=1.4.2
+  - numpy>=1.26.4
+  - scipy>=1.16.2
+  - scikit-learn>=1.7.2
+  - jax>=0.4.28
+  - jaxlib>=0.4.28
+  - optax>=0.2.1
+  - blackjax==1.2.2
+  - tqdm>=4.67.1
   requires_python: '>=3.9'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/noarch/beautifulsoup4-4.12.3-pyha770c72_0.conda
