@@ -63,14 +63,14 @@ def regression_airfoil_example():
         n_members=8,
         seed=0,
         loss=GaussianNLL(),
-        epochs=200,
+        epochs=1000,
         validation_split=0.15,
         lr=1e-3,
-        weight_decay=1e-4,
-        warmup_steps=5000,  # 50k in the original paper
-        n_samples=2000,  # 10k in the original paper
-        n_thinning=2,
-        patience=10,
+        weight_decay=1e-3,
+        warmup_steps=50000,  # 50k in the original paper
+        n_samples=10000,  # 10k in the original paper
+        n_thinning=10,
+        patience=20,
     )
 
     print(f"the params are {regressor.get_params()}")  # get_params is from sklearn!
@@ -289,6 +289,6 @@ def sklearn_pipeline():
 
 if __name__ == "__main__":
     regression_airfoil_example()
-    classification_example()
-    regression_concrete_example()
-    sklearn_pipeline()
+    #classification_example()
+    #regression_concrete_example()
+    #sklearn_pipeline()
