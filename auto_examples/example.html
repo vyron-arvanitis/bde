@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Usage Examples &#8212; bde 0.1.dev293+gaa53904b0 documentation</title>
+    <title>Usage Examples &#8212; bde 0.1.dev294+gb32f9ebcc documentation</title>
   
   
   
@@ -42,7 +42,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../_static/documentation_options.js?v=583e1d80"></script>
+    <script src="../_static/documentation_options.js?v=c7110737"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/design-tabs.js?v=36754332"></script>
@@ -126,8 +126,8 @@
       
     
     
-    <img src="../_static/logo.png" class="logo__image only-light" alt="bde 0.1.dev293+gaa53904b0 documentation - Home"/>
-    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="bde 0.1.dev293+gaa53904b0 documentation - Home"/>`);</script>
+    <img src="../_static/logo.pdf" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
+    <script>document.write(`<img src="../_static/logo.pdf" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -465,14 +465,14 @@ regression and classification tasks.</p>
         <span class="n">n_members</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
         <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">loss</span><span class="o">=</span><span class="n">GaussianNLL</span><span class="p">(),</span>
-        <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
         <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
         <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
-        <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span>
-        <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span>  <span class="c1"># 50k in the original paper</span>
-        <span class="n">n_samples</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>  <span class="c1"># 10k in the original paper</span>
-        <span class="n">n_thinning</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+        <span class="n">warmup_steps</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span>  <span class="c1"># 50k in the original paper</span>
+        <span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>  <span class="c1"># 10k in the original paper</span>
+        <span class="n">n_thinning</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">patience</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;the params are </span><span class="si">{</span><span class="n">regressor</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># get_params is from sklearn!</span>
@@ -691,9 +691,9 @@ regression and classification tasks.</p>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
     <span class="n">regression_airfoil_example</span><span class="p">()</span>
-    <span class="n">classification_example</span><span class="p">()</span>
-    <span class="n">regression_concrete_example</span><span class="p">()</span>
-    <span class="n">sklearn_pipeline</span><span class="p">()</span>
+    <span class="c1">#classification_example()</span>
+    <span class="c1">#regression_concrete_example()</span>
+    <span class="c1">#sklearn_pipeline()</span>
 </pre></div>
 </div>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-example-py">
