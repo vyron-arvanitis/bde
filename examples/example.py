@@ -67,9 +67,9 @@ def regression_airfoil_example():
         validation_split=0.15,
         lr=1e-3,
         weight_decay=1e-3,
-        warmup_steps=50000,  # 50k in the original paper
-        n_samples=10000,  # 10k in the original paper
-        n_thinning=10,
+        warmup_steps=5000,  # 50k in the original paper
+        n_samples=1000,  # 10k in the original paper
+        n_thinning=1,
         patience=20,
     )
 
