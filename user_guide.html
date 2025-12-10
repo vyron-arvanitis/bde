@@ -127,8 +127,8 @@
       
     
     
-    <img src="_static/logo.pdf" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
-    <script>document.write(`<img src="_static/logo.pdf" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
+    <img src="_static/logo.svg" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
+    <script>document.write(`<img src="_static/logo.svg" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -399,10 +399,10 @@ you should prepare data to get reliable results.</p>
 <li><p><a class="reference internal" href="generated/bde.BdeRegressor.html#bde.BdeRegressor" title="bde.BdeRegressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bde.BdeRegressor</span></code></a> for continuous targets.</p></li>
 <li><p><a class="reference internal" href="generated/bde.BdeClassifier.html#bde.BdeClassifier" title="bde.BdeClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bde.BdeClassifier</span></code></a> for categorical targets.</p></li>
 </ul>
-<p>Both inherit <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="(in scikit-learn v1.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.base.BaseEstimator</span></code></a> and the relevant mixins, so they
+<p>Both inherit <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.base.BaseEstimator.html#sklearn.base.BaseEstimator" title="(in scikit-learn v1.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.base.BaseEstimator</span></code></a> and the relevant mixins, so they
 support the familiar <code class="docutils literal notranslate"><span class="pre">fit</span></code>/<code class="docutils literal notranslate"><span class="pre">predict</span></code>/<code class="docutils literal notranslate"><span class="pre">score</span></code> methods, accept keyword
 hyperparameters in <code class="docutils literal notranslate"><span class="pre">__init__</span></code>, and can be dropped into a
-<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" title="(in scikit-learn v1.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code></a>. Under the hood they train a fully connected
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline" title="(in scikit-learn v1.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code></a>. Under the hood they train a fully connected
 ensemble in JAX and then run an MCMC sampler to draw posterior weight samples. At
 prediction time the estimator combines those samples to provide means, standard
 deviations, credible intervals, probability vectors, or the raw ensemble outputs.</p>
@@ -412,7 +412,7 @@ deviations, credible intervals, probability vectors, or the raw ensemble outputs
 <p>Bayesian deep ensembles are sensitive to feature and target scale because the
 networks are initialised with zero-mean weights and the prior assumes unit-scale
 activations. Large raw targets (for instance the default output of
-<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html#sklearn.datasets.make_regression" title="(in scikit-learn v1.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.datasets.make_regression()</span></code></a>) can lead to very poor fits if left
+<a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html#sklearn.datasets.make_regression" title="(in scikit-learn v1.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.datasets.make_regression()</span></code></a>) can lead to very poor fits if left
 unscaled. Always apply basic preprocessing before calling <code class="docutils literal notranslate"><span class="pre">fit</span></code>:</p>
 </section>
 <section id="understanding-the-outputs">
@@ -553,7 +553,7 @@ versions and provides tasks such as <code class="docutils literal notranslate"><
 <ul class="simple">
 <li><p>The <a class="reference internal" href="quick_start.html#quick-start"><span class="std std-ref">Quick start</span></a> page shows condensed scripts you can run end to end.</p></li>
 <li><p><a class="reference internal" href="api.html#api"><span class="std std-ref">API Reference</span></a> documents every public class and helper in the package.</p></li>
-<li><p><a class="reference external" href="https://scikit-learn.org/stable/auto_examples/index.html#general-examples" title="(in scikit-learn v1.7)"><span>Examples</span></a> renders notebooks and plots that mirror the examples
+<li><p><a class="reference external" href="https://scikit-learn.org/stable/auto_examples/index.html#general-examples" title="(in scikit-learn v1.8)"><span>Examples</span></a> renders notebooks and plots that mirror the examples
 in the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> directory.</p></li>
 </ul>
 </section>
