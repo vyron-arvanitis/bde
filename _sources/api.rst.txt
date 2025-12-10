@@ -4,7 +4,8 @@
 API Reference
 #############
 
-These are the two Estimators that the bde package offers
+The ``bde`` package offers two estimators: :class:`bde.BdeRegressor` and
+:class:`bde.BdeClassifier`.
 
 .. currentmodule:: bde
 
@@ -17,12 +18,3 @@ Estimators
 
    BdeRegressor
    BdeClassifier
-
-Predictors
-==========
-
-.. autosummary::
-   :toctree: generated/
-   :template: class.rst
-
-   BdePredictor

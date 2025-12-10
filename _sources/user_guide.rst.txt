@@ -12,6 +12,8 @@ scikit-learn's estimator API, refer to the official `developer guide
 concepts. The sections below assume that background and concentrate on how
 ``BdeRegressor`` and ``BdeClassifier`` behave, how they integrate with JAX, and how
 you should prepare data to get reliable results.
+For installation, environment setup, and JAX device configuration, start with
+:ref:`quick_start`.
 
 Estimator overview
 ------------------
@@ -29,6 +31,11 @@ ensemble in JAX and then run an MCMC sampler to draw posterior weight samples. A
 prediction time the estimator combines those samples to provide means, standard
 deviations, credible intervals, probability vectors, or the raw ensemble outputs.
 
+You can customise the architecture and training stack: choose any activation
+function, swap in your own optimiser, or rely on the defaults (``optax.adamw``).
+Losses also default sensibly: regression uses :class:`bde.loss.GaussianNLL` and
+classification uses :class:`bde.loss.CategoricalCrossEntropy`.
+
 Data preparation
 ----------------
 
@@ -37,6 +44,27 @@ networks are initialised with zero-mean weights and the prior assumes unit-scale
 activations. Large raw targets (for instance the default output of
 :func:`sklearn.datasets.make_regression`) can lead to very poor fits if left
 unscaled. Always apply basic preprocessing before calling ``fit``:
+
+* Standardise features with :class:`sklearn.preprocessing.StandardScaler` (or an
+  equivalent transformer) so each column has roughly zero mean and unit variance.
+* For regression, standardise the target as well and keep the scaler handy if you
+  need to transform predictions back to the original scale.
+
+
+Gaussian likelihood (regression)
+--------------------------------
+
+Regression heads emit a mean and an unconstrained scale. The scale is mapped to a
+positive standard deviation with ``softplus`` (plus a small epsilon) in all stages:
+the training loss :class:`bde.loss.GaussianNLL <bde.loss.loss.GaussianNLL>`, the
+posterior log-likelihood in :func:`bde.sampler.probabilistic.ProbabilisticModel.log_likelihood`,
+and the prediction helpers in :func:`bde.bde_evaluator.BdePredictor._regression_mu_sigma`.
+
+.. note::
+   If you request ``raw=True`` from the regressor you receive the unconstrained scale
+   head and should apply the same ``softplus`` transform before treating it as a
+   standard deviation.
+
 
 Understanding the outputs
 -------------------------
@@ -62,26 +90,12 @@ The estimators expose several prediction modes:
 ``predict_proba(X)``
     Classification only; returns class probability vectors.
 
-Gaussian likelihood (regression)
---------------------------------
-
-Regression heads emit a mean and an unconstrained scale. The scale is mapped to a
-positive standard deviation with ``softplus`` (plus a small epsilon) in all stages:
-the training loss :class:`bde.loss.GaussianNLL <bde.loss.loss.GaussianNLL>`, the
-posterior log-likelihood in :func:`bde.sampler.probabilistic.ProbabilisticModel.log_likelihood`,
-and the prediction helpers in :func:`bde.bde_evaluator.BdePredictor._regression_mu_sigma`.
-.. note::
-
-   If you request ``raw=True`` from the regressor you receive the unconstrained scale
-   head and should apply the same ``softplus`` transform before treating it as a
-   standard deviation.
-
 How to read uncertainties
 -------------------------
 
 - **Mean + std** (``mean_and_std=True``): ``std`` is the total predictive standard deviation. It sums aleatoric variance (averaged scale head) and epistemic variance (spread of ensemble means), so high values mean either noisy data or disagreement across members.
 - **Credible intervals** (``credible_intervals=[...])``): Quantiles are taken over *samples from the full mixture* of ensemble members and posterior draws. This captures both aleatoric and epistemic uncertainty. For example, requesting ``[0.05, 0.95]`` returns lower/upper curves you can treat as a 90% credible band.
-- **Raw outputs** (``raw=True``): Shape ``(E, T, N, D)`` for regression where ``D=2`` (mean, scale). You can manually compute aleatoric vs epistemic components, plot per-member predictions, or customise intervals if needed.
+- **Raw outputs** (``raw=True``): Shape ``(E, T, N, D)`` for regression where, ``E=ensemble_members``, ``T=n_samples``, ``N=n_data`` and ``D=2`` (mean, scale). You can manually compute aleatoric vs epistemic components, plot per-member predictions, or customise intervals if needed.
 
 
 Key hyperparameters
@@ -99,10 +113,10 @@ Key hyperparameters
 **Pre-sampling optimization**
 
 - ``epochs`` / ``patience``
-    Control optimization duration (the to start the sampler at a high likelihood region.
-    ``epochs`` sets the maximum number of epochs,
-    while ``patience`` enables early stopping. When ``patience`` is ``None``,
-    training always runs for all epochs.
+    Control how long the deterministic pre-training runs before sampling. ``epochs``
+    is the hard cap; ``patience`` triggers early stopping when the validation loss
+    plateaus so the sampler starts from a high-likelihood region. When ``patience``
+    is ``None`` training always runs for all epochs.
 - ``lr``
     Learning rate for the Adam optimiser during pre-sampling training.
 
@@ -140,21 +154,9 @@ with these pieces directly:
 * ``estimator._bde`` references the builder after ``fit`` and exposes the
   deterministic members and training history.
 * ``estimator.positions_eT_`` stores the weight samples with shape ``(E, T, ...)``.
-* Warmup behaviour can be tuned via ``desired_energy_var_start`` and
-  ``desired_energy_var_end``.
 
 Generally you should rely on the high-level estimator API, but the internals are
 accessible for custom diagnostics or research experiments.
-
-Accelerators and environment
-----------------------------
-
-The estimators run on whatever backend JAX initialises. On CPU-only machines you
-must set ``XLA_FLAGS="--xla_force_host_platform_device_count=<n>"`` to allocate
-several virtual devices for the ensemble. On GPU- or TPU-enabled hardware JAX
-picks up devices automatically; ensure your environment includes the matching
-``jaxlib`` build. The repository ships with a ``pixi.toml`` that pins compatible
-versions and provides tasks such as ``pixi run test`` and ``pixi run build-doc``.
 
 Where to next
 -------------

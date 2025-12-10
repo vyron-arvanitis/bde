@@ -127,8 +127,8 @@
       
     
     
-    <img src="_static/logo.svg" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
-    <script>document.write(`<img src="_static/logo.svg" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
+    <img src="_static/bde_logo.png" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
+    <script>document.write(`<img src="_static/bde_logo.png" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -391,7 +391,9 @@ document.write(`
 scikit-learn’s estimator API, refer to the official <a class="reference external" href="https://scikit-learn.org/stable/developers/develop.html">developer guide</a> for the foundational
 concepts. The sections below assume that background and concentrate on how
 <code class="docutils literal notranslate"><span class="pre">BdeRegressor</span></code> and <code class="docutils literal notranslate"><span class="pre">BdeClassifier</span></code> behave, how they integrate with JAX, and how
-you should prepare data to get reliable results.</p>
+you should prepare data to get reliable results.
+For installation, environment setup, and JAX device configuration, start with
+<a class="reference internal" href="quick_start.html#quick-start"><span class="std std-ref">Quick start</span></a>.</p>
 <section id="estimator-overview">
 <h2>Estimator overview<a class="headerlink" href="#estimator-overview" title="Link to this heading">#</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">bde</span></code> exposes two scikit-learn compatible estimators:</p>
@@ -406,6 +408,10 @@ hyperparameters in <code class="docutils literal notranslate"><span class="pre">
 ensemble in JAX and then run an MCMC sampler to draw posterior weight samples. At
 prediction time the estimator combines those samples to provide means, standard
 deviations, credible intervals, probability vectors, or the raw ensemble outputs.</p>
+<p>You can customise the architecture and training stack: choose any activation
+function, swap in your own optimiser, or rely on the defaults (<code class="docutils literal notranslate"><span class="pre">optax.adamw</span></code>).
+Losses also default sensibly: regression uses <code class="xref py py-class docutils literal notranslate"><span class="pre">bde.loss.GaussianNLL</span></code> and
+classification uses <code class="xref py py-class docutils literal notranslate"><span class="pre">bde.loss.CategoricalCrossEntropy</span></code>.</p>
 </section>
 <section id="data-preparation">
 <h2>Data preparation<a class="headerlink" href="#data-preparation" title="Link to this heading">#</a></h2>
@@ -414,6 +420,26 @@ networks are initialised with zero-mean weights and the prior assumes unit-scale
 activations. Large raw targets (for instance the default output of
 <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.datasets.make_regression.html#sklearn.datasets.make_regression" title="(in scikit-learn v1.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.datasets.make_regression()</span></code></a>) can lead to very poor fits if left
 unscaled. Always apply basic preprocessing before calling <code class="docutils literal notranslate"><span class="pre">fit</span></code>:</p>
+<ul class="simple">
+<li><p>Standardise features with <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html#sklearn.preprocessing.StandardScaler" title="(in scikit-learn v1.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">sklearn.preprocessing.StandardScaler</span></code></a> (or an
+equivalent transformer) so each column has roughly zero mean and unit variance.</p></li>
+<li><p>For regression, standardise the target as well and keep the scaler handy if you
+need to transform predictions back to the original scale.</p></li>
+</ul>
+</section>
+<section id="gaussian-likelihood-regression">
+<h2>Gaussian likelihood (regression)<a class="headerlink" href="#gaussian-likelihood-regression" title="Link to this heading">#</a></h2>
+<p>Regression heads emit a mean and an unconstrained scale. The scale is mapped to a
+positive standard deviation with <code class="docutils literal notranslate"><span class="pre">softplus</span></code> (plus a small epsilon) in all stages:
+the training loss <code class="xref py py-class docutils literal notranslate"><span class="pre">bde.loss.GaussianNLL</span></code>, the
+posterior log-likelihood in <code class="xref py py-func docutils literal notranslate"><span class="pre">bde.sampler.probabilistic.ProbabilisticModel.log_likelihood()</span></code>,
+and the prediction helpers in <code class="xref py py-func docutils literal notranslate"><span class="pre">bde.bde_evaluator.BdePredictor._regression_mu_sigma()</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you request <code class="docutils literal notranslate"><span class="pre">raw=True</span></code> from the regressor you receive the unconstrained scale
+head and should apply the same <code class="docutils literal notranslate"><span class="pre">softplus</span></code> transform before treating it as a
+standard deviation.</p>
+</div>
 </section>
 <section id="understanding-the-outputs">
 <h2>Understanding the outputs<a class="headerlink" href="#understanding-the-outputs" title="Link to this heading">#</a></h2>
@@ -439,26 +465,12 @@ the computation cheap.</p>
 </dd>
 </dl>
 </section>
-<section id="gaussian-likelihood-regression">
-<h2>Gaussian likelihood (regression)<a class="headerlink" href="#gaussian-likelihood-regression" title="Link to this heading">#</a></h2>
-<p>Regression heads emit a mean and an unconstrained scale. The scale is mapped to a
-positive standard deviation with <code class="docutils literal notranslate"><span class="pre">softplus</span></code> (plus a small epsilon) in all stages:
-the training loss <code class="xref py py-class docutils literal notranslate"><span class="pre">bde.loss.GaussianNLL</span></code>, the
-posterior log-likelihood in <code class="xref py py-func docutils literal notranslate"><span class="pre">bde.sampler.probabilistic.ProbabilisticModel.log_likelihood()</span></code>,
-and the prediction helpers in <code class="xref py py-func docutils literal notranslate"><span class="pre">bde.bde_evaluator.BdePredictor._regression_mu_sigma()</span></code>.
-.. note:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>If you request ``raw=True`` from the regressor you receive the unconstrained scale
-head and should apply the same ``softplus`` transform before treating it as a
-standard deviation.
-</pre></div>
-</div>
-</section>
 <section id="how-to-read-uncertainties">
 <h2>How to read uncertainties<a class="headerlink" href="#how-to-read-uncertainties" title="Link to this heading">#</a></h2>
 <ul class="simple">
 <li><p><strong>Mean + std</strong> (<code class="docutils literal notranslate"><span class="pre">mean_and_std=True</span></code>): <code class="docutils literal notranslate"><span class="pre">std</span></code> is the total predictive standard deviation. It sums aleatoric variance (averaged scale head) and epistemic variance (spread of ensemble means), so high values mean either noisy data or disagreement across members.</p></li>
 <li><p><strong>Credible intervals</strong> (<code class="docutils literal notranslate"><span class="pre">credible_intervals=[...])</span></code>): Quantiles are taken over <em>samples from the full mixture</em> of ensemble members and posterior draws. This captures both aleatoric and epistemic uncertainty. For example, requesting <code class="docutils literal notranslate"><span class="pre">[0.05,</span> <span class="pre">0.95]</span></code> returns lower/upper curves you can treat as a 90% credible band.</p></li>
-<li><p><strong>Raw outputs</strong> (<code class="docutils literal notranslate"><span class="pre">raw=True</span></code>): Shape <code class="docutils literal notranslate"><span class="pre">(E,</span> <span class="pre">T,</span> <span class="pre">N,</span> <span class="pre">D)</span></code> for regression where <code class="docutils literal notranslate"><span class="pre">D=2</span></code> (mean, scale). You can manually compute aleatoric vs epistemic components, plot per-member predictions, or customise intervals if needed.</p></li>
+<li><p><strong>Raw outputs</strong> (<code class="docutils literal notranslate"><span class="pre">raw=True</span></code>): Shape <code class="docutils literal notranslate"><span class="pre">(E,</span> <span class="pre">T,</span> <span class="pre">N,</span> <span class="pre">D)</span></code> for regression where, <code class="docutils literal notranslate"><span class="pre">E=ensemble_members</span></code>, <code class="docutils literal notranslate"><span class="pre">T=n_samples</span></code>, <code class="docutils literal notranslate"><span class="pre">N=n_data</span></code> and <code class="docutils literal notranslate"><span class="pre">D=2</span></code> (mean, scale). You can manually compute aleatoric vs epistemic components, plot per-member predictions, or customise intervals if needed.</p></li>
 </ul>
 </section>
 <section id="key-hyperparameters">
@@ -481,10 +493,10 @@ parallel devices are available training time is not affected).</p>
 <p><strong>Pre-sampling optimization</strong></p>
 <ul class="simple">
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">epochs</span></code> / <code class="docutils literal notranslate"><span class="pre">patience</span></code></dt><dd><p>Control optimization duration (the to start the sampler at a high likelihood region.
-<code class="docutils literal notranslate"><span class="pre">epochs</span></code> sets the maximum number of epochs,
-while <code class="docutils literal notranslate"><span class="pre">patience</span></code> enables early stopping. When <code class="docutils literal notranslate"><span class="pre">patience</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>,
-training always runs for all epochs.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">epochs</span></code> / <code class="docutils literal notranslate"><span class="pre">patience</span></code></dt><dd><p>Control how long the deterministic pre-training runs before sampling. <code class="docutils literal notranslate"><span class="pre">epochs</span></code>
+is the hard cap; <code class="docutils literal notranslate"><span class="pre">patience</span></code> triggers early stopping when the validation loss
+plateaus so the sampler starts from a high-likelihood region. When <code class="docutils literal notranslate"><span class="pre">patience</span></code>
+is <code class="docutils literal notranslate"><span class="pre">None</span></code> training always runs for all epochs.</p>
 </dd>
 </dl>
 </li>
@@ -533,20 +545,9 @@ with these pieces directly:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">estimator._bde</span></code> references the builder after <code class="docutils literal notranslate"><span class="pre">fit</span></code> and exposes the
 deterministic members and training history.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">estimator.positions_eT_</span></code> stores the weight samples with shape <code class="docutils literal notranslate"><span class="pre">(E,</span> <span class="pre">T,</span> <span class="pre">...)</span></code>.</p></li>
-<li><p>Warmup behaviour can be tuned via <code class="docutils literal notranslate"><span class="pre">desired_energy_var_start</span></code> and
-<code class="docutils literal notranslate"><span class="pre">desired_energy_var_end</span></code>.</p></li>
 </ul>
 <p>Generally you should rely on the high-level estimator API, but the internals are
 accessible for custom diagnostics or research experiments.</p>
-</section>
-<section id="accelerators-and-environment">
-<h2>Accelerators and environment<a class="headerlink" href="#accelerators-and-environment" title="Link to this heading">#</a></h2>
-<p>The estimators run on whatever backend JAX initialises. On CPU-only machines you
-must set <code class="docutils literal notranslate"><span class="pre">XLA_FLAGS=&quot;--xla_force_host_platform_device_count=&lt;n&gt;&quot;</span></code> to allocate
-several virtual devices for the ensemble. On GPU- or TPU-enabled hardware JAX
-picks up devices automatically; ensure your environment includes the matching
-<code class="docutils literal notranslate"><span class="pre">jaxlib</span></code> build. The repository ships with a <code class="docutils literal notranslate"><span class="pre">pixi.toml</span></code> that pins compatible
-versions and provides tasks such as <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build-doc</span></code>.</p>
 </section>
 <section id="where-to-next">
 <h2>Where to next<a class="headerlink" href="#where-to-next" title="Link to this heading">#</a></h2>
@@ -607,12 +608,11 @@ in the <code class="docutils literal notranslate"><span class="pre">examples/</s
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#estimator-overview">Estimator overview</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#data-preparation">Data preparation</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-the-outputs">Understanding the outputs</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#gaussian-likelihood-regression">Gaussian likelihood (regression)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-the-outputs">Understanding the outputs</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#how-to-read-uncertainties">How to read uncertainties</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-hyperparameters">Key hyperparameters</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sampler-and-builder-internals">Sampler and builder internals</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accelerators-and-environment">Accelerators and environment</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#where-to-next">Where to next</a></li>
 </ul>
   </nav></div>

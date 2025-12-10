@@ -33,7 +33,7 @@ hardware:
 
 .. prompt:: bash $
 
-  export XLA_FLAGS="--xla_force_host_platform_device_count=8"
+  export XLA_FLAGS="--xla_force_host_platform_device_count=<desired_devices_to_be_used>"
 
 You can set it once per shell session or inject it programmatically before
 importing JAX in your Python scripts.

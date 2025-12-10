@@ -127,8 +127,8 @@
       
     
     
-    <img src="_static/logo.svg" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
-    <script>document.write(`<img src="_static/logo.svg" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
+    <img src="_static/bde_logo.png" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
+    <script>document.write(`<img src="_static/bde_logo.png" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -410,7 +410,7 @@ required versions of JAX, scikit-learn, and the CUDA toolchain when available.</
 ensure JAX can see enough host devices. The environment variable below makes
 CPU-only runs allocate eight virtual devices; tweak the value to match your
 hardware:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1"><span class="nb">export</span><span class="w"> </span><span class="nv">XLA_FLAGS</span><span class="o">=</span><span class="s2">&quot;--xla_force_host_platform_device_count=8&quot;</span></span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span class="prompt1"><span class="nb">export</span><span class="w"> </span><span class="nv">XLA_FLAGS</span><span class="o">=</span><span class="s2">&quot;--xla_force_host_platform_device_count=&lt;desired_devices_to_be_used&gt;&quot;</span></span>
 </pre></div></div><p>You can set it once per shell session or inject it programmatically before
 importing JAX in your Python scripts.</p>
 </section>

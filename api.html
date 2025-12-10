@@ -128,8 +128,8 @@
       
     
     
-    <img src="_static/logo.svg" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
-    <script>document.write(`<img src="_static/logo.svg" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
+    <img src="_static/bde_logo.png" class="logo__image only-light" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>
+    <script>document.write(`<img src="_static/bde_logo.png" class="logo__image only-dark" alt="bde 0.1.dev294+gb32f9ebcc documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -346,9 +346,6 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="generated/bde.BdeRegressor.html">BdeRegressor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generated/bde.BdeClassifier.html">BdeClassifier</a></li>
 </ul>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="generated/bde.BdePredictor.html">BdePredictor</a></li>
-</ul>
 </div>
 </nav></div>
     </div>
@@ -404,7 +401,8 @@ document.write(`
                   
   <section id="api-reference">
 <span id="api"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">#</a></h1>
-<p>These are the two Estimators that the bde package offers</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">bde</span></code> package offers two estimators: <a class="reference internal" href="generated/bde.BdeRegressor.html#bde.BdeRegressor" title="bde.BdeRegressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bde.BdeRegressor</span></code></a> and
+<a class="reference internal" href="generated/bde.BdeClassifier.html#bde.BdeClassifier" title="bde.BdeClassifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bde.BdeClassifier</span></code></a>.</p>
 <section id="estimators">
 <h2>Estimators<a class="headerlink" href="#estimators" title="Link to this heading">#</a></h2>
 <table class="autosummary longtable table autosummary">
@@ -414,16 +412,6 @@ document.write(`
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="generated/bde.BdeClassifier.html#bde.BdeClassifier" title="bde.BdeClassifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BdeClassifier</span></code></a>([n_members, hidden_layers, ...])</p></td>
 <td><p>Classification wrapper with label encoding helpers.</p></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="predictors">
-<h2>Predictors<a class="headerlink" href="#predictors" title="Link to this heading">#</a></h2>
-<table class="autosummary longtable table autosummary">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="generated/bde.BdePredictor.html#bde.BdePredictor" title="bde.BdePredictor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BdePredictor</span></code></a>(forward_fn, positions_eT, xte, task)</p></td>
-<td><p>Lightweight wrapper that aggregates ensemble predictions on demand.</p></td>
 </tr>
 </tbody>
 </table>
@@ -477,7 +465,6 @@ document.write(`
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#estimators">Estimators</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#predictors">Predictors</a></li>
 </ul>
   </nav></div>
 
