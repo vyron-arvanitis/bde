@@ -25,7 +25,7 @@ This is the documentation for the `bde`.
     :class-container: sd-text-center
 
     .. grid-item-card:: Getting started
-        :img-top: _static/img/index_getting_started.pdf
+        :img-top: _static/img/index_getting_started.svg
         :class-card: intro-card
         :shadow: md
 
@@ -42,7 +42,7 @@ This is the documentation for the `bde`.
             To the getting started guideline
 
     .. grid-item-card::  User guide
-        :img-top: _static/img/index_user_guide.pdf
+        :img-top: _static/img/index_user_guide.svg
         :class-card: intro-card
         :shadow: md
 
@@ -59,7 +59,7 @@ This is the documentation for the `bde`.
             To the user guide
 
     .. grid-item-card::  API reference
-        :img-top: _static/img/index_api.pdf
+        :img-top: _static/img/index_api.svg
         :class-card: intro-card
         :shadow: md
 
@@ -76,7 +76,7 @@ This is the documentation for the `bde`.
             To the reference guide
 
     .. grid-item-card::  Examples
-        :img-top: _static/img/index_examples.pdf
+        :img-top: _static/img/index_examples.svg
         :class-card: intro-card
         :shadow: md
 
