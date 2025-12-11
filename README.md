@@ -1,28 +1,4 @@
-<img src="doc/_static/img/bde_logo.png"
-     width="230"
-     style="float: right; margin: 10px 0 20px 20px;">
-
-# Bayesian Deep Ensembles  
-### for scikit-learn
-
-
-[![codecov](https://codecov.io/gh/scikit-learn-contrib/bde/graph/badge.svg?token=L0XPWwoPLw)](https://vyron-arvanitis.github.io/bde/)
-
-Introduction
-------------
-
-**bde** is a user-friendly implementation of Bayesian Deep Ensembles compatible with
-both scikit-learn and JAX. It exposes estimators that plug into scikit-learn
-pipelines while leveraging JAX for accelerator-backed training, sampling, and
-uncertainty estimation.
-
-In particular, **bde** implements **Microcanonical Langevin Ensembles (MILE)** as
-introduced in [*Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks* (ICLR 2025)](https://arxiv.org/abs/2502.06335).
-A conceptual overview of MILE is shown below:
-
-<div style="width: 60%; margin: auto;">
-    <img src="doc/_static/img/flowchart.png" alt="MILE Overview" style="width: 100%;">
-</div>
+# portvine <a href='https://github.com/vyron-arvanitis/bde'><img src='doc/_static/img/bde_logo.png' align="right" width="30%" /></a>
 
 Installation
 ------------
