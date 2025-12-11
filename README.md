@@ -10,7 +10,7 @@ Installation
 ------------
 
 ```
-pip install git+[https://github.com/scikit-learn-contrib/bde.git](https://github.com/vyron-arvanitis/bde.git)
+pip install git+https://github.com/vyron-arvanitis/bde.git
 ```
 
 The public package index is not published yet; the command above is a placeholder
