@@ -1,4 +1,4 @@
-# Bayesian Deep Ensembles for scikit-learn <a href="https://github.com/vyron-arvanitis/bde"><img src="doc/_static/img/bde_logo.png" align="right" width="30%"><br><sub>created with nano-banana-pro</sub></a>
+# Bayesian Deep Ensembles for scikit-learn <a href="https://github.com/vyron-arvanitis/bde"><img src="doc/_static/img/bde_logo.svg" align="right" width="30%">
 
 
 
