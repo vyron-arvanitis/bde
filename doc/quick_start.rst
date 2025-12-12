@@ -16,7 +16,7 @@ current source build:
 
 .. prompt:: bash $
 
-  pip install git+https://github.com/scikit-learn-contrib/bde.git
+  pip install git+https://github.com/vyron-arvanitis/bde.git
 
 If you prefer reproducible environments with GPU or multi-device CPU support,
 consider using `pixi <https://prefix.dev/docs/pixi/overview>`__ as described in
