@@ -30,14 +30,6 @@ pip install git+https://github.com/vyron-arvanitis/bde.git
 
 The public package index isn’t published yet; the command above is a placeholder for the upcoming release.
 
-Usage
------
-```python
-from bde import BdeRegressor, BdeClassifier
-# reg = BdeRegressor(...)
-# clas = BdeClassifier(...)
-```
-
 Developer environment
 ---------------------
 
