@@ -128,7 +128,7 @@ Key hyperparameters
     ``n_thinning`` specifies the interval between saved samples.
 
 - ``desired_energy_var_start`` / ``desired_energy_var_end`` / ``step_size_init``
-    Configure the samplers behaviour. The ``desired_energy_var_*`` parameters
+    Configure the samplers behavior. The ``desired_energy_var_*`` parameters
     set the target variance of the energy during sampling which is linearly
     annealed from start to end over the course of the warmup phase. The
     ``step_size_init`` parameter sets the initial step size for the dynamics
@@ -136,11 +136,24 @@ Key hyperparameters
     variance. For medium sized BNNs a good default is to set
     ``desired_energy_var_start=0.5``, ``desired_energy_var_end=0.1``, and
     pick the learning rate as the ``step_size_init`` (or slightly larger). For simpler
-    models or highly overparameterized settings (for example a 2x16 network provides
+    models or highly over parameterized settings (for example a 2x16 network provides
     good results on a small dataset, then using a 3x32 network would be considered
-    highly overparameterized) decreasing the desired energy variance targets might
+    highly over parameterized) decreasing the desired energy variance targets might
     be necessary to reach good performance. **The desired energy variance is the most
     important hyperparameter** to tune for sampler performance.
+
+- ``prior_family``
+    Weight prior used for all ensemble members. Accepts string keys or
+    :class:`bde.sampler.prior.PriorDist` enums. Three families are supported:
+    ``standardnormal`` (unit-variance Gaussian, and the default when unspecified),
+    ``normal`` (Gaussian with configurable ``loc``/ ``scale``), and ``laplace``.
+    Combine with ``prior_kwargs`` to adjust the distribution; for example ``{"scale": 0.1}``
+    narrows the prior and the initialisation around zero.
+
+    .. note::
+       The ``standardnormal`` shortcut always uses ``loc=0`` and ``scale=1`` and
+       ignores ``prior_kwargs``. Pick ``normal`` if you want a Gaussian prior with
+       a different variance.
 
 Sampler and builder internals
 -----------------------------
