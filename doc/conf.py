@@ -5,6 +5,7 @@
 
 import os
 import sys
+from pathlib import Path
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -46,7 +47,7 @@ default_role = "literal"
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
 html_style = "css/bde.css"
-html_logo = "_static/img/bde_logo.png"
+html_logo = "_static/img/logo.svg"
 # html_favicon = "_static/img/favicon.ico"
 html_css_files = [
     "css/bde.css",
@@ -67,9 +68,9 @@ html_theme_options = {
 }
 
 html_context = {
-    "github_user": "scikit-learn-contrib",
+    "github_user": "vyron-arvanitis",
     "github_repo": "bde",
-    "github_version": "master",
+    "github_version": "main",
     "doc_path": "doc",
 }
 
@@ -106,7 +107,8 @@ intersphinx_mapping = {
 # -- Options for sphinx-gallery -----------------------------------------------
 
 # Generate the plot for the gallery
-plot_gallery = True
+plot_gallery = "True"
+
 
 sphinx_gallery_conf = {
     "doc_module": "bde",
@@ -114,4 +116,7 @@ sphinx_gallery_conf = {
     "examples_dirs": "../examples",
     "gallery_dirs": "auto_examples",
     "reference_url": {"bde": None},
+    "default_thumb_file": str(
+        Path(__file__).parent.resolve() / "_static/img/index_examples.svg"
+    ),
 }
