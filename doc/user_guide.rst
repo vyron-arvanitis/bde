@@ -33,7 +33,7 @@ encountered in neural networks and can be implemented embarrassingly parallel ac
 multiple devices.
 
 For references and theoretical as well as algorithmic details, see
-[*Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks* (ICLR 2025)](https://arxiv.org/abs/2502.06335).
+`Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks (ICLR 2025) <https://arxiv.org/abs/2502.06335>`_.
 
 
 Estimator overview
