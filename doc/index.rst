@@ -5,14 +5,14 @@
 
 :notoc:
 
-#############################################
+#############################################################################################
 Bayesian Deep Ensembles via MILE: easy to use, scikit-learn compatible and fast (JAX powered)
-#############################################
+#############################################################################################
 
 **Date**: |today| **Version**: |version|
 
 **Useful links**:
-`Source Repository <https://github.com/vyron-arvanitis/bde.git>`__ |
+`Source Repository <https://github.com/vyron-arvanitis/bde.git>`__
 
 .. `Source Repository <https://github.com/scikit-learn-contrib/bde>`__ |
 .. `Issues & Ideas <https://github.com/scikit-learn-contrib/bdek/issues>`__ |

@@ -1,5 +1,6 @@
 """Priors. This is used from @MILE."""
 
+import logging
 from typing import Callable, NamedTuple
 
 import jax
@@ -9,6 +10,8 @@ import jax.scipy.stats as stats
 from jax.flatten_util import ravel_pytree
 
 from bde.sampler.types import BaseStrEnum, ParamTree
+
+logger = logging.getLogger(__name__)
 
 
 class PriorDist(BaseStrEnum):
@@ -57,8 +60,11 @@ class Prior(NamedTuple):
 
 def f_init_normal(loc: float = 0.0, scale: float = 1.0) -> Callable:
     """Initialize from Normal distribution."""
+    logger.debug("Initializing normal prior: loc=%s, scale=%s", loc, scale)
     if not loc == 0.0:
-        print("Initialization: Ignoring location unequal to zero.")
+        logger.warning(
+            "Normal prior initializer ignores non-zero loc; weights remain zero-mean."
+        )
     return jinit.normal(stddev=scale)
 
 
@@ -74,6 +80,7 @@ def log_prior_normal(loc: float = 0.0, scale: float = 1.0) -> Callable:
 
 def f_init_laplace(loc: float = 0.0, scale: float = 1.0) -> Callable:
     """Initialize from Laplace distribution."""
+    logger.debug("Initializing laplace prior: loc=%s, scale=%s", loc, scale)
 
     def f_init(key, shape, dtype=jnp.float32) -> jax.Array:
         w = jax.random.laplace(key, shape, dtype)

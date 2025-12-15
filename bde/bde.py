@@ -16,7 +16,6 @@ from sklearn.utils._tags import (
     RegressorTags,
     Tags,
     TargetTags,
-    default_tags,
 )
 from sklearn.utils.validation import check_is_fitted
 
@@ -466,7 +465,7 @@ class Bde:
 
     # scikit-learn compatibility tags
     def __sklearn_tags__(self) -> Tags:
-        tags = default_tags(self)
+        tags = super().__sklearn_tags__()
         tags._skip_test = False
         tags.no_validation = False
         tags.requires_fit = True

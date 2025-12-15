@@ -2932,8 +2932,8 @@ packages:
   timestamp: 1702422720584
 - pypi: ./
   name: bde
-  version: 0.1.dev292+g817f88e7f
-  sha256: f23f547ea35555be9a9f7bf7df697be24d70c0e9fed94af20ed0413f5722d34a
+  version: 0.1.dev333+g67d6525f2.d20251213
+  sha256: 0228a1facff7f2ee0ae1b1e4c3ef33a09dc7cade6e9977f24c52f988e9e270ef
   requires_dist:
   - numpy>=1.26.4
   - scipy>=1.16.2
