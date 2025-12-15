@@ -1,8 +1,12 @@
-# Bayesian Deep Ensembles for scikit-learn <a href="https://github.com/vyron-arvanitis/bde"><img src="doc/_static/img/logo.svg" align="right" width="30%">
+# Bayesian Deep Ensembles for scikit-learn <a href="https://github.com/vyron-arvanitis/bde"><img src="doc/_static/img/logo.svg" align="right" height="150" />
+
 [![Docs Status](https://github.com/vyron-arvanitis/bde/actions/workflows/deploy-gh-pages.yml/badge.svg)](https://github.com/vyron-arvanitis/bde/actions/workflows/deploy-gh-pages.yml)
 [![Tests](https://github.com/vyron-arvanitis/bde/actions/workflows/python-app.yml/badge.svg)](https://github.com/vyron-arvanitis/bde/actions/workflows/python-app.yml)
 ![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen)
 [![License](https://img.shields.io/github/license/vyron-arvanitis/bde)](LICENSE)
+
+
+👉 **[Start Here: Complete Online Documentation](https://vyron-arvanitis.github.io/bde/)**
 
 
 Introduction
@@ -38,6 +42,9 @@ deterministic development environment:
 
 ```
 pixi install
+
+# Then you can directly run examples like so:
+pixi run python -m examples.example
 ```
 
 Pixi ensures the correct JAX, CUDA (when needed), and scikit-learn versions are

@@ -15,6 +15,27 @@ you should prepare data to get reliable results.
 For installation, environment setup, and JAX device configuration, start with
 :ref:`quick_start`.
 
+Method
+------
+
+`bde` implements Bayesian Deep Ensembles using **Microcanonical Langevin Ensembles (MILE)**,
+a hybrid approach for Bayesian neural network inference that combines deterministic
+ensemble pre-training with efficient MCMC sampling.
+
+Concretely, ensemble members are first trained independently using standard
+optimization, providing diverse and well-initialized starting points. These models
+are then refined using **Microcanonical Langevin Monte Carlo (MCLMC)** to generate
+high-quality posterior samples. This design yields strong predictive performance and
+reliable uncertainty estimates while remaining computationally efficient.
+
+The method is particularly well-suited for the complex, multi-modal posteriors
+encountered in neural networks and can be implemented embarrassingly parallel across
+multiple devices.
+
+For references and theoretical as well as algorithmic details, see
+[*Microcanonical Langevin Ensembles: Advancing the Sampling of Bayesian Neural Networks* (ICLR 2025)](https://arxiv.org/abs/2502.06335).
+
+
 Estimator overview
 ------------------
 
@@ -143,7 +164,7 @@ Key hyperparameters
     important hyperparameter** to tune for sampler performance.
 
 - ``prior_family``
-    Weight prior used for all ensemble members. Accepts string keys or
+    Isotropic weight prior used for all ensemble members. Accepts string keys or
     :class:`bde.sampler.prior.PriorDist` enums. Three families are supported:
     ``standardnormal`` (unit-variance Gaussian, and the default when unspecified),
     ``normal`` (Gaussian with configurable ``loc``/ ``scale``), and ``laplace``.
